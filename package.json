@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "mintlify dev",
-    "broken-links": "mintlify broken-links"
+    "broken-links": "mintlify broken-links",
+    "build:logos": "node scripts/generate-logo-wordmarks.mjs"
   },
   "devDependencies": {
     "mintlify": "^4.2.0"
