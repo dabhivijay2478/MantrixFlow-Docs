@@ -1,0 +1,30 @@
+---
+title: Sync Modes
+description: Full sync, incremental sync, and CDC explained in plain language.
+---
+
+Sync mode defines how data is read from the source. Choose the mode that fits your data size, update pattern, and source capabilities.
+
+## Full Sync
+
+Reads every record from the source on every run and writes all of them to the destination. The destination is effectively replaced (or appended) with the current state of the source.
+
+**When to use:** Small tables, sources that do not support incremental reads, or when you need a complete refresh each time.
+
+**Limitation:** Inefficient for large tables. Every run processes the entire dataset.
+
+## Incremental Sync
+
+Reads only records that are newer than the last run. Uses a cursor column (e.g. updated_at, created_at) to track the last synced value. Only rows with a cursor value greater than the stored value are read.
+
+**When to use:** Large tables that grow over time. Much more efficient than full sync for tables with millions of rows.
+
+**Requirements:** A cursor column that increases monotonically. Avoid columns that can have gaps or be updated out of order.
+
+## CDC (Change Data Capture)
+
+Reads the database replication log to capture every insert, update, and delete event as it happens. The most powerful mode but requires database-level configuration.
+
+**When to use:** When you need near-real-time sync and the source database supports CDC (PostgreSQL, MySQL, SQL Server).
+
+**Requirements:** Database administrator access to enable logical replication (PostgreSQL), binary logging (MySQL), or CDC (SQL Server). See the Sync Reference for setup guides.

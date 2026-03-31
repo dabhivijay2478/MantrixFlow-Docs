@@ -1,0 +1,60 @@
+---
+title: CDC Setup for SQL Server
+description: Enable SQL Server Agent and CDC. Exact T-SQL commands.
+---
+
+<Warning>
+**Database Admin Required**
+
+You need sysadmin or db_owner privileges to perform these steps.
+</Warning>
+
+Follow these steps to enable CDC for SQL Server.
+
+<Steps>
+  <Step>
+
+### 1. Enable SQL Server Agent
+
+Ensure SQL Server Agent is running. CDC uses agent jobs for cleanup.
+
+  </Step>
+  <Step>
+
+### 2. Enable CDC on the database
+
+```sql
+USE your_database;
+EXEC sys.sp_cdc_enable_db;
+```
+
+  </Step>
+  <Step>
+
+### 3. Enable CDC on tables
+
+For each table you want to capture:
+
+```sql
+EXEC sys.sp_cdc_enable_table
+  @source_schema = N'dbo',
+  @source_name = N'your_table',
+  @role_name = NULL,
+  @supports_net_changes = 1;
+```
+
+  </Step>
+  <Step>
+
+### 4. Grant permissions
+
+The user needs db_datareader and access to the CDC schema:
+
+```sql
+GRANT SELECT ON SCHEMA::cdc TO mantrixflow;
+```
+
+  </Step>
+</Steps>
+
+After completing these steps, configure the SQL Server source connection and run a pipeline with CDC sync mode.

@@ -1,0 +1,58 @@
+---
+title: GitHub
+description: Connect to GitHub using a personal access token or fine-grained token.
+---
+
+GitHub hosts code repositories. MANTrixFlow connects using a personal access token (classic) or fine-grained token to sync repositories, commits, pull requests, issues, and more.
+
+## Prerequisites
+
+You need a GitHub account. For organisation repositories, the token may need to be approved in the organisation settings.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Create a Token
+
+In GitHub, go to Settings → Developer settings → Personal access tokens. Create a classic token or fine-grained token. For classic tokens, select scopes: `repo`, `read:org` (if needed for private org repos).
+
+  </Step>
+  <Step>
+
+### 2. Organisation Approval
+
+If the token is for an organisation's private repositories, the organisation may require approval. Go to the organisation's Settings → Third-party access to approve the token.
+
+  </Step>
+  <Step>
+
+### 3. Repositories
+
+Enter the list of repository slugs in the format `owner/repo` (e.g. `mantrixflow/ai-bi`). Comma-separated. Leave empty to sync all accessible repositories.
+
+  </Step>
+  <Step>
+
+### 4. Start Date
+
+Enter an ISO 8601 date to control how far back the initial sync goes. Only data from this date onward is synced initially.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+- Repositories
+- Commits
+- Pull requests
+- Issues
+- Releases
+- Workflows
+- Workflow runs
+
+## Supported Sync Modes
+
+- **Full sync** — Reads all records on every run.
+- **Incremental sync** — Uses `updated_at` or similar to read only new or updated records.

@@ -1,0 +1,59 @@
+---
+title: HubSpot
+description: Connect to HubSpot CRM using a Private App access token.
+---
+
+HubSpot is a CRM and marketing platform. MANTrixFlow connects using a Private App access token rather than OAuth.
+
+## Prerequisites
+
+You need a HubSpot account and admin access to create a Private App. The app must have the required scopes for the CRM objects you want to sync.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Create a Private App
+
+In HubSpot, go to Settings → Integrations → Private Apps. Create a new private app.
+
+  </Step>
+  <Step>
+
+### 2. Select Scopes
+
+Select the scopes for CRM objects: contacts, companies, deals, tickets, engagements, owners, pipelines, and properties. Choose read access for the objects you need.
+
+  </Step>
+  <Step>
+
+### 3. Copy the Access Token
+
+After creating the app, copy the access token. Store it securely.
+
+  </Step>
+  <Step>
+
+### 4. API Key Field
+
+Paste the access token into the API key field in MANTrixFlow.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+- Contacts
+- Companies
+- Deals
+- Tickets
+- Engagements
+- Owners
+- Pipelines
+- Properties (and custom properties)
+
+## Supported Sync Modes
+
+- **Full sync** — Reads all records on every run.
+- **Incremental sync** — Uses `lastmodifieddate` or similar to read only new or updated records.

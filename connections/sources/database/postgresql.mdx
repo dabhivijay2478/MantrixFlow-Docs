@@ -1,0 +1,96 @@
+---
+title: PostgreSQL
+description: Connect to PostgreSQL databases including self-hosted, Supabase, Railway, Render, Neon, and AWS RDS.
+---
+
+PostgreSQL is a powerful open-source relational database. MANTrixFlow can sync data from any PostgreSQL instance, including self-hosted servers and managed services such as Supabase, Railway, Render, Neon, and AWS RDS.
+
+## Prerequisites
+
+You need a PostgreSQL database and a user with read access to the tables you want to sync. For CDC, you need database administrator access to enable logical replication.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Connection Name
+
+Enter a friendly name (e.g. "Production PostgreSQL") to identify this connection.
+
+  </Step>
+  <Step>
+
+### 2. Host
+
+Enter the database server hostname or IP address. For cloud providers, find this in your database dashboard (e.g. Supabase Project Settings, Neon connection string).
+
+  </Step>
+  <Step>
+
+### 3. Port
+
+Enter the port. Default is **5432**. Most managed PostgreSQL services use 5432.
+
+  </Step>
+  <Step>
+
+### 4. Database
+
+Enter the database name. For Supabase, this is usually `postgres`. For Neon, it is shown in the connection string.
+
+  </Step>
+  <Step>
+
+### 5. Username and Password
+
+Enter the username and password for the database user. Create a dedicated read-only user for MANTrixFlow (see below).
+
+  </Step>
+  <Step>
+
+### 6. Enable SSL
+
+For cloud databases, enable SSL. For local development, you may disable it.
+
+  </Step>
+</Steps>
+
+### Create a Read-Only User
+
+Run the following SQL as a superuser to create a dedicated user for MANTrixFlow:
+
+```sql
+CREATE USER mantrixflow_read WITH PASSWORD 'your_secure_password';
+
+-- Grant connect
+GRANT CONNECT ON DATABASE your_database TO mantrixflow_read;
+
+-- Grant usage on schema
+GRANT USAGE ON SCHEMA public TO mantrixflow_read;
+
+-- Grant select on all tables (adjust schema/table names as needed)
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO mantrixflow_read;
+
+-- For incremental sync, ensure the user can read the cursor column
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO mantrixflow_read;
+```
+
+## Available Streams
+
+Streams correspond to database tables. When you create a pipeline, you select which tables to sync. MANTrixFlow discovers the schema from the database and lets you choose streams per pipeline.
+
+## Supported Sync Modes
+
+- **Full sync** — Reads every row on every run. Supported for all tables.
+- **Incremental sync** — Uses a cursor column (e.g. `updated_at`, `created_at`) to read only new or updated rows. Choose a column that increases monotonically.
+
+## CDC Setup
+
+<Warning>
+**Database Admin Required**
+
+CDC requires database administrator access to enable logical replication and create a publication.
+</Warning>
+
+See the [CDC Setup for PostgreSQL](/sync-reference/cdc-postgresql) page for the exact commands to enable logical replication, set `wal_level` to `logical`, create a replication slot, create a publication, and grant replication permissions.

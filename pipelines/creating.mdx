@@ -1,0 +1,65 @@
+---
+title: Creating a Pipeline
+description: Step-by-step walkthrough of the pipeline builder wizard.
+---
+
+The pipeline builder guides you through each step. Follow this walkthrough to create a pipeline from start to finish.
+
+<Steps>
+  <Step>
+
+### 1. Choose source connection
+
+Select the source connection from the dropdown. Only connections you have created appear. If you need a new connection, create it first in Connections.
+
+  </Step>
+  <Step>
+
+### 2. Choose destination connection
+
+Select the destination connection. Again, create the connection in Connections if it does not exist.
+
+  </Step>
+  <Step>
+
+### 3. Select streams
+
+Choose which streams (tables or data feeds) to sync. You can select one or more. Each stream will sync to a table or collection in the destination.
+
+  </Step>
+  <Step>
+
+### 4. Set sync mode
+
+For each stream, choose the sync mode: Full sync, Incremental sync, or CDC (if supported). For incremental, select the cursor column (e.g. updated_at).
+
+  </Step>
+  <Step>
+
+### 5. Set write mode
+
+Choose how to write to the destination: Append, Replace, or Upsert. For upsert, specify the primary key column.
+
+  </Step>
+  <Step>
+
+### 6. Column mapping (optional)
+
+Optionally rename columns or select only specific columns. By default, all columns are synced with their original names.
+
+  </Step>
+  <Step>
+
+### 7. Transformation rules (optional)
+
+Add transformation rules: rename, cast, filter, add column, fill nulls, or custom rules. Rules are applied in order before writing to the destination.
+
+  </Step>
+  <Step>
+
+### 8. Review and save
+
+Review the configuration. Click Save to create the pipeline. You can run it immediately or configure a schedule.
+
+  </Step>
+</Steps>

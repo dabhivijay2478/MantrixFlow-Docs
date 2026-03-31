@@ -1,0 +1,60 @@
+---
+title: Stripe
+description: Connect to Stripe using a restricted API key. Charges, customers, invoices, and more.
+---
+
+Stripe is a payment processing platform. MANTrixFlow connects using a restricted API key with read-only permissions.
+
+## Prerequisites
+
+You need a Stripe account and access to create API keys in the Dashboard.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Create a Restricted Key
+
+In Stripe Dashboard, go to Developers → API keys. Create a restricted key. Do not use the secret key for live mode with full access.
+
+  </Step>
+  <Step>
+
+### 2. Set Permissions
+
+Grant read-only access to the resources you need: Charges, Customers, Invoices, Payment Intents, Subscriptions, Products, Prices, Refunds, Balance transactions. Restrict to the minimum required.
+
+  </Step>
+  <Step>
+
+### 3. Copy the Secret Key
+
+After creating the restricted key, copy the secret key. It starts with `rk_` for restricted keys. Paste it into MANTrixFlow.
+
+  </Step>
+  <Step>
+
+### 4. Start Date
+
+Enter an ISO 8601 date (e.g. `2024-01-01`) to control how far back the initial sync goes. Only records created or updated after this date are synced initially.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+- Charges
+- Customers
+- Invoices
+- Payment Intents
+- Subscriptions
+- Products
+- Prices
+- Refunds
+- Balance transactions
+
+## Supported Sync Modes
+
+- **Full sync** — Reads all records (within start date) on every run.
+- **Incremental sync** — Uses `created` or `updated` timestamps to read only new or updated records.

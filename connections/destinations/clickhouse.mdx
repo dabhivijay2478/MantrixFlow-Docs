@@ -1,0 +1,50 @@
+---
+title: ClickHouse
+description: Write synced data to ClickHouse. HTTP interface on port 8123.
+---
+
+ClickHouse is a columnar analytical database. MANTrixFlow connects via the HTTP interface (port 8123 by default).
+
+## Prerequisites
+
+You need a ClickHouse server and a user with INSERT and CREATE TABLE permissions on the target database.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Host and Port
+
+Enter the ClickHouse host and port. Default HTTP port is **8123**.
+
+  </Step>
+  <Step>
+
+### 2. Database
+
+Enter the database name. The table will be created in this database.
+
+  </Step>
+  <Step>
+
+### 3. Username and Password
+
+Enter the ClickHouse username and password.
+
+  </Step>
+</Steps>
+
+## Write Modes
+
+### Append
+
+Appends rows to the existing table. ClickHouse MergeTree tables are optimised for append. The table is created if it does not exist.
+
+### Replace
+
+Replaces the table. For MergeTree, this typically means dropping and recreating.
+
+### Upsert
+
+ClickHouse supports ReplacingMergeTree for deduplication. Configure the engine and version column as needed.

@@ -1,0 +1,40 @@
+---
+title: Elasticsearch
+description: Write synced data to Elasticsearch. Index documents with API key or basic auth.
+---
+
+Elasticsearch is a search and analytics engine. MANTrixFlow indexes documents into Elasticsearch. Use it when you need full-text search or log analytics on your synced data.
+
+## Prerequisites
+
+You need an Elasticsearch cluster (self-hosted or Elastic Cloud) and an API key or username/password with index and write permissions.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Host URL
+
+Enter the Elasticsearch host URL (e.g. `https://my-cluster.es.us-east-1.aws.found.io:9243`).
+
+  </Step>
+  <Step>
+
+### 2. Authentication
+
+Use an API key (recommended) or basic authentication (username and password). Create an API key in Elasticsearch Security → API Keys.
+
+  </Step>
+  <Step>
+
+### 3. Index Name
+
+Enter the index name. Documents will be written to this index. The index is created automatically if it does not exist.
+
+  </Step>
+</Steps>
+
+## Upsert Key
+
+The upsert key field maps to the document identifier (`_id`) used for document updates. When a document with the same ID already exists, it is updated instead of creating a duplicate.

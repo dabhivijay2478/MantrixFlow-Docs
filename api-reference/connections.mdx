@@ -1,0 +1,70 @@
+---
+title: Connections API
+description: Create, list, delete, and test connections. Discover streams.
+---
+
+All connection endpoints are under `/organizations/:organizationId/data-sources`. Replace `organizationId` with your organisation UUID.
+
+## Create Source Connection
+
+**POST** `/organizations/:organizationId/data-sources`
+
+Creates a data source. Then create the connection config via the connection endpoint.
+
+**Request body:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Friendly name for the connection |
+| sourceType | string | Yes | Connector type (e.g. postgres, mysql, shopify) |
+| connectorRole | string | No | "source" or "destination" |
+| description | string | No | Optional description |
+| metadata | object | No | Optional metadata |
+
+**Response:** `{ success: true, data: { id, name, sourceType, ... } }`
+
+## List Connections
+
+**GET** `/organizations/:organizationId/data-sources`
+
+Lists all data sources.
+
+**Query params:** `sourceType`, `isActive`, `limit`, `offset`
+
+**Response:** `{ success: true, data: [...] }`
+
+## Get Connection
+
+**GET** `/organizations/:organizationId/data-sources/:id`
+
+Returns a single data source by ID.
+
+## Delete Connection
+
+**DELETE** `/organizations/:organizationId/data-sources/:id`
+
+Deletes a data source and its connection config.
+
+## Create or Update Connection Config
+
+**POST** `/organizations/:organizationId/data-sources/:sourceId/connection`
+
+Creates or updates the connection credentials. The body contains the connector-specific config (host, port, credentials, etc.).
+
+## Get Connection Config (metadata only)
+
+**GET** `/organizations/:organizationId/data-sources/:sourceId/connection`
+
+Returns connection metadata (not credentials). Use to check if a connection exists.
+
+## Test Connection
+
+**POST** `/organizations/:organizationId/data-sources/:sourceId/connection` (with test flag)
+
+Or use the ETL test endpoint. Tests the connection config without saving.
+
+## Discover Streams
+
+**POST** `/organizations/:organizationId/data-sources/:sourceId/discover`
+
+Discovers available streams (tables, collections) from the source. Returns the list of streams with their schemas.

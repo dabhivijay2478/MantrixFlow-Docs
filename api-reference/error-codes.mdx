@@ -1,0 +1,54 @@
+---
+title: Error Codes
+description: Common error codes and recommended actions.
+---
+
+## HTTP Status Codes
+
+| Code | Meaning |
+|------|---------|
+| 400 | Bad Request — Invalid input, missing required fields |
+| 401 | Unauthorized — Invalid or missing Bearer token |
+| 403 | Forbidden — Insufficient permissions |
+| 404 | Not Found — Resource does not exist |
+| 409 | Conflict — Resource already exists or state conflict |
+| 422 | Unprocessable Entity — Validation failed |
+| 500 | Internal Server Error — Server error |
+
+## Common Errors
+
+### Invalid credentials
+
+**Cause:** Connection credentials are wrong or expired.
+
+**Action:** Verify the connection config. Test the connection. For OAuth sources, refresh the token.
+
+### Connection timeout
+
+**Cause:** The source or destination is unreachable (network, firewall, IP allowlist).
+
+**Action:** Add the ETL server IP to the source/destination allowlist. Check firewall rules.
+
+### Permission denied
+
+**Cause:** The database user lacks required privileges (SELECT, REPLICATION, etc.).
+
+**Action:** Grant the required privileges. See the connector documentation for the exact SQL.
+
+### Stream not found
+
+**Cause:** The selected stream does not exist or was removed.
+
+**Action:** Re-discover streams. Update the pipeline configuration.
+
+### Schema mismatch
+
+**Cause:** The source schema changed or the destination table has incompatible columns.
+
+**Action:** Reset the pipeline or update the column mapping. For CDC, recreate the publication if tables changed.
+
+### Rate limit exceeded
+
+**Cause:** Too many requests to the source API.
+
+**Action:** Reduce sync frequency. Use incremental sync to reduce data volume.

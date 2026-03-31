@@ -1,0 +1,64 @@
+---
+title: Pipelines & run history
+description: Create pipelines, open the visual builder, monitor runs, status, and errors on the pipeline detail page.
+---
+
+Key routes:
+
+- List: `/workspace/data-pipelines`
+- Create: `/workspace/data-pipelines/new`
+- Builder (canvas): `/workspace/data-pipelines/[pipelineId]/builder`
+- Detail (runs, tabs): `/workspace/data-pipelines/[pipelineId]`
+
+## Pipeline list
+
+Open **Data Pipelines** in the sidebar (`/workspace/data-pipelines`). The page title may read **Pipelines**. Filter by **All**, **Running**, **Failed**, or **Scheduled**. Search narrows the list. Each card shows name, last status, source connector, branch or destination labels when present, and last run time.
+
+![Pipelines list](/images/user-guide/ug-pipelines-list.png)
+
+## Create a pipeline
+
+1. Click **+ New Pipeline**.
+2. Enter a **Pipeline name** and select a **Source connection**.
+3. Click **Create & open canvas** to land in the builder (you configure transforms and destinations on the canvas).
+
+![Create pipeline form](/images/user-guide/ug-new-pipeline-form.png)
+
+## Open the builder (edit pipeline graph)
+
+- Click the pipeline row to open the canvas, or use **⋯** → **Open Builder**.
+
+The canvas shows the **source** node, optional **transform** nodes, and **destination** nodes with listen/run states and quick actions (**Add transform**, **Add emitter (destination)**, **Run pipeline**, etc.).
+
+![Pipeline builder — branches on canvas](/images/user-guide/ug-pipeline-builder-branches.png)
+
+## Run history, status, and errors
+
+Open the pipeline’s **detail** page (not only the builder). You will see:
+
+- Summary metrics (rows processed, success/fail counts, last sync time).
+- Tabs such as **Run History**, **Code**, **Explore**, **Incoming/Outgoing Data**, **Configuration**, **Settings**.
+- **Recent runs** with status, trigger, rows written, failures, duration.
+
+If the source or destination connection is disconnected, a **banner** explains that the pipeline cannot run until you reconnect under **Connections**.
+
+![Pipeline detail — run history and warning banner](/images/user-guide/ug-pipeline-detail-runs.png)
+
+## Row actions: run and delete
+
+Use **Run now** on the list to trigger a manual run. **⋯** opens:
+
+- **Open Builder**
+- **Run Now**
+- **Delete** (destructive; confirm in the modal)
+
+![Pipeline row overflow menu](/images/user-guide/ug-pipeline-row-menu.png)
+
+![Delete pipeline confirmation](/images/user-guide/ug-pipeline-delete-confirm.png)
+
+Cancel the dialog if you only wanted to inspect the warning; deletion is permanent.
+
+## Edit metadata vs graph
+
+- **Graph** (streams, branches, transforms, destinations): **Open Builder** and **Save** on the canvas toolbar where applicable.
+- **Schedule, sync options, detail tabs**: use the pipeline **detail** page tabs (**Configuration** / **Settings**) as implemented for your org’s API version.

@@ -1,0 +1,28 @@
+---
+title: MySQL (Destination)
+description: Write synced data to MySQL. Upsert uses ON DUPLICATE KEY UPDATE.
+---
+
+MySQL is a relational database destination. MANTrixFlow supports append, replace, and upsert write modes.
+
+## Prerequisites
+
+You need a MySQL database and a user with CREATE, INSERT, UPDATE, and DELETE permissions on the target database.
+
+## Connection Setup
+
+Use the same connection fields as the [MySQL source](/connections/sources/database/mysql): host, port (3306), database, username, and password.
+
+## Write Modes
+
+### Append
+
+Inserts new rows. The table is created if it does not exist.
+
+### Replace
+
+Drops and recreates the table on every sync.
+
+### Upsert
+
+Uses `ON DUPLICATE KEY UPDATE` syntax. The upsert key column must be set as a primary key or unique key in the destination table. MySQL requires the key to be part of a unique constraint for upsert to work correctly.

@@ -1,0 +1,22 @@
+---
+title: Data Privacy
+description: What data the platform stores and what it does not store.
+---
+
+## What We Store
+
+- **Connection metadata** — Connection names, types, and organisation association. Not credentials (those are encrypted).
+- **Pipeline configuration** — Source, destination, stream selection, sync mode, write mode, transformation rules.
+- **Sync state** — Cursor values and CDC positions for incremental and CDC syncs.
+- **Run metadata** — Run IDs, status, row counts, timestamps, error messages. Not the actual synced data.
+- **User and organisation data** — Account info, team membership, roles.
+
+## What We Do Not Store
+
+- **Your source data** — Data flows from your source through the ETL service to your destination. We do not persist it.
+- **Credentials in logs** — Credentials are never written to logs. Only connection IDs and metadata may appear.
+- **Synced data** — The platform does not retain a copy of the data you sync. It exists only in your source and destination.
+
+## Data Flow
+
+Source → ETL (transient) → Destination. The ETL service reads from the source, applies transformations, and writes to the destination. Data is held in memory only during the sync.

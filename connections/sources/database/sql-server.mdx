@@ -1,0 +1,85 @@
+---
+title: SQL Server
+description: Connect to Microsoft SQL Server 2017+ and Azure SQL Database.
+---
+
+Microsoft SQL Server is an enterprise relational database. MANTrixFlow supports SQL Server 2017 and above, including Azure SQL Database.
+
+## Prerequisites
+
+You need a SQL Server instance and a login with read access to the tables you want to sync. For CDC, you need permissions to enable CDC on the database and tables.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Connection Name
+
+Enter a friendly name (e.g. "SQL Server Production") to identify this connection.
+
+  </Step>
+  <Step>
+
+### 2. Host
+
+Enter the server hostname or IP address. For Azure SQL, use the server name from the connection string (e.g. `yourserver.database.windows.net`).
+
+  </Step>
+  <Step>
+
+### 3. Port
+
+Enter the port. Default is **1433**.
+
+  </Step>
+  <Step>
+
+### 4. Database
+
+Enter the database name.
+
+  </Step>
+  <Step>
+
+### 5. Username and Password
+
+Enter the SQL Server login and password. Ensure SQL Server Authentication is enabled if using mixed mode. For Azure SQL, use the admin login or a user with db_datareader.
+
+  </Step>
+</Steps>
+
+### Enable SQL Server Authentication
+
+If using mixed mode, enable SQL Server Authentication in SQL Server Management Studio: Server Properties → Security → SQL Server and Windows Authentication mode.
+
+### Create a Login and User
+
+```sql
+-- Create login
+CREATE LOGIN mantrixflow WITH PASSWORD = 'your_secure_password';
+
+-- Create user in database
+USE your_database;
+CREATE USER mantrixflow FOR LOGIN mantrixflow;
+
+-- Grant read access
+ALTER ROLE db_datareader ADD MEMBER mantrixflow;
+```
+
+## Available Streams
+
+Streams correspond to tables. MANTrixFlow discovers the schema. You select which tables to sync when creating a pipeline.
+
+## Supported Sync Modes
+
+- **Full sync** — Reads every row on every run.
+- **Incremental sync** — Uses a cursor column to read only new or updated rows.
+
+## CDC Setup
+
+<Warning>
+**Database Admin Required**
+
+CDC requires SQL Server Agent to be running and CDC to be enabled on the database and tables. See [CDC Setup for SQL Server](/sync-reference/cdc-sql-server) for the exact T-SQL commands.
+</Warning>

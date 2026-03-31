@@ -1,0 +1,59 @@
+---
+title: BigQuery
+description: Connect to Google BigQuery using service account authentication.
+---
+
+BigQuery is Google's serverless data warehouse. MANTrixFlow uses service account authentication rather than username and password.
+
+## Prerequisites
+
+You need a Google Cloud project with BigQuery enabled and a service account with BigQuery Data Viewer and BigQuery Job User roles.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Create a Service Account
+
+In Google Cloud Console, go to IAM & Admin → Service Accounts. Create a new service account (e.g. "mantrixflow-sync").
+
+  </Step>
+  <Step>
+
+### 2. Assign Roles
+
+Grant the service account **BigQuery Data Viewer** and **BigQuery Job User** roles. BigQuery Data Viewer allows reading tables. BigQuery Job User allows running queries.
+
+  </Step>
+  <Step>
+
+### 3. Create and Download JSON Key
+
+Create a key for the service account (JSON format). Download the JSON file.
+
+  </Step>
+  <Step>
+
+### 4. Paste Credentials
+
+In MANTrixFlow, paste the entire JSON key contents into the credentials field. Do not share this key publicly.
+
+  </Step>
+  <Step>
+
+### 5. Project ID and Dataset ID
+
+Enter the Google Cloud project ID and the BigQuery dataset ID. Tables in this dataset map to streams.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+Streams correspond to BigQuery tables in the specified dataset. MANTrixFlow discovers the schema. You select which tables to sync when creating a pipeline.
+
+## Supported Sync Modes
+
+- **Full sync** — Reads every row on every run.
+- **Incremental sync** — Uses a cursor column to read only new or updated rows.

@@ -1,0 +1,55 @@
+---
+title: Slack
+description: Connect to Slack using a Slack app. OAuth scopes and bot token.
+---
+
+Slack is a messaging platform. MANTrixFlow connects using a Slack app with the required OAuth scopes. Install the app to your workspace and use the bot token.
+
+## Prerequisites
+
+You need a Slack workspace and permission to create and install apps. Create a Slack app in the [Slack API](https://api.slack.com/apps) dashboard.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Create a Slack App
+
+Go to api.slack.com/apps and create a new app. Choose "From scratch" or "From manifest".
+
+  </Step>
+  <Step>
+
+### 2. Set OAuth Scopes
+
+Under OAuth & Permissions, add the required Bot Token Scopes: `channels:history`, `channels:read`, `users:read`, `reactions:read`, and others as needed for the streams you want to sync.
+
+  </Step>
+  <Step>
+
+### 3. Install the App
+
+Install the app to your workspace. Authorise the requested permissions.
+
+  </Step>
+  <Step>
+
+### 4. Copy the Bot Token
+
+Copy the Bot User OAuth Token (starts with `xoxb-`). Paste it into MANTrixFlow.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+- Messages (per channel)
+- Channels
+- Users
+- Reactions
+
+## Supported Sync Modes
+
+- **Full sync** — Reads all records on every run.
+- **Incremental sync** — Uses message timestamps to read only new messages.

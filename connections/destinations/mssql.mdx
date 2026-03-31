@@ -1,0 +1,28 @@
+---
+title: MSSQL (Destination)
+description: Write synced data to Microsoft SQL Server. ODBC driver and write modes.
+---
+
+Microsoft SQL Server is a relational database destination. MANTrixFlow supports append, replace, and upsert write modes.
+
+## Prerequisites
+
+You need a SQL Server instance and a user with CREATE, INSERT, UPDATE, and DELETE permissions. The ETL server may require an ODBC driver for SQL Server.
+
+## Connection Setup
+
+Enter the server host, port (1433), database, username, and password. For Azure SQL, use the server name from the connection string. Ensure the SQL Server ODBC driver is installed if required.
+
+## Write Modes
+
+### Append
+
+Inserts new rows. The table is created if it does not exist.
+
+### Replace
+
+Drops and recreates the table on every sync.
+
+### Upsert
+
+Uses MERGE or equivalent to insert new rows and update existing rows based on the primary key. Specify the upsert key column.

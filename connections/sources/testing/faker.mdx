@@ -1,0 +1,46 @@
+---
+title: Faker
+description: Generate synthetic data for testing pipelines without connecting to a real source.
+---
+
+Faker generates synthetic data for testing. Use it to build and test pipelines without connecting to a real data source. No external credentials are required.
+
+## Prerequisites
+
+None. Faker requires no external accounts.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Connection Name
+
+Enter a friendly name (e.g. "Test Data").
+
+  </Step>
+  <Step>
+
+### 2. Count
+
+Enter the number of rows to generate per stream. Default is 1000. Use a smaller value for quick tests.
+
+  </Step>
+  <Step>
+
+### 3. Seed
+
+Optionally enter a seed for deterministic generation. Same seed produces the same data on every run. Leave empty for random data.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+- Users (id, name, email, created_at, etc.)
+- Products (id, name, price, category, etc.)
+- Orders (id, user_id, total, status, created_at, etc.)
+
+## Supported Sync Modes
+
+- **Full sync** — Generates data on every run. With a fixed seed, data is identical each time.

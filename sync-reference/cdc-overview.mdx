@@ -1,0 +1,31 @@
+---
+title: CDC Overview
+description: Change data capture at a conceptual level.
+---
+
+CDC (Change Data Capture) reads the database replication log to capture every insert, update, and delete as it happens. It is the most powerful sync mode for databases but requires database-level configuration.
+
+## How CDC Differs
+
+- **Full sync** — Reads the current state of the table. No history of changes.
+- **Incremental sync** — Reads rows that changed since the last run. May miss updates if the cursor column is not updated.
+- **CDC** — Reads the replication log. Captures every change with the exact operation (insert, update, delete). Near-real-time.
+
+## When to Use CDC
+
+- You need near-real-time sync (seconds or minutes of latency).
+- You need to capture deletes (incremental sync typically does not).
+- You need to replicate updates even when the cursor column is not updated.
+- Your database supports CDC and you have admin access to enable it.
+
+## Supported Databases
+
+- **PostgreSQL** — Logical replication. See [CDC Setup for PostgreSQL](/sync-reference/cdc-postgresql).
+- **MySQL** — Binary log. See [CDC Setup for MySQL](/sync-reference/cdc-mysql).
+- **SQL Server** — Native CDC. See [CDC Setup for SQL Server](/sync-reference/cdc-sql-server).
+
+<Warning>
+**Database Admin Required**
+
+CDC requires database administrator access. You must enable replication, create publications, and grant replication permissions.
+</Warning>

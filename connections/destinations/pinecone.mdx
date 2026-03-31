@@ -1,0 +1,44 @@
+---
+title: Pinecone
+description: Write vectors to Pinecone. Requires an embedding column in the data.
+---
+
+Pinecone is a vector database. MANTrixFlow can write to Pinecone when your data includes an embedding column. Produce embeddings upstream (e.g. using a transformation or external service) before writing to this destination.
+
+## Prerequisites
+
+You need a Pinecone account and an API key. Create an index with the appropriate dimensions for your embeddings.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. API Key
+
+Obtain an API key from the Pinecone console. Paste it into the credentials field.
+
+  </Step>
+  <Step>
+
+### 2. Index Name
+
+Enter the name of the Pinecone index. The index must exist and have dimensions matching your embedding column.
+
+  </Step>
+  <Step>
+
+### 3. Environment
+
+Enter the Pinecone environment (e.g. `us-east-1-aws`). Find this in the Pinecone console.
+
+  </Step>
+</Steps>
+
+## Data Requirements
+
+Your data must include:
+
+- **Embedding column** — A vector column (array of floats) with the same dimensions as the index.
+- **Metadata columns** — Optional. Stored as metadata in Pinecone.
+- **Upsert key** — Used as the vector ID for upsert operations. Must be unique per vector.

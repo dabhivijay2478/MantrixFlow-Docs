@@ -1,0 +1,66 @@
+---
+title: Shopify
+description: Connect to Shopify using a Custom App and Admin API access token.
+---
+
+Shopify is an e-commerce platform. MANTrixFlow connects to Shopify via the Admin API using a Custom App access token.
+
+## Prerequisites
+
+You need a Shopify store and admin access to create a Custom App. The app must have the required API access scopes for the data you want to sync.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Create a Custom App
+
+In your Shopify admin, go to Settings → Apps and sales channels → Develop apps → Create an app. Or use the Shopify Partners dashboard to create a custom app for a development store.
+
+  </Step>
+  <Step>
+
+### 2. Configure API Scopes
+
+Select the required scopes. For orders, products, customers, and inventory, you need read access to: `read_orders`, `read_products`, `read_customers`, `read_inventory`, `read_fulfillments`, and related scopes. Configure based on the streams you need.
+
+  </Step>
+  <Step>
+
+### 3. Install the App
+
+Install the app on your store. This generates the Admin API access token.
+
+  </Step>
+  <Step>
+
+### 4. Copy the Access Token
+
+After installation, copy the Admin API access token. Store it securely. You cannot view it again after closing the dialog.
+
+  </Step>
+  <Step>
+
+### 5. Shop Name
+
+Enter only the subdomain of your store URL. For `mystore.myshopify.com`, enter `mystore`. Do not include `myshopify.com`.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+- Orders
+- Order line items
+- Products
+- Product variants
+- Customers
+- Inventory levels
+- Transactions
+- Collections
+
+## Supported Sync Modes
+
+- **Full sync** — Reads all records on every run.
+- **Incremental sync** — Uses `updated_at` or similar to read only new or updated records.

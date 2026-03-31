@@ -1,0 +1,41 @@
+---
+title: Weaviate
+description: Write vectors to Weaviate. Requires an embedding column in the data.
+---
+
+Weaviate is a vector database. MANTrixFlow can write to Weaviate when your data includes an embedding column. Produce embeddings upstream before writing to this destination.
+
+## Prerequisites
+
+You need a Weaviate instance (self-hosted or Weaviate Cloud) and an API key if authentication is enabled.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Host URL
+
+Enter the Weaviate host URL (e.g. `https://your-cluster.weaviate.network`).
+
+  </Step>
+  <Step>
+
+### 2. API Key
+
+If your Weaviate instance requires authentication, enter the API key.
+
+  </Step>
+  <Step>
+
+### 3. Class/Collection Name
+
+Enter the class (collection) name. The class must exist with a vector property matching your embedding dimensions.
+
+  </Step>
+</Steps>
+
+## Data Requirements
+
+- **Embedding column** — Vector data with dimensions matching the class schema.
+- **Upsert key** — Used as the object ID for upsert operations.

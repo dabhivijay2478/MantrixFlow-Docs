@@ -1,0 +1,24 @@
+---
+title: Rename Columns
+description: Change column names during sync.
+---
+
+The rename transformation changes the name of a column. It is equivalent to column mapping but applied as a transformation rule.
+
+## When to Use
+
+- The destination expects different column names (e.g. camelCase vs snake_case).
+- You want to standardise naming across sources.
+- You need to rename in the transform stage rather than the mapping stage.
+
+## Example
+
+Rename `user_id` to `userId`:
+
+| Before | After |
+|--------|-------|
+| user_id | userId |
+
+## Configuration
+
+Specify the source column name and the new (destination) column name. The transformation is applied before writing to the destination.

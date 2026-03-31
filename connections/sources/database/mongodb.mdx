@@ -1,0 +1,99 @@
+---
+title: MongoDB
+description: Connect to MongoDB Atlas, self-hosted replica sets, and MongoDB Community Edition.
+---
+
+MongoDB is a document database. MANTrixFlow supports MongoDB Atlas, self-hosted replica sets, and MongoDB Community Edition.
+
+## Prerequisites
+
+You need a MongoDB deployment. For incremental sync, a **replica set** is required. Standalone instances support full sync only. The connecting user must have read access to the collections you want to sync.
+
+## Connection Setup
+
+You can connect using either a full connection string or individual host, port, database, username, and password fields.
+
+### Option 1: Connection String (Atlas)
+
+<Steps>
+  <Step>
+
+### 1. Connection Method
+
+Select **Connection String (Atlas/SRV)**.
+
+  </Step>
+  <Step>
+
+### 2. Connection String
+
+Paste the full connection string from MongoDB Atlas. Format: `mongodb+srv://user:password@cluster.mongodb.net/?appName=Cluster0`. URL-encode special characters in the password (`@` → `%40`, `:` → `%3A`).
+
+  </Step>
+  <Step>
+
+### 3. Databases
+
+Optionally specify databases to sync as comma-separated (e.g. `sample_mflix, test`). Leave empty to use admin.
+
+  </Step>
+</Steps>
+
+### Option 2: Individual Fields
+
+<Steps>
+  <Step>
+
+### 1. Connection Method
+
+Select **Individual (Host, Port, Username, Password)**.
+
+  </Step>
+  <Step>
+
+### 2. Host
+
+Enter the host (e.g. `cluster0.xxxxx.mongodb.net` for Atlas, or `localhost` for self-hosted).
+
+  </Step>
+  <Step>
+
+### 3. Port
+
+Default is **27017**. Atlas SRV uses 27017.
+
+  </Step>
+  <Step>
+
+### 4. Database, Username, Password
+
+Enter the default database for auth, username, and password.
+
+  </Step>
+  <Step>
+
+### 5. Databases
+
+Optionally specify databases to sync as comma-separated. Leave empty for admin.
+
+  </Step>
+</Steps>
+
+<Warning>
+**MongoDB Atlas**
+
+Add your IP to Network Access in Atlas (or use 0.0.0.0/0 for testing). Ensure the cluster is M10+ (replica set). URL-encode special characters in the password.
+</Warning>
+
+## Role Assignments
+
+The connecting user needs read access to the collections. For Atlas, assign the `read` role on the database(s) you want to sync. For self-hosted, ensure the user has `read` or `readAnyDatabase` as appropriate.
+
+## Available Streams
+
+Streams correspond to collections. MANTrixFlow discovers collections from the specified databases. You select which collections to sync when creating a pipeline.
+
+## Supported Sync Modes
+
+- **Full sync** — Supported for all deployments.
+- **Incremental sync** — Requires a replica set. Uses a cursor field (e.g. `_id` or a timestamp) to read only new or updated documents.

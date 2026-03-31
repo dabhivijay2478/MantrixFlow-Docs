@@ -1,0 +1,30 @@
+---
+title: Sync State
+description: What the sync state stores and how it is used.
+---
+
+For incremental and CDC syncs, MANTrixFlow stores sync state. This state tells the next run where to resume.
+
+## What Is Stored
+
+### Incremental Sync
+
+- **Cursor value** — The maximum value of the cursor column from the last successful run. The next run reads only rows with a cursor value greater than this.
+
+### CDC
+
+- **CDC position** — The position in the database replication log (e.g. LSN for PostgreSQL, binlog position for MySQL). The next run continues from this position.
+
+## How It Is Used
+
+On each run:
+
+1. The pipeline loads the stored sync state.
+2. It uses the state to determine what to read (incremental: rows after cursor; CDC: log events after position).
+3. After a successful run, it updates the state with the new cursor value or CDC position.
+
+## When State Is Cleared
+
+- **Reset** — You can manually reset the sync state. The next run will behave like a full sync (or CDC from the current position).
+- **Pipeline deletion** — Deleting a pipeline removes its sync state.
+- **Stream reconfiguration** — Changing the cursor column or stream may require a reset.

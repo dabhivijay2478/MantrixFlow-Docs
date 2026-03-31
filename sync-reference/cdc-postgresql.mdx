@@ -1,0 +1,76 @@
+---
+title: CDC Setup for PostgreSQL
+description: Enable logical replication and create a publication. Exact PostgreSQL commands.
+---
+
+<Warning>
+**Database Admin Required**
+
+You need superuser or replication privileges to perform these steps.
+</Warning>
+
+Follow these steps to enable CDC for PostgreSQL.
+
+<Steps>
+  <Step>
+
+### 1. Set wal_level to logical
+
+Edit postgresql.conf or use ALTER SYSTEM:
+
+```sql
+ALTER SYSTEM SET wal_level = 'logical';
+```
+
+Restart PostgreSQL for the change to take effect.
+
+  </Step>
+  <Step>
+
+### 2. Create a replication slot (optional)
+
+The connector may create the slot automatically. If you need to create it manually:
+
+```sql
+SELECT * FROM pg_create_logical_replication_slot('mantrixflow_slot', 'pgoutput');
+```
+
+  </Step>
+  <Step>
+
+### 3. Create a publication
+
+Create a publication for the tables you want to sync:
+
+```sql
+CREATE PUBLICATION mantrixflow_pub FOR TABLE schema1.table1, schema1.table2;
+```
+
+Or for all tables in a schema:
+
+```sql
+CREATE PUBLICATION mantrixflow_pub FOR ALL TABLES IN SCHEMA public;
+```
+
+  </Step>
+  <Step>
+
+### 4. Grant replication permissions
+
+The user must have REPLICATION privilege:
+
+```sql
+ALTER USER mantrixflow_read REPLICATION;
+```
+
+Or create a dedicated replication user:
+
+```sql
+CREATE USER mantrixflow_repl WITH REPLICATION PASSWORD 'your_password';
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO mantrixflow_repl;
+```
+
+  </Step>
+</Steps>
+
+After completing these steps, configure the PostgreSQL source connection with the publication name and run a pipeline with CDC sync mode.

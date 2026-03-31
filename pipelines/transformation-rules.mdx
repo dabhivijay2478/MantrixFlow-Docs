@@ -1,0 +1,40 @@
+---
+title: Transformation Rules
+description: Rename, cast, filter, add column, fill nulls, and custom rules.
+---
+
+Transformation rules are applied to the data after it is read from the source and before it is written to the destination. Rules are executed in order.
+
+## Rename
+
+Changes a column name. Equivalent to column mapping but applied as a transformation. Use when you need to rename in the transform stage rather than the mapping stage.
+
+**Example:** Rename `user_id` to `userId`.
+
+## Cast
+
+Changes the data type of a column. Use when the inferred type is wrong (e.g. a string that contains a number should be numeric).
+
+**Example:** Cast `price` from string to float.
+
+## Filter Rows
+
+Removes rows that do not match a condition. Use to sync only a subset of data.
+
+**Example:** Keep only rows where `status = 'completed'`.
+
+## Add Column
+
+Creates a new column derived from existing columns using a simple expression. Use for computed fields.
+
+**Example:** Add `full_name` as `first_name + ' ' + last_name`.
+
+## Fill Nulls
+
+Replaces null values in a column with a specified default value. Use when the destination does not accept nulls or you want a fallback.
+
+**Example:** Fill nulls in `country` with `'Unknown'`.
+
+## Custom Rules
+
+Some connectors support custom transformation logic (e.g. SQL expressions or script-based transforms). See the connector documentation for details.

@@ -1,0 +1,41 @@
+---
+title: Webhook Callbacks
+description: Receive notifications when pipeline runs complete.
+---
+
+MANTrixFlow can send webhook callbacks when pipeline runs complete. Configure a webhook URL in your pipeline or organisation settings.
+
+## Payload
+
+When a run completes (success or failure), the platform sends a POST request to your webhook URL with a JSON body:
+
+```json
+{
+  "jobId": "run-uuid",
+  "status": "completed",
+  "rowsSynced": 1000,
+  "errorMessage": null,
+  "pipelineId": "pipeline-uuid",
+  "organizationId": "org-uuid"
+}
+```
+
+For failed runs:
+
+```json
+{
+  "jobId": "run-uuid",
+  "status": "failed",
+  "errorMessage": "Connection timeout",
+  "userMessage": "Human-readable error",
+  "pipelineId": "pipeline-uuid"
+}
+```
+
+## Verification
+
+Verify the webhook is from MANTrixFlow using the signature header (if configured). Check the documentation for the exact verification method.
+
+## Retries
+
+If your endpoint returns a non-2xx status, the platform may retry the webhook. Configure retry behaviour in the webhook settings.

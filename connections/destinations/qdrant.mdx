@@ -1,0 +1,41 @@
+---
+title: Qdrant
+description: Write vectors to Qdrant. Requires an embedding column in the data.
+---
+
+Qdrant is a vector database. MANTrixFlow can write to Qdrant when your data includes an embedding column. Produce embeddings upstream before writing to this destination.
+
+## Prerequisites
+
+You need a Qdrant instance (self-hosted or Qdrant Cloud) and an API key if authentication is enabled.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Host URL
+
+Enter the Qdrant host URL (e.g. `https://your-cluster.qdrant.io`).
+
+  </Step>
+  <Step>
+
+### 2. API Key
+
+If using Qdrant Cloud, enter the API key from the console.
+
+  </Step>
+  <Step>
+
+### 3. Collection Name
+
+Enter the collection name. The collection must exist with dimensions matching your embedding column.
+
+  </Step>
+</Steps>
+
+## Data Requirements
+
+- **Embedding column** — Vector data with dimensions matching the collection.
+- **Upsert key** — Used as the point ID for upsert operations.

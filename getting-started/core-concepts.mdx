@@ -1,0 +1,34 @@
+---
+title: Core Concepts
+description: "Understand the five fundamental concepts of MANTrixFlow: connections, pipelines, streams, sync modes, and write modes."
+---
+
+MANTrixFlow is built around five core concepts. Understanding these will help you configure pipelines correctly.
+
+## Connections
+
+A connection is a saved set of credentials for a source or destination. When you add a connection, you enter the host, credentials, and other configuration. MANTrixFlow encrypts and stores these credentials. You never send credentials in pipeline requests — only the connection ID is used. Each connection can be reused across multiple pipelines.
+
+## Pipelines
+
+A pipeline links one source connection to one destination connection. It defines what to sync (which streams), how to read from the source (sync mode), and how to write to the destination (write mode). A pipeline can sync one or more streams. You run a pipeline manually or on a schedule.
+
+## Streams
+
+Streams are the individual tables or data feeds within a connected source. For a database, each table is a stream. For a SaaS app, each API resource (e.g. orders, customers) is a stream. When you create a pipeline, you choose which streams to sync. Each stream maps to a table or collection in the destination.
+
+## Sync Modes
+
+Sync mode defines how data is read from the source:
+
+- **Full sync** — Reads every record on every run. Suitable for small tables or sources that do not support incremental reads.
+- **Incremental sync** — Reads only records newer than the last run using a cursor column (e.g. `updated_at`). Efficient for large tables.
+- **CDC (Change Data Capture)** — Reads the database replication log to capture inserts, updates, and deletes in real time. Requires database configuration.
+
+## Write Modes
+
+Write mode defines how data is written to the destination:
+
+- **Append** — Adds new rows to the existing table. Does not update or delete.
+- **Replace** — Drops and recreates the table on every sync. Full replacement.
+- **Upsert** — Inserts new rows and updates existing rows using a primary key column. Requires specifying the upsert key.

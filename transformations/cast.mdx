@@ -1,0 +1,20 @@
+---
+title: Cast Types
+description: Convert column data types during sync.
+---
+
+The cast transformation changes the data type of a column. Use it when the inferred type is wrong or the destination expects a specific type.
+
+## When to Use
+
+- A string column contains numbers and should be numeric.
+- A date is stored as string and should be a date type.
+- The destination requires a specific type (e.g. boolean, integer).
+
+## Example
+
+Cast price from string to float. Values like "19.99" become 19.99.
+
+## Supported Types
+
+Common types include: string, integer, float, boolean, date, datetime. The exact set depends on the pipeline configuration.

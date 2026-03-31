@@ -1,0 +1,32 @@
+---
+title: BigQuery (Destination)
+description: Write synced data to BigQuery. Service account with Data Editor and Data Owner roles.
+---
+
+BigQuery is a serverless data warehouse. MANTrixFlow writes to BigQuery using a service account with write permissions.
+
+## Prerequisites
+
+You need a Google Cloud project and a service account with **BigQuery Data Editor** and **BigQuery Data Owner** (or **BigQuery Job User**) roles. These are in addition to the read roles required for a source.
+
+## Connection Setup
+
+Use the same service account setup as the [BigQuery source](/connections/sources/warehouse/bigquery), but add **BigQuery Data Editor** and **BigQuery Data Owner** roles so the service account can create and write to tables.
+
+## Write Modes
+
+### Append
+
+Appends rows to the existing table. The table is created if it does not exist. Use for append-only data.
+
+### Replace
+
+Overwrites the table on every sync. DROP and CREATE or TRUNCATE + INSERT depending on configuration. Use for full refresh.
+
+### Upsert
+
+Uses a merge pattern to insert new rows and update existing rows based on the primary key. BigQuery supports MERGE statements for upsert behaviour.
+
+## Dataset and Table
+
+Specify the dataset ID and the table name. The table is created automatically if it does not exist. Column types are inferred from the source schema.

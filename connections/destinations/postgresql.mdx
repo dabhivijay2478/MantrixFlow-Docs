@@ -1,0 +1,28 @@
+---
+title: PostgreSQL (Destination)
+description: Write synced data to PostgreSQL. Append, replace, and upsert write modes.
+---
+
+PostgreSQL is a popular destination for synced data. MANTrixFlow supports three write modes: append, replace, and upsert.
+
+## Prerequisites
+
+You need a PostgreSQL database and a user with write access (CREATE, INSERT, UPDATE, DELETE) to the target schema.
+
+## Connection Setup
+
+Use the same connection fields as the [PostgreSQL source](/connections/sources/database/postgresql): host, port (5432), database, username, and password. The user must have write permissions.
+
+## Write Modes
+
+### Append
+
+Adds new rows to the existing table. Does not update or delete existing rows. Use when the source only produces new records. The table must already exist or will be created on first run.
+
+### Replace
+
+Drops and recreates the table on every sync. Full replacement. Use for small tables or when you want a complete refresh each run.
+
+### Upsert
+
+Performs insert or update using the primary key column specified in the upsert key field. New rows are inserted; existing rows (matched by the key) are updated. The destination table should have a primary key or unique index on the upsert key column(s).

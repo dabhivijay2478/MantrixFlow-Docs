@@ -1,0 +1,26 @@
+---
+title: Add Column
+description: Create a new column from existing columns.
+---
+
+The add column transformation creates a new column derived from existing columns using a simple expression.
+
+## When to Use
+
+- Concatenate first and last name into full_name.
+- Compute a value (e.g. total = quantity * price).
+- Add a constant (e.g. source_system = 'erp').
+- Extract part of a value (e.g. year from date).
+
+## Example
+
+Add `full_name` as `first_name + ' ' + last_name`:
+
+| first_name | last_name | full_name |
+|------------|-----------|-----------|
+| John       | Doe       | John Doe  |
+| Jane       | Smith     | Jane Smith|
+
+## Configuration
+
+Specify the new column name and the expression. The expression can reference other columns. Syntax depends on the pipeline engine.

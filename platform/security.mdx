@@ -1,0 +1,26 @@
+---
+title: Security and Encryption
+description: How credentials are protected and stored.
+---
+
+MANTrixFlow protects your credentials with encryption and secure handling.
+
+## Encryption at Rest
+
+All connection credentials are encrypted at rest using AES-256 symmetric encryption. The encryption key is stored as an environment variable on the ETL server and is never accessible through any API endpoint.
+
+## Decryption
+
+Credentials are decrypted only at the moment of a sync run. The ETL service fetches the decrypted config, uses it for the sync, and discards it from memory immediately after. Credentials are never written to logs.
+
+## API Security
+
+- No credentials travel in pipeline request bodies. Only connection UUIDs are used. The ETL server resolves connection IDs to decrypted configs via an internal API.
+- All public API endpoints require a Bearer token (Supabase Auth). Unauthorised requests are rejected.
+
+## Best Practices
+
+- Use dedicated database users with minimum required privileges.
+- Rotate credentials periodically.
+- Use IP allowlists where possible to restrict access to the ETL server.
+- Enable SSL for database connections.

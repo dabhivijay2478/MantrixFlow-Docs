@@ -1,0 +1,50 @@
+---
+title: Activity log & edge cases
+description: Use the Activity Log for org-wide audit trails; understand delete confirmations, validation, and common failure banners.
+---
+
+## Activity log (organization-wide)
+
+**Activity Log** (`/workspace/activity`) shows pipeline runs, schema updates, and other events with filters, status pills, and expandable detail.
+
+Use it when you need cross-pipeline visibility or to correlate **PIPELINE_RUN_STARTED** / **PIPELINE_RUN_COMPLETED** rows with the **Run History** tab on a single pipeline.
+
+![Activity log with filters and table](/images/user-guide/ug-activity-log.png)
+
+## Create / edit / delete — general pattern
+
+| Action | Typical entry | Safer practice |
+|--------|---------------|----------------|
+| Create | Primary button (+ New …) | Start in staging org; use meaningful names |
+| Edit | Row **⋯**, **Edit**, or open detail → **Save** | Test connection / preview after credential changes |
+| Delete | **⋯** → **Delete** → confirm modal | Ensure no pipeline still references the entity |
+
+## Deleting pipelines
+
+- Confirmation explicitly names the pipeline (e.g. “TEst”) and states the action cannot be undone.
+- After delete, **Activity Log** may record a deleted event; list views update after refetch.
+
+See [Pipelines & run history](/user-guide/pipelines) for the delete screenshots.
+
+## Deleting connections
+
+- If a connection is **still used** by a pipeline, deleting it will cause **disconnect** warnings on the pipeline detail page and runs will fail until you reconnect or reconfigure.
+- Prefer **Test Connection** after network or credential rotation.
+
+## “Non-existing” entities
+
+- Opening an invalid URL (wrong UUID) typically surfaces a not-found or error state from the app—bookmark **list** pages (`/workspace/connections`, `/workspace/data-pipelines`) as the source of truth.
+- **Search** bars only match what the API returns; typos show empty states, not errors.
+
+## Validation summary
+
+1. **Connection** — form **Test Connection**; list **Never tested** until success.
+2. **Pipeline** — manual **Run now** from list or detail **Sync Now**; inspect **Run History** rows (success / running / failed).
+3. **Transform** — **Preview with sample data** before **Save Script**.
+4. **Organization** — slug uniqueness enforced on save (error toast on conflict).
+
+## When screenshots show warnings
+
+Real workspaces may show banners (e.g. source/destination disconnected). Treat those as **expected documentation examples** of failure UX: fix underlying connections, then re-run.
+
+If you export docs publicly, **blur emails, user IDs, hostnames, and org names** in screenshots or regenerate captures from a dedicated demo tenant.

@@ -1,0 +1,51 @@
+---
+title: Google Sheets
+description: Connect to Google Sheets using a service account. Spreadsheet ID and sheet tabs as streams.
+---
+
+Google Sheets stores tabular data in spreadsheets. MANTrixFlow connects using a service account with Viewer access to the spreadsheet. Each sheet tab becomes a separate stream.
+
+## Prerequisites
+
+You need a Google Cloud project with the Google Sheets API and Google Drive API enabled. Create a service account and share the spreadsheet with the service account email.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Create a Service Account
+
+In Google Cloud Console, create a service account. Enable the Google Sheets API and Google Drive API for the project.
+
+  </Step>
+  <Step>
+
+### 2. Share the Spreadsheet
+
+Open the Google Sheet. Click Share. Add the service account email (e.g. `mantrixflow@project.iam.gserviceaccount.com`) with Viewer access.
+
+  </Step>
+  <Step>
+
+### 3. Spreadsheet ID
+
+Find the spreadsheet ID in the URL. Format: `https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit`. The ID is the long string between `/d/` and `/edit`.
+
+  </Step>
+  <Step>
+
+### 4. Paste Credentials
+
+Download the JSON key for the service account. Paste the JSON contents into the credentials field in MANTrixFlow.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+Each sheet tab within the spreadsheet becomes a separate stream. The first row is used as headers.
+
+## Supported Sync Modes
+
+- **Full sync** — Reads all rows on every run.

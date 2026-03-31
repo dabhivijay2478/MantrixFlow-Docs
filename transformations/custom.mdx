@@ -1,0 +1,23 @@
+---
+title: Custom Rules
+description: Custom transformation logic for advanced use cases.
+---
+
+Some connectors or pipeline configurations support custom transformation rules. These allow you to apply logic beyond the built-in rename, cast, filter, add column, and fill nulls.
+
+## Supported Types
+
+- **SQL expressions** — For database sources, you may be able to use SQL expressions in transformations.
+- **Script-based** — Some pipelines support JavaScript, Python, or other scripting for row-level transforms.
+- **Connector-specific** — Check the connector documentation for supported custom rules.
+
+## Use Cases
+
+- Complex conditionals (e.g. map multiple source values to one destination value).
+- Custom date formatting.
+- Lookup or join logic (e.g. enrich with reference data).
+- Aggregations or grouping.
+
+## Configuration
+
+Custom rules are configured per-connector. See the [Connections](/connections/overview) documentation for your source and destination to see what custom options are available.

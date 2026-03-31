@@ -1,0 +1,53 @@
+---
+title: Organization management
+description: Create organizations, switch the active organization, and update org details from Settings—all in the MantrixFlow app.
+---
+
+Organizations scope **connections**, **pipelines**, **activity**, and **team** membership. Routes and entry points:
+
+- Full list & create: `/organizations` and `/organizations/new`
+- Switcher: bottom of the **sidebar** (workspace layout)
+- **Organization** tab under **Settings**: `/workspace/settings` → **Organization**
+
+## View organizations
+
+The **Organizations** page lists every org you belong to with **Slug**, **Description**, **Created**, **Status** (e.g. **Current**), and row actions (e.g. edit).
+
+![Organizations table](/images/user-guide/ug-organizations-list.png)
+
+## Create an organization
+
+1. Click **+ Create Organization** (from the list) or **Add organization** in the sidebar switcher.
+2. Enter **Organization name** (slug auto-fills from the name; adjust if needed).
+3. Optional **Description**.
+4. Submit **Create Organization**.
+
+![Create organization form](/images/user-guide/ug-organization-create-form.png)
+
+After creation, the app typically sets the new org as current or returns you to the list—follow the toast and navigation you see in your tenant.
+
+## Switch organization
+
+1. Click the org chip at the bottom of the sidebar (shows current org name).
+2. Pick another org from the list, or **View all organizations** / **Add organization** shortcuts.
+
+![Organization switcher menu](/images/user-guide/ug-organization-switcher.png)
+
+Switching refreshes workspace data (connections, pipelines, logs) for the selected org.
+
+## View current organization
+
+- Sidebar footer chip (always visible in workspace).
+- **Organizations** list: **Current** badge on the active row.
+- **Settings → Organization**: name and slug for the active org context.
+
+## Update organization details (owners)
+
+1. Go to **Settings** in the sidebar.
+2. Open the **Organization** tab.
+3. Edit **Organization name**, **Slug**, or **Description**.
+4. **Save Changes** (owners; other roles may see read-only messaging).
+
+![Settings — Organization tab](/images/user-guide/ug-settings-organization.png)
+
+Deep link pattern for table-driven edit from **Organizations**: `/organizations/[organizationId]/edit` (pencil icon on the row).

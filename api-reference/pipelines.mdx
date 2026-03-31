@@ -1,0 +1,96 @@
+---
+title: Pipelines API
+description: Create, update, delete pipelines. Trigger runs. Get run history.
+---
+
+All pipeline endpoints are under `/organizations/:organizationId/pipelines`.
+
+## Create Pipeline
+
+**POST** `/organizations/:organizationId/pipelines`
+
+**Request body:** CreatePipelineDto with sourceSchemaId, destSchemaId, name, stream config, sync mode, write mode, etc.
+
+**Response:** `{ success: true, data: { id, name, ... } }`
+
+## List Pipelines
+
+**GET** `/organizations/:organizationId/pipelines`
+
+**Query params:** `limit`, `offset`, `status`
+
+**Response:** `{ success: true, data: [...] }`
+
+## Get Pipeline
+
+**GET** `/organizations/:organizationId/pipelines/:id`
+
+Returns a single pipeline by ID.
+
+## Get Pipeline (full)
+
+**GET** `/organizations/:organizationId/pipelines/:id/full`
+
+Returns pipeline with full schema and connection details.
+
+## Update Pipeline
+
+**PATCH** `/organizations/:organizationId/pipelines/:id`
+
+**Request body:** UpdatePipelineDto with fields to update.
+
+## Delete Pipeline
+
+**DELETE** `/organizations/:organizationId/pipelines/:id`
+
+## Run Pipeline
+
+**POST** `/organizations/:organizationId/pipelines/:id/run`
+
+**Request body:** RunPipelineDto with optional overrides (full sync, incremental, etc.).
+
+**Response:** `{ success: true, data: { runId, status, ... } }`
+
+## Get Sync State
+
+**GET** `/organizations/:organizationId/pipelines/:id/sync-state`
+
+Returns the current sync state (cursor, CDC position).
+
+## Delete Sync State
+
+**DELETE** `/organizations/:organizationId/pipelines/:id/sync-state`
+
+Resets the sync state. Next run will behave like a full sync.
+
+## Pause Pipeline
+
+**POST** `/organizations/:organizationId/pipelines/:id/pause`
+
+## Resume Pipeline
+
+**POST** `/organizations/:organizationId/pipelines/:id/resume`
+
+## Get Run History
+
+**GET** `/organizations/:organizationId/pipelines/:id/runs`
+
+**Query params:** `limit`, `offset`, `status`
+
+**Response:** `{ success: true, data: [...] }`
+
+## Get Run Details
+
+**GET** `/organizations/:organizationId/pipelines/:id/runs/:runId`
+
+Returns details for a single run.
+
+## Cancel Run
+
+**POST** `/organizations/:organizationId/pipelines/:id/runs/:runId/cancel`
+
+## Get Pipeline Stats
+
+**GET** `/organizations/:organizationId/pipelines/:id/stats`
+
+Returns aggregate statistics (total runs, success rate, etc.).

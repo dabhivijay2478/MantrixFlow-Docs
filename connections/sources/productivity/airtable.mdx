@@ -1,0 +1,45 @@
+---
+title: Airtable
+description: Connect to Airtable using a personal access token. Bases and tables as streams.
+---
+
+Airtable is a spreadsheet-database hybrid. MANTrixFlow connects using a personal access token created in the Airtable developer portal. Each base and table combination becomes a stream.
+
+## Prerequisites
+
+You need an Airtable account and access to create a personal access token. The token must have the required scopes for reading records.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Create a Personal Access Token
+
+In the [Airtable Developer Portal](https://airtable.com/create/tokens), create a new token. Add the required scopes: `data.records:read` and `schema.bases:read` for the bases you want to sync.
+
+  </Step>
+  <Step>
+
+### 2. Add Base Scopes
+
+Select the bases the token can access. Grant read access to the bases containing the tables you want to sync.
+
+  </Step>
+  <Step>
+
+### 3. Copy the Token
+
+Copy the token. Store it securely. Paste it into the API key or token field in MANTrixFlow.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+Each table within a base becomes a stream. MANTrixFlow discovers bases and tables from the token's scope.
+
+## Supported Sync Modes
+
+- **Full sync** — Reads all records on every run.
+- **Incremental sync** — Uses `lastModifiedTime` or similar to read only new or updated records.

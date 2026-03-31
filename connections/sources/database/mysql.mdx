@@ -1,0 +1,88 @@
+---
+title: MySQL
+description: Connect to MySQL 5.7+, MariaDB, PlanetScale, and AWS RDS MySQL.
+---
+
+MySQL is a widely used relational database. MANTrixFlow supports MySQL 5.7 and above, MariaDB, and hosted services including PlanetScale and AWS RDS MySQL.
+
+## Prerequisites
+
+You need a MySQL database and a user with `SELECT` and `REPLICATION CLIENT` privileges. For CDC, you need `REPLICATION SLAVE` and `REPLICATION CLIENT` privileges and binary logging enabled.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Connection Name
+
+Enter a friendly name (e.g. "MySQL Production") to identify this connection.
+
+  </Step>
+  <Step>
+
+### 2. Host
+
+Enter the database server hostname or IP address. For PlanetScale, use the host from the connection string. For AWS RDS, use the RDS endpoint.
+
+  </Step>
+  <Step>
+
+### 3. Port
+
+Enter the port. Default is **3306**.
+
+  </Step>
+  <Step>
+
+### 4. Database
+
+Enter the database name you want to sync from.
+
+  </Step>
+  <Step>
+
+### 5. Username and Password
+
+Enter the username and password. Create a dedicated user with minimum required privileges (see below).
+
+  </Step>
+  <Step>
+
+### 6. Enable SSL
+
+For cloud MySQL, enable SSL. For local development, you may disable it.
+
+  </Step>
+</Steps>
+
+### Create a Dedicated User
+
+```sql
+CREATE USER 'mantrixflow'@'%' IDENTIFIED BY 'your_secure_password';
+
+-- For basic sync
+GRANT SELECT, REPLICATION CLIENT ON *.* TO 'mantrixflow'@'%';
+
+-- For CDC (also required)
+GRANT REPLICATION SLAVE ON *.* TO 'mantrixflow'@'%';
+
+FLUSH PRIVILEGES;
+```
+
+## Available Streams
+
+Streams correspond to database tables. MANTrixFlow discovers tables from the database. You select which tables to sync when creating a pipeline.
+
+## Supported Sync Modes
+
+- **Full sync** — Reads every row on every run.
+- **Incremental sync** — Uses a cursor column (e.g. `updated_at`) to read only new or updated rows.
+
+## CDC Setup
+
+<Warning>
+**Database Admin Required**
+
+CDC requires binary logging to be enabled and specific privileges. See [CDC Setup for MySQL](/sync-reference/cdc-mysql) for the exact commands.
+</Warning>

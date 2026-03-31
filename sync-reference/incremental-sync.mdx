@@ -1,0 +1,30 @@
+---
+title: Incremental Sync
+description: Cursor fields, choosing the right cursor column, and common pitfalls.
+---
+
+Incremental sync reads only records that are newer than the last run. It uses a cursor column to track progress and is much more efficient for large tables.
+
+## How It Works
+
+1. On the first run, the pipeline reads all rows and stores the maximum value of the cursor column.
+2. On subsequent runs, it reads only rows where the cursor column is greater than the stored value.
+3. After each run, it updates the stored cursor value to the new maximum.
+
+## Choosing the Cursor Column
+
+The cursor column must:
+
+- **Increase monotonically** — New and updated rows should have greater values than older rows. Timestamp columns (updated_at, created_at) work well.
+- **Be indexed** — For performance, the cursor column should be indexed in the source.
+- **Never decrease** — Avoid columns that can be updated to smaller values (e.g. a status that gets reset).
+
+**Good choices:** updated_at, created_at, id (if IDs are sequential), modified_at.
+
+**Bad choices:** status, name, any column that can change to a "smaller" value.
+
+## Common Pitfalls
+
+- **Gaps in cursor values** — If the cursor column has gaps (e.g. batch updates that skip timestamps), you might miss rows. Prefer columns that are set on every update.
+- **Timezone** — Ensure the cursor column uses a consistent timezone (UTC recommended).
+- **Null values** — Rows with null in the cursor column may be excluded. Use a column that is always populated.

@@ -1,0 +1,28 @@
+---
+title: Full Sync
+description: When to use full sync, how it works, and its limitations.
+---
+
+Full sync reads every record from the source on every run and writes all of them to the destination. It is the simplest sync mode and works with every source.
+
+## When to Use
+
+- **Small tables** — Tables with fewer than a few hundred thousand rows.
+- **Sources without incremental support** — Some SaaS APIs or file sources only support full reads.
+- **Complete refresh** — When you want the destination to exactly match the source state each run.
+- **Infrequent syncs** — When the pipeline runs rarely (e.g. daily or weekly), full sync may be acceptable even for larger tables.
+
+## How It Works
+
+1. The pipeline connects to the source.
+2. It reads every row from the selected stream(s).
+3. It applies transformation rules (if any).
+4. It writes to the destination according to the write mode (append, replace, or upsert).
+
+For replace mode, the destination table is dropped and recreated (or truncated and repopulated). For append, rows are added. For upsert, rows are inserted or updated by primary key.
+
+## Limitations
+
+- **Performance** — Every run processes the entire dataset. For large tables (millions of rows), this can be slow and resource-intensive.
+- **Source load** — The source may be under heavy load during a full sync. Consider off-peak scheduling.
+- **Network** — Large full syncs transfer more data than incremental syncs.

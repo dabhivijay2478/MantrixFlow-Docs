@@ -1,0 +1,26 @@
+---
+title: Fill Nulls
+description: Replace null values with a default.
+---
+
+The fill nulls transformation replaces null values in a column with a specified default value.
+
+## When to Use
+
+- The destination does not accept nulls (e.g. NOT NULL constraint).
+- You want a fallback for missing values (e.g. 'Unknown' for null country).
+- Analytics require a default (e.g. 0 for null numeric columns).
+
+## Example
+
+Fill nulls in `country` with `'Unknown'`:
+
+| Before | After |
+|--------|-------|
+| USA    | USA   |
+| null   | Unknown |
+| UK     | UK    |
+
+## Configuration
+
+Specify the column and the default value. The default must match the column type (string, number, etc.).

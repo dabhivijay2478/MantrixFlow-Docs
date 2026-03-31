@@ -1,0 +1,47 @@
+---
+title: Transformations & pipeline branches
+description: Configure Python transform scripts, branch labels, error handling, and additional destinations on the pipeline builder canvas.
+---
+
+In MantrixFlow, a **pipeline branch** is a path on the builder: **source → (optional) transform → destination**. You can add more branches to send the same (or filtered) data to another destination or to apply different transforms.
+
+This is **not** a separate “environment” or “Git branch” screen—branching is modeled **on the canvas** only.
+
+## Open the transform editor
+
+1. Open **Data Pipelines** → select your pipeline → **Open Builder** (or click the pipeline row).
+2. Click the **transform** node (e.g. labelled with **PYTHON** and a short code preview).
+3. Use **Transform settings** (gear) on the node, or click the node body to open the side panel.
+
+## Configure branch label, table, script, and errors
+
+The transform panel includes:
+
+- **Branch label** — shown on the canvas; rename to match the destination or use case (e.g. “Analytics warehouse”, “Support replica”).
+- **Source table** — which stream/table this transform receives.
+- **Python script** — must define `transform(record)` (or the pattern shown in the template). Return a dict matching the shape you want downstream.
+- **On error** — **Stop run on error** vs **Skip record and continue**.
+- **Preview with sample data** — validates logic against sample rows.
+- **Save Script** — persists changes to the pipeline graph.
+
+![Transform panel with Python script and branch label](/images/user-guide/ug-transform-panel.png)
+
+## Add another branch (destination path)
+
+On the canvas:
+
+- Use **Add transform** after the source (or between nodes) when you need a new transform step.
+- Use **Add emitter (destination)** / **Add destination** to attach another destination connection for a parallel branch.
+
+Each branch can target a different destination connection, schema/table, and **append / merge / overwrite** (emit) behaviour configured on the destination node (**Destination / emit settings**).
+
+![Builder showing source, transform, and destination branch](/images/user-guide/ug-pipeline-builder-branches.png)
+
+## AI-assisted edits
+
+**Ask AI** on the builder toolbar can suggest graph changes; always review suggestions before saving or running in production.
+
+## Operational tips
+
+- After editing transforms, **Save** on the builder and run a **test sync** or small manual run before scheduling.
+- If a run fails, use **Run History** on the pipeline detail page and the **Activity Log** for correlated events.

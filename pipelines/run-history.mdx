@@ -1,0 +1,32 @@
+---
+title: Run History
+description: Status badges, sync state, and how to reset.
+---
+
+Each pipeline run is recorded in the run history. You can see the status, rows synced, duration, and any error messages.
+
+## Status Badges
+
+- **Completed** — The run finished successfully. Data was synced to the destination.
+- **Failed** — The run encountered an error. Check the error message for details.
+- **Running** — The run is in progress.
+- **Cancelled** — The run was cancelled by a user or the system.
+
+## Sync State
+
+For incremental and CDC syncs, the platform stores sync state:
+
+- **Cursor value** — The last value of the cursor column (incremental sync).
+- **CDC position** — The position in the replication log (CDC).
+
+This state is used for the next run to know where to resume. Do not modify it unless you are resetting the sync.
+
+## Reset Sync State
+
+If you need to re-sync from the beginning (e.g. after a schema change or data correction), you can reset the sync state. This clears the stored cursor and CDC position. The next run will behave like a full sync.
+
+<Warning>
+**Data implications**
+
+Resetting sync state does not delete data in the destination. For replace mode, the next run will overwrite. For append and upsert, you may get duplicates if you do not also truncate or clean the destination.
+</Warning>

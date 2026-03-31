@@ -1,0 +1,42 @@
+---
+title: DuckDB
+description: Write to an embedded DuckDB database file. Suitable for local analytics and testing.
+---
+
+DuckDB is an embedded analytical database. MANTrixFlow can write to a DuckDB file on the server. This destination is useful for local analytics and testing pipelines without a cloud database.
+
+## Prerequisites
+
+None. DuckDB creates a local file. Ensure the ETL server has write access to the specified path.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Database File Path
+
+Enter the path where the DuckDB file will be created (e.g. `/data/mantrixflow.duckdb`). The file is created on first write. Use an absolute path.
+
+  </Step>
+</Steps>
+
+## Write Modes
+
+### Append
+
+Appends rows to the existing table. The table is created if it does not exist.
+
+### Replace
+
+Drops and recreates the table on every sync.
+
+### Upsert
+
+Uses DuckDB's upsert capabilities. Specify the primary key column for the upsert key.
+
+## Use Cases
+
+- Previewing pipeline results locally
+- Testing transformations before writing to production
+- Embedded analytics in applications

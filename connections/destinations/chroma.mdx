@@ -1,0 +1,34 @@
+---
+title: Chroma
+description: Write vectors to Chroma. Requires an embedding column in the data.
+---
+
+Chroma is an open-source vector database. MANTrixFlow can write to Chroma when your data includes an embedding column. Produce embeddings upstream before writing to this destination.
+
+## Prerequisites
+
+You need a Chroma instance (self-hosted or Chroma Cloud) and the connection URL. Chroma can run locally or as a server.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Host URL
+
+Enter the Chroma server URL (e.g. `http://localhost:8000` for local, or your Chroma Cloud URL).
+
+  </Step>
+  <Step>
+
+### 2. Collection Name
+
+Enter the collection name. The collection is created if it does not exist, with dimensions from your embedding column.
+
+  </Step>
+</Steps>
+
+## Data Requirements
+
+- **Embedding column** — Vector data. Dimensions are inferred from the first batch.
+- **Upsert key** — Used as the document ID for upsert operations. Must be unique per vector.

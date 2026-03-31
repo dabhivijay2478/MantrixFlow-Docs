@@ -1,0 +1,56 @@
+---
+title: Google Analytics
+description: Connect to GA4 using a service account. Property ID and JSON key.
+---
+
+Google Analytics 4 (GA4) provides web analytics data. MANTrixFlow connects using a Google Cloud service account with Viewer access to the GA4 property.
+
+## Prerequisites
+
+You need a GA4 property and a Google Cloud project. Create a service account and grant it Viewer access to the GA4 property.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Create a Service Account
+
+In Google Cloud Console, go to IAM & Admin → Service Accounts. Create a new service account.
+
+  </Step>
+  <Step>
+
+### 2. Grant Viewer Access to GA4
+
+In Google Analytics, go to Admin → Property Access Management. Add the service account email and grant Viewer role.
+
+  </Step>
+  <Step>
+
+### 3. Download JSON Key
+
+Create a JSON key for the service account. Download the file.
+
+  </Step>
+  <Step>
+
+### 4. Paste Credentials and Property ID
+
+Paste the JSON key contents into the credentials field in MANTrixFlow. Enter the GA4 property ID (numeric, found in Admin → Property Settings).
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+- Sessions
+- Events
+- User demographics
+- Traffic sources
+- Conversions
+
+## Supported Sync Modes
+
+- **Full sync** — Reads all data (within date range) on every run.
+- **Incremental sync** — Uses date-based cursors to read only new data.

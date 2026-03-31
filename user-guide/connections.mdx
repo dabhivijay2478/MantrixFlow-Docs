@@ -1,0 +1,87 @@
+---
+title: Connections (sources & destinations)
+description: Create, validate, edit, and delete database connections in MantrixFlow—with screenshots from the Connections workspace.
+---
+
+All **source** and **destination** credentials are managed on the **Connections** page. Routes:
+
+- List: `/workspace/connections`
+- Add (catalog): `/workspace/connections/new?role=source` or `role=destination`
+- New PostgreSQL (example): `/workspace/connections/new/postgres?role=source` (or `destination`)
+- Edit: `/workspace/connections/[connectionId]/edit`
+
+## View all connections
+
+Use **All**, **Sources**, or **Destinations** tabs and the search field to filter. Each row shows connector type, host/database summary, whether it is used in pipelines, and last test status when available.
+
+![Connections list with filters](/images/user-guide/ug-connections-list-after-neon-save.png)
+
+## Create a connection
+
+1. Click **+ New Connection**.
+2. Choose **Source** or **Destination** at the top of the catalog (same page supports both roles).
+3. Pick a connector (e.g. **PostgreSQL** under *Available now*).
+
+![New connection catalog — source vs destination](/images/user-guide/ug-new-connection-catalog.png)
+
+4. Fill **Connection name**, **Host**, **Port**, **Database**, **Username**, **Password**, **Schema**, and **SSL mode** as required by your provider (Neon, RDS, self-hosted Postgres, etc.).
+
+![PostgreSQL connection form (new source)](/images/user-guide/ug-postgres-connection-form.png)
+
+5. Click **Test Connection** before **Save Connection** when you want to validate reachability and credentials without persisting, or save first if your workflow tests after save.
+
+## Validate (test) a connection
+
+- On the **create** or **edit** form, use **Test Connection**.
+- From the list, open the row **⋯** menu and choose **Test Connection**.
+
+![Connection row menu — Test, Edit, Delete](/images/user-guide/ug-connection-actions-menu.png)
+
+**Source-only shortcuts** (when the row is a **SOURCE**): the menu also includes **Discover Tables** and **Source configuration** — open these after the connection tests successfully.
+
+![Neon Source row menu with Discover Tables](/images/user-guide/ug-neon-source-menu.png)
+
+If the test fails, fix host/firewall/SSL/user grants and test again. The list may show a **Never tested** warning until a successful test has been recorded.
+
+## Example walkthrough: Neon PostgreSQL
+
+The following captures use a **Neon** branch (`ep-nameless-lab-…aws.neon.tech`), database **`neondb`**, user **`neondb_owner`**, **SSL required**. Credential values are shown **only inside the screenshots** (not repeated in this page text).
+
+**Edit source** — fill the form, reveal the password field if you need to verify typing, then **Test Connection**:
+
+![Neon source — filled form](/images/user-guide/ug-neon-source-connection-filled.png)
+
+**Successful validation** (inline status under **Test Connection**):
+
+![Neon source — test succeeded](/images/user-guide/ug-neon-connection-test-result.png)
+
+**Edit destination** — toggle **Destination** on the same PostgreSQL connector type, name the connection (e.g. `Neon Destination`), use the same host/database/user, test, then **Save**:
+
+![Neon destination — filled form](/images/user-guide/ug-neon-destination-connection-filled.png)
+
+![Neon destination — test succeeded](/images/user-guide/ug-neon-destination-test-result.png)
+
+## Discover tables (source)
+
+From a **SOURCE** row **⋯** menu, choose **Discover Tables**. The app opens the **Neon Source** explorer with schemas and tables (cached metadata refreshes on a schedule; use **Source configuration** for details).
+
+![Discover Tables — schema explorer & SQL editor](/images/user-guide/ug-discover-tables-explorer.png)
+
+![Source configuration tab — metadata refresh](/images/user-guide/ug-source-configuration-tab.png)
+
+## Edit or update a connection
+
+1. From **⋯** on the row, choose **Edit** (or open the connection and use the same form).
+2. Update fields; **Save Connection** commits changes. **Reset** (where shown) discards unsaved edits.
+
+![Edit connection — PostgreSQL](/images/user-guide/ug-connection-edit.png)
+
+For CDC (PostgreSQL logical replication), use **Set up CDC** when available after the connection is saved.
+
+## Delete a connection
+
+From the row **⋯** menu, choose **Delete** and confirm. **Do not delete** a connection that still backs an active pipeline until you have retargeted or removed that pipeline, or runs may fail with disconnect warnings.
+
+## “Data sources” URLs vs the Connections page
+
+The primary **list** UI is **Connections** (`/workspace/connections`). Some tools (table/query explorer, **Discover** flows) still use routes under **`/workspace/data-sources/...`** after you pick a connection—these are the same saved connections, not a second catalog.

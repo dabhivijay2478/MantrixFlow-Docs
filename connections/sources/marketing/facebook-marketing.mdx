@@ -1,0 +1,50 @@
+---
+title: Facebook Marketing
+description: Connect to Facebook Ads using a user access token or system user token.
+---
+
+Facebook Marketing (Meta Ads) provides advertising data. MANTrixFlow connects using a Facebook user access token with `ads_read` permission or a system user token.
+
+## Prerequisites
+
+You need a Facebook Business account and access to Ads Manager. You need either a user access token with `ads_read` or a system user token from Business Manager.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Access Token
+
+Obtain a user access token with `ads_read` permission from the Facebook Graph API Explorer, or create a system user in Business Manager and generate a token with Ads Management access.
+
+  </Step>
+  <Step>
+
+### 2. Account ID
+
+Enter the numeric Ad Account ID. Find it in the Facebook Ads Manager URL (e.g. `act=123456789`) or in Business Settings → Accounts → Ad Accounts.
+
+  </Step>
+  <Step>
+
+### 3. Start Date
+
+Enter an ISO 8601 date to control how far back the initial sync goes. Only data from this date onward is synced initially.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+- Ads
+- Ad sets
+- Campaigns
+- Ad insights
+- Ad creatives
+- Audiences
+
+## Supported Sync Modes
+
+- **Full sync** — Reads all records (within start date) on every run.
+- **Incremental sync** — Uses timestamp fields to read only new or updated records.

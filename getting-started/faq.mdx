@@ -1,0 +1,50 @@
+---
+title: FAQ
+description: Frequently asked questions about MANTrixFlow.
+---
+
+## Supported Connectors
+
+**Which sources and destinations does MANTrixFlow support?**
+
+MANTrixFlow supports many sources (PostgreSQL, MySQL, MongoDB, Snowflake, BigQuery, Shopify, Stripe, HubSpot, Salesforce, GitHub, and more) and destinations (PostgreSQL, BigQuery, Snowflake, DuckDB, MongoDB, S3, and others). See the [Connections Overview](/connections/overview) for the full list.
+
+## Data Security
+
+**How are my credentials stored?**
+
+All connection credentials are encrypted at rest using AES-256. The encryption key is stored as an environment variable on the ETL server and is never exposed through any API. Credentials are decrypted only during a sync run and are discarded from memory immediately after.
+
+**Does MANTrixFlow store my data?**
+
+MANTrixFlow does not store your source data. Data flows from your source through the ETL service to your destination. Only metadata (connection IDs, pipeline configs, sync state) is stored in the platform database.
+
+## Sync Frequency
+
+**How often can I run a pipeline?**
+
+You can run pipelines manually at any time. For scheduled runs, you configure the interval (e.g. every hour, every day). The minimum interval depends on your plan.
+
+**Does incremental sync miss data?**
+
+Incremental sync uses a cursor column to track the last synced value. If you choose a stable cursor (e.g. `updated_at`), you will not miss records. Avoid cursor columns that can have gaps or be updated out of order.
+
+## Troubleshooting
+
+**My pipeline run failed. What should I do?**
+
+Check the run details for the error message. Common causes include invalid credentials, network access (e.g. IP allowlist), insufficient permissions, or schema mismatches. See the connector documentation for required permissions and setup.
+
+**How do I reset sync state?**
+
+If you need to re-sync from the beginning, you can reset the sync state for a pipeline. This clears the stored cursor and CDC position. The next run will behave like a full sync. See [Sync State](/sync-reference/sync-state) for details.
+
+## Billing and Limits
+
+**How is billing calculated?**
+
+Billing is typically based on the number of rows synced or the number of pipeline runs. Check the [Billing](/platform/billing) page for your plan details.
+
+**Is there a free tier?**
+
+Check [cloud.mantrixflow.com](https://cloud.mantrixflow.com) for current pricing and free tier availability.

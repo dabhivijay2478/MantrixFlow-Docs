@@ -1,0 +1,28 @@
+---
+title: MongoDB (Destination)
+description: Write synced data to MongoDB collections. Append, replace, and upsert modes.
+---
+
+MongoDB is a document database destination. MANTrixFlow writes documents to MongoDB collections. Connection options match the [MongoDB source](/connections/sources/database/mongodb): connection string or individual host, port, database, username, and password.
+
+## Prerequisites
+
+You need a MongoDB deployment and a user with write access (insert, update, delete) on the target database and collections.
+
+## Write Modes
+
+### Append
+
+Inserts new documents. The collection is created if it does not exist.
+
+### Replace
+
+Replaces the entire collection on every sync. Drops and recreates or truncates and inserts.
+
+### Upsert
+
+Uses the specified field as the document identifier (`_id` or custom) for update operations. New documents are inserted; existing documents (matched by the key) are updated.
+
+## Upsert Configuration
+
+When using upsert mode, specify which field to use as the document identifier. For MongoDB, `_id` is the default. You can use a custom field if your source data has a unique identifier.

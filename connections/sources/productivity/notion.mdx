@@ -1,0 +1,45 @@
+---
+title: Notion
+description: Connect to Notion using an internal integration token. Connect integration to pages and databases.
+---
+
+Notion is a workspace and documentation tool. MANTrixFlow connects using an internal integration token. You must connect the integration to specific pages and databases for them to appear as streams.
+
+## Prerequisites
+
+You need a Notion workspace and admin access to create an integration. The integration must be shared with the pages and databases you want to sync.
+
+## Connection Setup
+
+<Steps>
+  <Step>
+
+### 1. Create an Integration
+
+In Notion, go to Settings & members → Connections → Develop or manage integrations. Create a new integration. Copy the Internal Integration Token.
+
+  </Step>
+  <Step>
+
+### 2. Connect to Pages and Databases
+
+Open each database or page you want to sync. Click the `...` menu → Add connections. Select your integration. The integration must have access to the database for it to be discovered.
+
+  </Step>
+  <Step>
+
+### 3. Paste the Token
+
+Paste the Internal Integration Token into MANTrixFlow.
+
+  </Step>
+</Steps>
+
+## Available Streams
+
+Each database shared with the integration becomes a stream. MANTrixFlow discovers databases the integration has access to.
+
+## Supported Sync Modes
+
+- **Full sync** — Reads all records on every run.
+- **Incremental sync** — Uses `last_edited_time` or similar to read only new or updated records.
