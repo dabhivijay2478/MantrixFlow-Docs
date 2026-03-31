@@ -17,20 +17,28 @@ const dataUri = `data:image/png;base64,${png.toString("base64")}`;
 const greenMatrix =
   "0 0 0 0 0  0 0 0 0.6588235294117647 0  0 0 0 0.34901960784313724 0  0 0 0 1 0";
 
-const light = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 32" width="220" height="32" role="img" aria-label="MantrixFlow">
-  <image href="${dataUri}" x="0" y="2" width="28" height="28" preserveAspectRatio="xMidYMid meet" />
-  <text x="36" y="22" font-family="Geist, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="600" fill="#09090b">MantrixFlow</text>
+const w = 252;
+const h = 36;
+const icon = 32;
+const iconY = (h - icon) / 2;
+const textX = icon + 10;
+const textY = 26;
+const fontPx = 22;
+
+const light = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="MantrixFlow">
+  <image href="${dataUri}" x="0" y="${iconY}" width="${icon}" height="${icon}" preserveAspectRatio="xMidYMid meet" />
+  <text x="${textX}" y="${textY}" font-family="Geist, ui-sans-serif, system-ui, sans-serif" font-size="${fontPx}" font-weight="600" fill="#09090b">MantrixFlow</text>
 </svg>
 `;
 
-const dark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 32" width="220" height="32" role="img" aria-label="MantrixFlow">
+const dark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="MantrixFlow">
   <defs>
     <filter id="m-brand-green" color-interpolation-filters="sRGB">
       <feColorMatrix type="matrix" values="${greenMatrix}" />
     </filter>
   </defs>
-  <image href="${dataUri}" x="0" y="2" width="28" height="28" preserveAspectRatio="xMidYMid meet" filter="url(#m-brand-green)" />
-  <text x="36" y="22" font-family="Geist, ui-sans-serif, system-ui, sans-serif" font-size="17" font-weight="600" fill="#fafafa">MantrixFlow</text>
+  <image href="${dataUri}" x="0" y="${iconY}" width="${icon}" height="${icon}" preserveAspectRatio="xMidYMid meet" filter="url(#m-brand-green)" />
+  <text x="${textX}" y="${textY}" font-family="Geist, ui-sans-serif, system-ui, sans-serif" font-size="${fontPx}" font-weight="600" fill="#fafafa">MantrixFlow</text>
 </svg>
 `;
 
