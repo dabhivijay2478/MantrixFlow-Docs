@@ -17,17 +17,20 @@ const dataUri = `data:image/png;base64,${png.toString("base64")}`;
 const greenMatrix =
   "0 0 0 0 0  0 0 0 0.6588235294117647 0  0 0 0 0.34901960784313724 0  0 0 0 1 0";
 
-const w = 252;
-const h = 36;
-const icon = 32;
+/** Wordmark type size (px). Mintlify scales the SVG in the navbar; large intrinsic size = sharp text. */
+const fontPx = 60;
+const icon = 56;
+const gap = 18;
+const h = 88;
+const w = 520;
 const iconY = (h - icon) / 2;
-const textX = icon + 10;
-const textY = 26;
-const fontPx = 22;
+const textX = icon + gap;
+const textY = h / 2;
+const textAttrs = `dominant-baseline="central" text-anchor="start" x="${textX}" y="${textY}"`;
 
 const light = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="MantrixFlow">
   <image href="${dataUri}" x="0" y="${iconY}" width="${icon}" height="${icon}" preserveAspectRatio="xMidYMid meet" />
-  <text x="${textX}" y="${textY}" font-family="Geist, ui-sans-serif, system-ui, sans-serif" font-size="${fontPx}" font-weight="600" fill="#09090b">MantrixFlow</text>
+  <text ${textAttrs} font-family="Geist, ui-sans-serif, system-ui, sans-serif" font-size="${fontPx}" font-weight="600" fill="#09090b">MantrixFlow</text>
 </svg>
 `;
 
@@ -38,7 +41,7 @@ const dark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" wi
     </filter>
   </defs>
   <image href="${dataUri}" x="0" y="${iconY}" width="${icon}" height="${icon}" preserveAspectRatio="xMidYMid meet" filter="url(#m-brand-green)" />
-  <text x="${textX}" y="${textY}" font-family="Geist, ui-sans-serif, system-ui, sans-serif" font-size="${fontPx}" font-weight="600" fill="#fafafa">MantrixFlow</text>
+  <text ${textAttrs} font-family="Geist, ui-sans-serif, system-ui, sans-serif" font-size="${fontPx}" font-weight="600" fill="#fafafa">MantrixFlow</text>
 </svg>
 `;
 
