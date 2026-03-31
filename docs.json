@@ -14,8 +14,8 @@
     }
   },
   "logo": {
-    "light": "/images/m.png",
-    "dark": "/images/m.png",
+    "light": "/images/logo-wordmark-light.svg",
+    "dark": "/images/logo-wordmark-dark.svg",
     "href": "https://mantrixflow.com"
   },
   "favicon": "/favicon.ico",
