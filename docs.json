@@ -1,22 +1,71 @@
 {
-  "name": "MANTrixFlow",
-  "theme": "mint",
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "MantrixFlow",
+  "description": "Documentation for MantrixFlow — ETL pipelines, connectors, sync modes, and the workspace app.",
+  "theme": "almond",
   "colors": {
-    "primary": "#22c55e",
-    "light": "#4ade80",
-    "dark": "#16a34a"
+    "primary": "#059669",
+    "light": "#34d399",
+    "dark": "#047857"
   },
-  "favicon": "/favicon.svg",
+  "logo": {
+    "light": "/images/m.png",
+    "dark": "/images/m.png",
+    "href": "https://mantrixflow.com"
+  },
+  "favicon": "/favicon.ico",
+  "appearance": {
+    "default": "system"
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "fonts": {
+    "family": "Plus Jakarta Sans",
+    "heading": {
+      "family": "Plus Jakarta Sans"
+    }
+  },
+  "background": {
+    "decoration": "gradient"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Website",
+        "href": "https://mantrixflow.com"
+      },
+      {
+        "label": "App",
+        "href": "https://cloud.mantrixflow.com"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Open app",
+      "href": "https://cloud.mantrixflow.com"
+    }
+  },
+  "styling": {
+    "codeblocks": {
+      "theme": {
+        "light": "github-light",
+        "dark": "github-dark"
+      }
+    }
+  },
   "navigation": {
     "groups": [
     {
       "group": "Introduction",
+      "icon": "sparkles",
       "pages": [
         "index"
       ]
     },
     {
       "group": "User guide",
+      "icon": "book-open",
       "pages": [
         "user-guide/index",
         "user-guide/connections",
@@ -28,6 +77,7 @@
     },
     {
       "group": "Getting started",
+      "icon": "rocket",
       "pages": [
         "getting-started/introduction",
         "getting-started/quick-start",
@@ -37,6 +87,7 @@
     },
     {
       "group": "Connections",
+      "icon": "database",
       "pages": [
         "connections/overview",
         {
@@ -134,6 +185,7 @@
     },
     {
       "group": "Pipelines",
+      "icon": "git-branch",
       "pages": [
         "pipelines/overview",
         "pipelines/creating",
@@ -146,6 +198,7 @@
     },
     {
       "group": "Sync reference",
+      "icon": "refresh-cw",
       "pages": [
         "sync-reference/full-sync",
         "sync-reference/incremental-sync",
@@ -159,6 +212,7 @@
     },
     {
       "group": "Transformations",
+      "icon": "wand-sparkles",
       "pages": [
         "transformations/rename",
         "transformations/cast",
@@ -170,6 +224,7 @@
     },
     {
       "group": "API reference",
+      "icon": "terminal",
       "pages": [
         "api-reference/authentication",
         "api-reference/connections",
@@ -181,6 +236,7 @@
     },
     {
       "group": "Platform",
+      "icon": "building-2",
       "pages": [
         "platform/organisation",
         "platform/team-members",

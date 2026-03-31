@@ -1,4 +1,4 @@
-# MANTrixFlow documentation (Mintlify)
+# MantrixFlow documentation (Mintlify)
 
 Product documentation for [MantrixFlow](https://mantrixflow.com). Edit MDX and `docs.json` here.
 
@@ -17,6 +17,13 @@ git push -u origin main
 npm install
 npm run dev
 ```
+
+## Branding
+
+- **Logo:** `images/m.png` — referenced from `docs.json` as `logo.light` / `logo.dark` (click goes to mantrixflow.com).
+- **Favicon:** `favicon.ico` at repo root (browser tab / bookmarks).
+
+If the mark is hard to see in **dark** UI chrome, add a light-on-transparent asset (e.g. `images/m-light.png`) and set only `logo.dark` to that path in `docs.json`.
 
 ## Images
 

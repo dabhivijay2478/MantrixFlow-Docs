@@ -3,7 +3,7 @@ title: PostgreSQL
 description: Connect to PostgreSQL databases including self-hosted, Supabase, Railway, Render, Neon, and AWS RDS.
 ---
 
-PostgreSQL is a powerful open-source relational database. MANTrixFlow can sync data from any PostgreSQL instance, including self-hosted servers and managed services such as Supabase, Railway, Render, Neon, and AWS RDS.
+PostgreSQL is a powerful open-source relational database. MantrixFlow can sync data from any PostgreSQL instance, including self-hosted servers and managed services such as Supabase, Railway, Render, Neon, and AWS RDS.
 
 ## Prerequisites
 
@@ -44,7 +44,7 @@ Enter the database name. For Supabase, this is usually `postgres`. For Neon, it 
 
 ### 5. Username and Password
 
-Enter the username and password for the database user. Create a dedicated read-only user for MANTrixFlow (see below).
+Enter the username and password for the database user. Create a dedicated read-only user for MantrixFlow (see below).
 
   </Step>
   <Step>
@@ -58,7 +58,7 @@ For cloud databases, enable SSL. For local development, you may disable it.
 
 ### Create a Read-Only User
 
-Run the following SQL as a superuser to create a dedicated user for MANTrixFlow:
+Run the following SQL as a superuser to create a dedicated user for MantrixFlow:
 
 ```sql
 CREATE USER mantrixflow_read WITH PASSWORD 'your_secure_password';
@@ -78,7 +78,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO mantrixflow_
 
 ## Available Streams
 
-Streams correspond to database tables. When you create a pipeline, you select which tables to sync. MANTrixFlow discovers the schema from the database and lets you choose streams per pipeline.
+Streams correspond to database tables. When you create a pipeline, you select which tables to sync. MantrixFlow discovers the schema from the database and lets you choose streams per pipeline.
 
 ## Supported Sync Modes
 

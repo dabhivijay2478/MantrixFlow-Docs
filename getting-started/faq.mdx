@@ -1,13 +1,13 @@
 ---
 title: FAQ
-description: Frequently asked questions about MANTrixFlow.
+description: Frequently asked questions about MantrixFlow.
 ---
 
 ## Supported Connectors
 
-**Which sources and destinations does MANTrixFlow support?**
+**Which sources and destinations does MantrixFlow support?**
 
-MANTrixFlow supports many sources (PostgreSQL, MySQL, MongoDB, Snowflake, BigQuery, Shopify, Stripe, HubSpot, Salesforce, GitHub, and more) and destinations (PostgreSQL, BigQuery, Snowflake, DuckDB, MongoDB, S3, and others). See the [Connections Overview](/connections/overview) for the full list.
+MantrixFlow supports many sources (PostgreSQL, MySQL, MongoDB, Snowflake, BigQuery, Shopify, Stripe, HubSpot, Salesforce, GitHub, and more) and destinations (PostgreSQL, BigQuery, Snowflake, DuckDB, MongoDB, S3, and others). See the [Connections Overview](/connections/overview) for the full list.
 
 ## Data Security
 
@@ -15,9 +15,9 @@ MANTrixFlow supports many sources (PostgreSQL, MySQL, MongoDB, Snowflake, BigQue
 
 All connection credentials are encrypted at rest using AES-256. The encryption key is stored as an environment variable on the ETL server and is never exposed through any API. Credentials are decrypted only during a sync run and are discarded from memory immediately after.
 
-**Does MANTrixFlow store my data?**
+**Does MantrixFlow store my data?**
 
-MANTrixFlow does not store your source data. Data flows from your source through the ETL service to your destination. Only metadata (connection IDs, pipeline configs, sync state) is stored in the platform database.
+MantrixFlow does not store your source data. Data flows from your source through the ETL service to your destination. Only metadata (connection IDs, pipeline configs, sync state) is stored in the platform database.
 
 ## Sync Frequency
 
