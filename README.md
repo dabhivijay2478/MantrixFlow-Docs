@@ -22,8 +22,13 @@ npm run dev
 
 - **Logo:** `images/m.png` — referenced from `docs.json` as `logo.light` / `logo.dark` (click goes to mantrixflow.com).
 - **Favicon:** `favicon.ico` at repo root (browser tab / bookmarks).
+- **Colors & fonts** in `docs.json` follow the app’s `globals.css` tokens (e.g. `--primary: #00a859`, dark `--background: #09090b`, **Geist**).
 
 If the mark is hard to see in **dark** UI chrome, add a light-on-transparent asset (e.g. `images/m-light.png`) and set only `logo.dark` to that path in `docs.json`.
+
+## Images in MDX
+
+Screenshots use **`<img src="/images/...">`** (root-relative URLs) so paths match Mintlify’s static file hosting. Keep PNGs committed under `images/user-guide/` and `images/workspace/`.
 
 ## Images
 

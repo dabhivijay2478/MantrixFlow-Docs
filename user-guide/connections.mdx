@@ -14,7 +14,7 @@ All **source** and **destination** credentials are managed on the **Connections*
 
 Use **All**, **Sources**, or **Destinations** tabs and the search field to filter. Each row shows connector type, host/database summary, whether it is used in pipelines, and last test status when available.
 
-![Connections list with filters](/images/user-guide/ug-connections-list-after-neon-save.png)
+<img src="/images/user-guide/ug-connections-list-after-neon-save.png" alt="Connections list with filters" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
 ## Create a connection
 
@@ -22,11 +22,11 @@ Use **All**, **Sources**, or **Destinations** tabs and the search field to filte
 2. Choose **Source** or **Destination** at the top of the catalog (same page supports both roles).
 3. Pick a connector (e.g. **PostgreSQL** under *Available now*).
 
-![New connection catalog — source vs destination](/images/user-guide/ug-new-connection-catalog.png)
+<img src="/images/user-guide/ug-new-connection-catalog.png" alt="New connection catalog — source vs destination" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
 4. Fill **Connection name**, **Host**, **Port**, **Database**, **Username**, **Password**, **Schema**, and **SSL mode** as required by your provider (Neon, RDS, self-hosted Postgres, etc.).
 
-![PostgreSQL connection form (new source)](/images/user-guide/ug-postgres-connection-form.png)
+<img src="/images/user-guide/ug-postgres-connection-form.png" alt="PostgreSQL connection form (new source)" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
 5. Click **Test Connection** before **Save Connection** when you want to validate reachability and credentials without persisting, or save first if your workflow tests after save.
 
@@ -35,11 +35,11 @@ Use **All**, **Sources**, or **Destinations** tabs and the search field to filte
 - On the **create** or **edit** form, use **Test Connection**.
 - From the list, open the row **⋯** menu and choose **Test Connection**.
 
-![Connection row menu — Test, Edit, Delete](/images/user-guide/ug-connection-actions-menu.png)
+<img src="/images/user-guide/ug-connection-actions-menu.png" alt="Connection row menu — Test, Edit, Delete" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
 **Source-only shortcuts** (when the row is a **SOURCE**): the menu also includes **Discover Tables** and **Source configuration** — open these after the connection tests successfully.
 
-![Neon Source row menu with Discover Tables](/images/user-guide/ug-neon-source-menu.png)
+<img src="/images/user-guide/ug-neon-source-menu.png" alt="Neon Source row menu with Discover Tables" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
 If the test fails, fix host/firewall/SSL/user grants and test again. The list may show a **Never tested** warning until a successful test has been recorded.
 
@@ -49,32 +49,32 @@ The following captures use a **Neon** branch (`ep-nameless-lab-…aws.neon.tech`
 
 **Edit source** — fill the form, reveal the password field if you need to verify typing, then **Test Connection**:
 
-![Neon source — filled form](/images/user-guide/ug-neon-source-connection-filled.png)
+<img src="/images/user-guide/ug-neon-source-connection-filled.png" alt="Neon source — filled form" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
 **Successful validation** (inline status under **Test Connection**):
 
-![Neon source — test succeeded](/images/user-guide/ug-neon-connection-test-result.png)
+<img src="/images/user-guide/ug-neon-connection-test-result.png" alt="Neon source — test succeeded" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
 **Edit destination** — toggle **Destination** on the same PostgreSQL connector type, name the connection (e.g. `Neon Destination`), use the same host/database/user, test, then **Save**:
 
-![Neon destination — filled form](/images/user-guide/ug-neon-destination-connection-filled.png)
+<img src="/images/user-guide/ug-neon-destination-connection-filled.png" alt="Neon destination — filled form" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
-![Neon destination — test succeeded](/images/user-guide/ug-neon-destination-test-result.png)
+<img src="/images/user-guide/ug-neon-destination-test-result.png" alt="Neon destination — test succeeded" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
 ## Discover tables (source)
 
 From a **SOURCE** row **⋯** menu, choose **Discover Tables**. The app opens the **Neon Source** explorer with schemas and tables (cached metadata refreshes on a schedule; use **Source configuration** for details).
 
-![Discover Tables — schema explorer & SQL editor](/images/user-guide/ug-discover-tables-explorer.png)
+<img src="/images/user-guide/ug-discover-tables-explorer.png" alt="Discover Tables — schema explorer & SQL editor" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
-![Source configuration tab — metadata refresh](/images/user-guide/ug-source-configuration-tab.png)
+<img src="/images/user-guide/ug-source-configuration-tab.png" alt="Source configuration tab — metadata refresh" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
 ## Edit or update a connection
 
 1. From **⋯** on the row, choose **Edit** (or open the connection and use the same form).
 2. Update fields; **Save Connection** commits changes. **Reset** (where shown) discards unsaved edits.
 
-![Edit connection — PostgreSQL](/images/user-guide/ug-connection-edit.png)
+<img src="/images/user-guide/ug-connection-edit.png" alt="Edit connection — PostgreSQL" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
 
 For CDC (PostgreSQL logical replication), use **Set up CDC** when available after the connection is saved.
 
