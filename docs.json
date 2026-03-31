@@ -7,7 +7,8 @@
     "dark": "#16a34a"
   },
   "favicon": "/favicon.svg",
-  "navigation": [
+  "navigation": {
+    "groups": [
     {
       "group": "Introduction",
       "pages": [
@@ -188,7 +189,8 @@
         "platform/data-privacy"
       ]
     }
-  ],
+    ]
+  },
   "footer": {
     "socials": {
       "website": "https://mantrixflow.com"
