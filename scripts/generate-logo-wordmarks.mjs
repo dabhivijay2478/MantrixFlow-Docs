@@ -17,15 +17,21 @@ const dataUri = `data:image/png;base64,${png.toString("base64")}`;
 const greenMatrix =
   "0 0 0 0 0  0 0 0 0.6588235294117647 0  0 0 0 0.34901960784313724 0  0 0 0 1 0";
 
-/** Wordmark type size (px). Mintlify scales the SVG in the navbar; large intrinsic size = sharp text. */
-const fontPx = 60;
-const icon = 56;
-const gap = 18;
-const h = 88;
-const w = 520;
-const iconY = (h - icon) / 2;
-const textX = icon + gap;
-const textY = h / 2;
+/**
+ * Lockup tuned for Mintlify navbar height: icon height ≈ word cap size (not tiny vs type).
+ * Extra-tall viewBox adds horizontal/vertical padding so scaling does not clip or hug edges.
+ */
+const fontPx = 40;
+const icon = Math.round(fontPx * 0.92);
+const gap = 14;
+const padX = 2;
+const padY = 16;
+const innerH = Math.max(fontPx + 8, icon + 4);
+const h = innerH + padY * 2;
+const w = 400;
+const iconY = padY + (innerH - icon) / 2;
+const textX = padX + icon + gap;
+const textY = padY + innerH / 2;
 const textTuning = `letter-spacing="-0.04em" text-rendering="geometricPrecision"`;
 const textAttrs = `dominant-baseline="central" text-anchor="start" x="${textX}" y="${textY}" ${textTuning}`;
 
