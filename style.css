@@ -50,45 +50,63 @@
 }
 
 /*
- * Logo scales with the bar; cap height so icon + word stay proportional (not oversized vs tabs).
- * Width auto keeps SVG aspect; contain avoids clipping.
+ * Sizing: use :where() so we never beat Mintlify/Tailwind `hidden` on display.
+ * (A normal #navbar .nav-logo img rule can outrank .hidden and show both logos.)
  */
-#navbar .nav-logo img,
-#navbar a[href="https://mantrixflow.com"] img,
-#navbar a[href^="https://mantrixflow.com"] img {
-  display: block;
+:where(#navbar .nav-logo img, #navbar a[href="https://mantrixflow.com"] img, #navbar
+    a[href^="https://mantrixflow.com"] img) {
   width: auto !important;
   height: clamp(1.7rem, 1.85vw + 1.05rem, 2.4rem) !important;
   max-height: 2.4rem !important;
   max-width: min(72vw, 20rem);
   object-fit: contain;
   object-position: left center;
-  vertical-align: middle;
 }
 
 @media (min-width: 1024px) {
-  #navbar .nav-logo img,
-  #navbar a[href="https://mantrixflow.com"] img,
-  #navbar a[href^="https://mantrixflow.com"] img {
+  :where(#navbar .nav-logo img, #navbar a[href="https://mantrixflow.com"] img, #navbar
+      a[href^="https://mantrixflow.com"] img) {
     height: clamp(1.85rem, 1.5vw + 1.2rem, 2.55rem) !important;
     max-height: 2.55rem !important;
   }
 }
 
 @media (max-width: 480px) {
-  #navbar .nav-logo img,
-  #navbar a[href="https://mantrixflow.com"] img,
-  #navbar a[href^="https://mantrixflow.com"] img {
+  :where(#navbar .nav-logo img, #navbar a[href="https://mantrixflow.com"] img, #navbar
+      a[href^="https://mantrixflow.com"] img) {
     height: clamp(1.45rem, 5vw, 1.85rem) !important;
     max-height: 1.85rem !important;
     max-width: min(68vw, 16rem);
   }
 }
 
-/* Subtle depth on dark chrome (works when parent uses dark tokens) */
-html.dark #navbar .nav-logo img,
-html.dark #navbar a[href="https://mantrixflow.com"] img,
-html.dark #navbar a[href^="https://mantrixflow.com"] img {
+/*
+ * Root fix for “two logos”: docs.json logo.light + logo.dark become two <img> tags.
+ * Only one should show. If global CSS or hydration beats Tailwind’s `hidden`, both appear.
+ * We force the correct asset by filename (works on localhost and Mintlify CDN URLs).
+ */
+#navbar img[src*="logo-wordmark-dark"] {
+  display: none !important;
+}
+
+html.dark #navbar img[src*="logo-wordmark-light"],
+body.dark #navbar img[src*="logo-wordmark-light"],
+.dark #navbar img[src*="logo-wordmark-light"],
+[data-theme="dark"] #navbar img[src*="logo-wordmark-light"] {
+  display: none !important;
+}
+
+html.dark #navbar img[src*="logo-wordmark-dark"],
+body.dark #navbar img[src*="logo-wordmark-dark"],
+.dark #navbar img[src*="logo-wordmark-dark"],
+[data-theme="dark"] #navbar img[src*="logo-wordmark-dark"] {
+  display: inline-block !important;
+}
+
+/* Subtle depth on dark chrome */
+html.dark
+  :where(#navbar .nav-logo img, #navbar a[href="https://mantrixflow.com"] img, #navbar
+    a[href^="https://mantrixflow.com"] img) {
   filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
 }
 
