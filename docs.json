@@ -8,6 +8,11 @@
     "light": "#4ade80",
     "dark": "#15803d"
   },
+  "thumbnails": {
+    "fonts": {
+      "family": "Geist"
+    }
+  },
   "logo": {
     "light": "/images/m.png",
     "dark": "/images/m.png",
@@ -22,8 +27,12 @@
   },
   "fonts": {
     "family": "Geist",
-    "heading": {
+    "body": {
       "family": "Geist"
+    },
+    "heading": {
+      "family": "Georgia",
+      "weight": 500
     }
   },
   "background": {
