@@ -45,10 +45,6 @@
   "navbar": {
     "links": [
       {
-        "label": "Website",
-        "href": "https://mantrixflow.com"
-      },
-      {
         "label": "Talk to us",
         "href": "mailto:support@mantrixflow.com"
       }
