@@ -10,7 +10,7 @@
   },
   "thumbnails": {
     "fonts": {
-      "family": "Geist"
+      "family": "Nunito"
     }
   },
   "logo": {
@@ -26,12 +26,12 @@
     "library": "lucide"
   },
   "fonts": {
-    "family": "Geist",
+    "family": "Nunito",
     "body": {
-      "family": "Geist"
+      "family": "Nunito"
     },
     "heading": {
-      "family": "Georgia",
+      "family": "Merriweather",
       "weight": 500
     }
   },
