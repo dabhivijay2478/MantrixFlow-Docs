@@ -1,6 +1,6 @@
 ---
 title: Incremental sync
-description: Choose a reliable cursor column, configure incremental sync in the current app flow, and avoid the most common mistakes.
+description: Choose a reliable cursor column, understand which sources use column-based incremental sync, and avoid the most common mistakes.
 ---
 
 Incremental sync reads only records that are newer than the last successful run. In MantrixFlow, this is the most common production choice for application tables and SaaS resources that grow continuously and expose a dependable update field.
@@ -11,6 +11,17 @@ Incremental sync reads only records that are newer than the last successful run.
 - CRM objects such as deals or contacts that update throughout the day
 - subscription or invoice resources with predictable modification timestamps
 - larger source tables where full sync would be too expensive to run repeatedly
+
+## Sources that use incremental sync in MantrixFlow
+
+| Source | Incremental strategy | Delete handling |
+| --- | --- | --- |
+| PostgreSQL fallback | `xmin` soft CDC or user-selected column | deletes are not captured |
+| MySQL | user-selected timestamp or monotonic ID | deletes are not captured |
+| MariaDB | user-selected timestamp or monotonic ID | deletes are not captured |
+| SQLite | user-selected column or `rowid` for append-only tables | deletes are not captured |
+| CockroachDB fallback | user-selected column on older clusters | deletes are not captured |
+| SaaS connectors | source-native API cursor | depends on each API |
 
 ## Step by step in MantrixFlow
 
@@ -37,11 +48,19 @@ Good examples:
 - `modified_at`
 - `created_at` for append-only tables
 - monotonic numeric IDs for insert-only workloads
+- `rowid` for append-only SQLite tables
+
+## Source-specific reminders
+
+- MySQL, MariaDB, and SQLite incremental syncs do not capture hard deletes.
+- If the chosen column is not indexed, each sync may scan the full source table.
+- For CockroachDB, prefer MVCC timestamp mode when the cluster version supports it.
+- For PostgreSQL, use logical CDC instead of a cursor when delete fidelity matters.
 
 ## Real-world example
 
 Summit RevOps syncs `public.orders` from PostgreSQL into PostgreSQL every 15 minutes. They use `updated_at` as the incremental key because new orders, refund changes, and fulfillment updates all touch that column. This keeps the destination current without rereading years of order history on every run.
 
-## Important limitation
+## Important limitations
 
-Incremental sync is excellent for inserts and updates, but it is not the best fit for hard deletes. If delete tracking matters and the source is PostgreSQL, use the documented CDC flow.
+Incremental sync is excellent for inserts and updates, but it is not the best fit for hard deletes. If delete tracking matters and the source is PostgreSQL, use log-based CDC. For MySQL, MariaDB, SQLite, and cursor-based API sources, model deletes explicitly with a soft-delete field if downstream consumers need that signal.

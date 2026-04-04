@@ -1,6 +1,6 @@
 ---
 title: Sync modes
-description: Choose between full sync, incremental sync, and PostgreSQL CDC based on source behavior, freshness needs, and operational risk.
+description: Choose between full sync, incremental sync, and log-based CDC based on source behavior, freshness needs, and operational risk.
 ---
 
 Sync mode decides how MantrixFlow reads data from the source. The right choice depends on table size, resource behavior, freshness requirements, and whether deletes matter.
@@ -11,7 +11,7 @@ Sync mode decides how MantrixFlow reads data from the source. The right choice d
 | --- | --- | --- | --- |
 | Full sync | smaller tables and simpler SaaS resources | nightly Notion pages sync | re-reads everything each run |
 | Incremental sync | growing tables or resources with reliable update fields | `orders` using `updated_at` | depends on correct cursor behavior |
-| PostgreSQL CDC | low-latency inserts, updates, and deletes | operational orders replication | requires PostgreSQL replication setup |
+| Log-based CDC | low-latency inserts, updates, and deletes | PostgreSQL operational orders replication | requires source-specific setup |
 
 ## Full sync
 
@@ -19,17 +19,17 @@ Use full sync when the dataset is modest or the source does not expose a good cu
 
 ## Incremental sync
 
-Use incremental sync when records have a trustworthy field such as `updated_at`, `modified_at`, or a monotonic ID. This is the most common production mode for application tables and many SaaS resources.
+Use incremental sync when records have a trustworthy field such as `updated_at`, `modified_at`, or a monotonic ID. This is the most common production mode for MySQL, MariaDB, SQLite, fallback PostgreSQL flows, and many SaaS resources.
 
-## PostgreSQL CDC
+## Log-based CDC
 
-Use CDC when you need low-latency inserts, updates, and deletes without relying on an application-level cursor. In the current app, self-serve CDC is documented only for PostgreSQL sources.
+Use log-based CDC when you need low-latency inserts, updates, and deletes without relying on an application-level cursor. In the current app, PostgreSQL is the primary log-based implementation. Other connectors use cursor-based incremental methods instead of database log streaming.
 
 ## How to choose safely
 
 - Start with **Full sync** for smaller datasets and first-run validation.
 - Move to **Incremental sync** when volume grows and you have a reliable cursor.
-- Use **PostgreSQL CDC** only when the business need justifies the extra database setup.
+- Use **Log-based CDC** only when the business need justifies the extra database setup and you can verify the source prerequisites safely.
 
 ## Companion destination decision
 

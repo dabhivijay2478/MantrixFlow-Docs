@@ -1,6 +1,6 @@
 ---
 title: CDC overview
-description: What change data capture means in MantrixFlow today, when to use it, and where the current UI supports it.
+description: What change tracking means in MantrixFlow today, which sources support log-based or cursor-based CDC, and the safety rules behind the feature.
 ---
 
 Change data capture, or CDC, reads database change logs instead of rereading whole tables. It is the right choice when you need inserts, updates, and deletes with lower latency and stronger fidelity than cursor-based incremental sync can provide.
@@ -12,9 +12,13 @@ Change data capture, or CDC, reads database change logs instead of rereading who
 - reduces repeated full-table reads on busy production systems
 - supports lower-latency replication workflows when incremental sync is not enough
 
-## Current product reality
+## Safety rules MantrixFlow enforces
 
-In the current standard workspace UI, self-serve CDC is exposed for **PostgreSQL sources**. The builder includes a dedicated **CDC Setup** tab for PostgreSQL and the documented supported flow stops there.
+- source schemas are never altered automatically
+- replication slots are never dropped unless a user explicitly asks for cleanup
+- slot names are pipeline-specific and organization-specific
+- PostgreSQL log-based pipelines always run a baseline snapshot before streaming changes
+- CDC and incremental pipelines use merge-style writes instead of destructive replace mode
 
 ## How CDC compares to other sync modes
 
@@ -22,19 +26,39 @@ In the current standard workspace UI, self-serve CDC is exposed for **PostgreSQL
 | --- | --- | --- | --- |
 | Full sync | current table contents | smaller datasets and first validation | re-reads everything |
 | Incremental sync | rows newer than a cursor | most production app tables | depends on a trustworthy cursor |
-| PostgreSQL CDC | replication or change log | low-latency operational replication | needs database admin setup |
+| Log-based CDC | database change log | low-latency operational replication | needs source-specific setup |
+
+## Source support matrix
+
+| Source | Method in MantrixFlow | Captures deletes | Notes |
+| --- | --- | --- | --- |
+| PostgreSQL | `pgoutput` logical replication | yes | preferred log-based implementation |
+| PostgreSQL fallback | `xmin` soft CDC | no | fallback when logical replication is unavailable |
+| MySQL | incremental column | no | choose an indexed timestamp or monotonic ID |
+| MariaDB | incremental column | no | same behavior as MySQL |
+| SQLite | incremental column or `rowid` | no | best for light workloads only |
+| CockroachDB | MVCC timestamp or incremental column | MVCC: no hard delete replay in destination; fallback: no | version-dependent path |
+| Stripe | API cursor | source-dependent event coverage | use `/v1/events`, not list endpoints |
+| Shopify | API cursor | no hard delete replay | rate-limited on large stores |
+| HubSpot | API cursor | archived objects only when requested | object-specific cursors |
+| GitHub | API cursor | no hard delete replay | based on `updated_at` or event endpoints |
+| Notion | API cursor | no | deleted pages are not exposed by the API |
 
 ## When teams justify CDC
 
 - order, payment, or fulfillment systems where deletes and fast updates matter
 - operational reporting that must stay close to source-of-truth timing
-- PostgreSQL tables where application timestamps are incomplete or unreliable
+- sources where application timestamps are incomplete or unreliable
 - pipelines that are already proven with incremental sync but now need lower latency or delete handling
 
 ## Safe adoption flow
 
 1. Prove the source and destination with a manual run first.
-2. Complete the PostgreSQL CDC prerequisites inside the source panel.
-3. Verify the CDC status before enabling log-based sync.
-4. Run manually and confirm downstream tables behave as expected.
-5. Only then schedule production cadence.
+2. Pick the strongest method the source supports:
+   - PostgreSQL log-based first
+   - source-native API cursors for SaaS connectors
+   - incremental columns only when no change log is available
+3. Complete the source-specific checks inside the **CDC** tab.
+4. Verify warnings and blocking failures before saving.
+5. Run manually and confirm downstream tables behave as expected.
+6. Only then schedule production cadence.
