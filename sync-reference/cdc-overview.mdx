@@ -10,7 +10,7 @@ Change data capture, or CDC, reads database change logs instead of rereading who
 - captures hard deletes without relying on application-level soft-delete logic
 - tracks updates even when the app does not maintain a perfect `updated_at`
 - reduces repeated full-table reads on busy production systems
-- supports near-real-time replication workflows
+- supports lower-latency replication workflows when incremental sync is not enough
 
 ## Current product reality
 
