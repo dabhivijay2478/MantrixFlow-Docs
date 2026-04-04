@@ -1,24 +1,63 @@
 ---
-title: Team Members
-description: Invite team members and manage roles and permissions.
+title: Team members
+description: Invite users, assign the current supported roles, and manage ownership and membership using the live team flows.
 ---
 
-You can invite team members to your organisation. Each member has a role that determines their permissions.
+Team access is managed per organization. The team page is where operators invite users, update roles, remove members, and, when necessary, transfer ownership.
 
-## Roles
+## Current roles in the product
 
-- **Owner** — Full access. Can delete the organisation, transfer ownership, manage billing, and manage all resources.
-- **Admin** — Can manage team members, connections, and pipelines. Cannot delete the organisation or change billing.
-- **Member** — Can view and run pipelines. Can create connections and pipelines. Cannot manage team members.
-- **Viewer** — Read-only. Can view connections and pipelines but cannot create, edit, or run them.
+| Role | What it is for |
+| --- | --- |
+| `OWNER` | full control, including organization details and ownership transfer |
+| `ADMIN` | manages workspace data, connections, pipelines, and users |
+| `EDITOR` | builds and edits pipelines and connections but does not manage organization administration |
+| `VIEWER` | read-only access |
 
-## Inviting Members
+## Important rule
 
-1. Go to Organisation Settings → Team.
-2. Click Invite member.
-3. Enter the email address and select a role.
-4. The invitee receives an email. They must accept to join.
+You cannot invite someone directly as `OWNER`. Ownership is transferred separately after the person is already a member.
 
-## Managing Members
+## Invite a team member
 
-Owners and admins can change a member's role or remove them from the organisation. Removing a member revokes their access immediately.
+1. Open **Workspace → Team**.
+2. Click **Invite Member**.
+3. Enter the email address.
+4. Choose a role: `ADMIN`, `EDITOR`, or `VIEWER`.
+5. Send the invitation.
+
+## What the invitee does
+
+The invite link opens the acceptance flow, where the invited user verifies the invite and completes account setup before joining the organization.
+
+## Change a member role
+
+1. Open **Workspace → Team**.
+2. Find the member in the table.
+3. Use the role dropdown or open the member edit screen.
+4. Confirm the role change.
+
+Owner roles cannot be changed through normal role editing. Ownership must be transferred.
+
+## Remove a member
+
+1. Open the member actions menu.
+2. Choose **Remove Member**.
+3. Confirm the action.
+
+Removal revokes the member's access to that organization.
+
+## Transfer ownership
+
+Only the current owner can transfer ownership. From the team page, the owner can open the member action menu and choose **Transfer Ownership** for a non-owner member.
+
+## Real-world example
+
+A data lead keeps two analysts as `VIEWER`, grants one engineer `EDITOR` access to maintain pipelines, and uses `ADMIN` for the operations manager who needs to handle invites and pipeline issues but should not take ownership of the organization.
+
+## Good team hygiene
+
+- Keep the number of owners small.
+- Use `EDITOR` for most builder users.
+- Review pending invitations regularly.
+- Remove access promptly when responsibilities change.

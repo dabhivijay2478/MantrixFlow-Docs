@@ -1,80 +1,69 @@
 ---
 title: Quick Start
-description: Create your first pipeline in under 10 minutes using Faker and PostgreSQL.
+description: Build your first production-style pipeline by syncing a PostgreSQL source into a PostgreSQL destination through the current MantrixFlow workspace flow.
 ---
 
-This guide walks you through creating your first data pipeline from sign-up to seeing data in your destination. You will use the Faker source (synthetic data) and a PostgreSQL destination. No external accounts are required beyond MantrixFlow and a PostgreSQL database.
+This quick start uses a realistic scenario instead of placeholder demo data.
 
-<Steps>
-  <Step>
+**Scenario:** Lighthouse Commerce runs its application on Neon PostgreSQL and wants an analytics copy of the `orders` table in a separate PostgreSQL destination. The team wants one manual validation run first and an hourly schedule after that.
 
-### 1. Sign in
+## Before you begin
 
-Go to [cloud.mantrixflow.com](https://cloud.mantrixflow.com) and sign in. Create an account if you do not have one.
+Have these values ready:
 
-<img src="/images/workspace/login.png" alt="MantrixFlow sign-in screen" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+- Source host, database, username, password, and schema for the operational PostgreSQL database
+- Destination host, database, username, password, and schema for the reporting database
+- A source user with read access and a destination user with write access
+- SSL enabled for both connections if they are cloud-hosted
 
-  </Step>
-  <Step>
+## Step by step
 
-### 2. Navigate to connections
+1. Sign in and switch to the correct organization.
+2. Open **Connections** and create a **Source** connection with **PostgreSQL**.
+3. Fill the form with real values such as:
+   - `Connection Name`: `Neon Production Orders`
+   - `Host`: `ep-lighthouse-prod-123456.us-east-2.aws.neon.tech`
+   - `Port`: `5432`
+   - `Database`: `app`
+   - `Username`: `mf_readonly`
+   - `Schema`: `public`
+   - `SSL Mode`: `require`
+4. Click **Test Connection** and save the source after the test succeeds.
+5. Create a second **Destination** connection with values such as:
+   - `Connection Name`: `Analytics Postgres`
+   - `Host`: `analytics-db.internal.lighthouse.io`
+   - `Database`: `warehouse`
+   - `Username`: `mf_writer`
+   - `Schema`: `analytics`
+   - `SSL Mode`: `require`
+6. Go to **Data Pipelines**, click **+ New Pipeline**, name it `Orders to Analytics`, choose the PostgreSQL source connection, and open the canvas.
+7. In **Source Configuration**, select `public.orders` and save the stream selection.
+8. In **Transform**, keep the default pass-through script or use a light cleanup such as:
 
-In the workspace, open **Connections** from the sidebar. You will create a source connection and a destination connection.
+```python
+def transform(record):
+    return {
+        **record,
+        "order_status": str(record.get("order_status", "")).lower(),
+        "loaded_from": "mantrixflow_quick_start",
+    }
+```
 
-  </Step>
-  <Step>
+9. Use **Preview with sample data** and save the script.
+10. In **Destination**, choose `Analytics Postgres`, set `Schema` to `analytics`, `Table` to `orders_live`, and keep `Write mode` on `Upsert`.
+11. Save the pipeline and click **Run Now**.
+12. Check **Run History** and confirm that `analytics.orders_live` contains the expected rows.
+13. After the manual run looks correct, add an hourly schedule.
 
-### 3. Create a Faker source connection
+## What success looks like
 
-Click **+ New Connection** (or **+ New Connection** in the empty state). In the catalog, pick **Faker** as the connector. Give it a name (e.g. "Test Data"). The Faker connector generates synthetic data for testing. You can leave the default count and seed values. Save the connection.
+You now have a working pipeline that uses the same flow most teams follow in production:
 
-  </Step>
-  <Step>
+- reusable source and destination connections
+- a named pipeline shell
+- a selected source table
+- an optional Python transform
+- a configured destination branch
+- saved configuration, run history, and scheduling
 
-### 4. Create a PostgreSQL destination connection
-
-Click **+ New Connection** again, toggle **Destination** if needed (`/workspace/connections/new?role=destination`), and select **PostgreSQL**. Enter host, port (default **5432**), database name, username, and password. For hosted Postgres (Supabase, Neon, etc.), use your provider’s connection values. Save and use **Test Connection** when offered.
-
-  </Step>
-  <Step>
-
-### 5. Navigate to Data Pipelines
-
-In the sidebar, open **Data Pipelines** (`/workspace/data-pipelines`). Click **New Pipeline** (the header action uses this label).
-
-  </Step>
-  <Step>
-
-### 6. Create the pipeline (name + source only)
-
-On **Create Pipeline**, enter a **Pipeline name**, choose your **Faker** source under **Source connection**, then click **Create & open canvas**. The app creates a pipeline shell and sends you to the **builder**—you do **not** pick the PostgreSQL destination on this screen (that happens on the canvas).
-
-  </Step>
-  <Step>
-
-### 7. Configure streams, destination, and sync on the canvas
-
-In the builder, wire the **source** to your real **PostgreSQL** destination (replace any placeholder destination with your destination connection / table as the UI allows). Select the stream (e.g. **users** from Faker), set **sync mode** to **Full** and **write mode** to **Replace** (or equivalent labels on the destination node), then **Save** if the toolbar exposes save.
-
-  </Step>
-  <Step>
-
-### 8. Run the pipeline
-
-Use **Run pipeline** / **Run now** from the builder or the pipeline **detail** page. Wait until the run finishes; open **Run history** on the pipeline detail view if you need status, row counts, or errors.
-
-  </Step>
-  <Step>
-
-### 9. Verify the data
-
-In PostgreSQL, confirm the destination table holds rows synced from Faker (shape depends on the stream you selected).
-
-  </Step>
-</Steps>
-
-<Tip>
-**No PostgreSQL?**
-
-If you do not have PostgreSQL, you can use DuckDB as the destination for local testing, or any other supported destination you have access to.
-</Tip>
+From here, you can expand to more tables, more branches, or another supported SQL destination.

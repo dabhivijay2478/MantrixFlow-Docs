@@ -1,50 +1,52 @@
 ---
-title: Activity log & edge cases
-description: Use the Activity Log for org-wide audit trails; understand delete confirmations, validation, and common failure banners.
+title: Activity log and edge cases
+description: Use the Activity Log and common recovery patterns to operate MantrixFlow safely when runs fail, credentials change, or entities go missing.
 ---
 
-## Activity log (organization-wide)
+Production documentation is not complete until it explains what to do when things go wrong. This page covers the operational behaviors most teams hit after their first successful pipeline.
 
-**Activity Log** (`/workspace/activity`) shows pipeline runs, schema updates, and other events with filters, status pills, and expandable detail.
+## Use the Activity Log for org-wide context
 
-Use it when you need cross-pipeline visibility or to correlate **PIPELINE_RUN_STARTED** / **PIPELINE_RUN_COMPLETED** rows with the **Run History** tab on a single pipeline.
+The **Activity Log** shows events across the organization, not just one pipeline. It is the fastest way to answer questions like:
 
-<img src="/images/user-guide/ug-activity-log.png" alt="Activity log with filters and table" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+- Did the run actually start?
+- Was the failure limited to one pipeline or many?
+- Did a connection test fail shortly before pipeline errors began?
+- Was a pipeline deleted or edited by another operator?
 
-## Create / edit / delete — general pattern
+![Activity log with filters and table](/images/user-guide/ug-activity-log.png)
 
-| Action | Typical entry | Safer practice |
-|--------|---------------|----------------|
-| Create | Primary button (+ New …) | Start in staging org; use meaningful names |
-| Edit | Row **⋯**, **Edit**, or open detail → **Save** | Test connection / preview after credential changes |
-| Delete | **⋯** → **Delete** → confirm modal | Ensure no pipeline still references the entity |
+## The most common edge cases
 
-## Deleting pipelines
+### Connection tests fail after a password rotation
 
-- Confirmation explicitly names the pipeline (e.g. “TEst”) and states the action cannot be undone.
-- After delete, **Activity Log** may record a deleted event; list views update after refetch.
+Re-open the connection, update the credential, run **Test Connection**, save, and only then retry the affected pipelines.
 
-See [Pipelines & run history](/user-guide/pipelines) for the delete screenshots.
+### A source table disappears from the builder
 
-## Deleting connections
+Refresh source metadata or use **Discover Tables** from the connection. If it still does not appear, check grants on the source schema and table.
 
-- If a connection is **still used** by a pipeline, deleting it will cause **disconnect** warnings on the pipeline detail page and runs will fail until you reconnect or reconfigure.
-- Prefer **Test Connection** after network or credential rotation.
+### The pipeline saves but the run fails immediately
 
-## “Non-existing” entities
+Validate the destination configuration. A missing schema, invalid table name, or stale destination credential often surfaces only at run time.
 
-- Opening an invalid URL (wrong UUID) typically surfaces a not-found or error state from the app—bookmark **list** pages (`/workspace/connections`, `/workspace/data-pipelines`) as the source of truth.
-- **Search** bars only match what the API returns; typos show empty states, not errors.
+### The transform preview works but the pipeline run fails
 
-## Validation summary
+Preview confirms sample-row behavior, not every production edge case. Check the exact run error and tighten the script around null handling, nested objects, or type casting.
 
-1. **Connection** — form **Test Connection**; list **Never tested** until success.
-2. **Pipeline** — manual **Run now** from list or detail **Sync Now**; inspect **Run History** rows (success / running / failed).
-3. **Transform** — **Preview with sample data** before **Save Script**.
-4. **Organization** — slug uniqueness enforced on save (error toast on conflict).
+### Someone deletes a connection that a pipeline still needs
 
-## When screenshots show warnings
+Expect broken runs until the pipeline is pointed at a replacement connection. The fix is usually to recreate the connection, edit the destination or source configuration, save, and run manually.
 
-Real workspaces may show banners (e.g. source/destination disconnected). Treat those as **expected documentation examples** of failure UX: fix underlying connections, then re-run.
+## Safe change-management checklist
 
-If you export docs publicly, **blur emails, user IDs, hostnames, and org names** in screenshots or regenerate captures from a dedicated demo tenant.
+1. Confirm the active organization.
+2. Test the connection after any credential, network, or SSL change.
+3. Save builder changes before running.
+4. Run manually before re-enabling schedules.
+5. Check both **Run History** and **Activity Log** after the change.
+
+## About warning banners in screenshots
+
+Some screenshots show warnings on purpose. They represent normal operator scenarios such as disconnected credentials or missing dependencies. Treat them as examples of what the failure UX looks like, not as product defects in the docs.
+

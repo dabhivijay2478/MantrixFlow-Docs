@@ -1,43 +1,54 @@
 ---
-title: Welcome
-description: MantrixFlow documentation — pipelines, connectors, and sync. Product-native guides with screenshots and connector references.
+title: Introduction
+description: Product-aligned MantrixFlow documentation for the connectors, pipeline flow, and workspace features that are live in the current app.
 ---
 
-MantrixFlow moves data from your **sources** to your **destinations** with visual pipelines, Python transforms, and scheduling. This site is the **Mintlify** docs experience (Almond theme): product **user guide** with screenshots, **getting started**, full **connector** catalog, sync reference, and API notes.
+This documentation is intentionally scoped to the features that are live in the current product. It covers only the connectors, builder behavior, and workspace flows that users can create, test, save, and run today.
 
-<Columns cols={2}>
-  <Card title="Screenshot-based guide" icon="images" href="/user-guide">
-    Connections, pipelines, transforms, orgs, and activity — aligned with the live workspace UI.
-  </Card>
-  <Card title="Quick start" icon="timer" href="/getting-started/quick-start">
-    Sign in, create connections, and run your first pipeline in minutes.
-  </Card>
-</Columns>
+If a tile appears in the catalog before its full create, test, save, and pipeline path is production-ready, it stays out of this doc set until that end-to-end flow is actually live.
 
-## Explore the docs
+## Current supported connectors
 
-<CardGroup cols={2}>
-  <Card title="User guide" icon="layout-dashboard" href="/user-guide">
-    End-to-end flows in the app with real UI captures.
-  </Card>
-  <Card title="Quick Start" icon="rocket" href="/getting-started/quick-start">
-    Short path from signup to a running sync.
-  </Card>
-  <Card title="Core concepts" icon="layers" href="/getting-started/core-concepts">
-    Connections, streams, sync modes, write modes.
-  </Card>
-  <Card title="All connectors" icon="plug" href="/connections/overview">
-    Sources and destinations in one place.
-  </Card>
-</CardGroup>
+**Sources**
+- PostgreSQL
+- MySQL
+- MariaDB
+- CockroachDB
+- Stripe
+- Shopify
+- HubSpot
+- GitHub
+- Notion
 
-## What you can do
+**Destinations**
+- PostgreSQL
+- MySQL
+- MariaDB
+- CockroachDB
 
-- **Connect** — Databases, warehouses, and SaaS (PostgreSQL, Snowflake, Shopify, Stripe, and more).
-- **Pipeline builder** — Visual graph: source → optional Python transform → one or more destinations.
-- **Sync** — Full load, incremental, and CDC where the connector supports it.
-- **Operate** — Run history, activity log, schedules, and org / team settings in the app.
+Future connectors and unpublished developer surfaces are intentionally not documented here until they are available in the product.
 
-<Info>
-**New here?** Start with [Quick Start](/getting-started/quick-start) or browse the [User guide](/user-guide) for the same flows with screenshots.
-</Info>
+## What you will find here
+
+- Getting started guides that follow the real connection-first, builder-second app flow
+- Source and destination setup pages that mirror the actual connection forms
+- Pipeline and sync references for full sync, incremental sync, and PostgreSQL CDC
+- Transformation guides based on the current Python script and filter implementation
+- Platform guidance for organizations, team access, security, and data privacy
+
+## A representative production flow
+
+A common first rollout looks like this:
+
+1. Create a PostgreSQL or Shopify source connection in **Connections**.
+2. Create a PostgreSQL destination connection.
+3. Create the pipeline shell from **Data Pipelines**.
+4. In the builder, pick one table or resource, keep the first transform simple, and set the destination table.
+5. Run manually, validate the destination rows, and only then turn on a schedule.
+
+## Recommended reading order
+
+- [Quick Start](/getting-started/quick-start)
+- [User Guide](/user-guide/index)
+- [Connections Overview](/connections/overview)
+- [Pipelines Overview](/pipelines/overview)

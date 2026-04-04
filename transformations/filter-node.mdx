@@ -1,0 +1,52 @@
+---
+title: Filter node
+description: Configure the current Filter node using either a Python expression or an SQL WHERE clause.
+---
+
+Use the **Filter** node when the job is only to keep some records and drop others. If you also need to rename, flatten, or derive fields, use `transform(record)` instead.
+
+## Two live filter modes
+
+### Python Expression
+
+Use a record-level expression such as:
+
+```python
+record.get("status") != "deleted"
+```
+
+Return `True` to keep the record and `False` to drop it.
+
+### SQL WHERE
+
+Use a source-side predicate such as:
+
+```sql
+status != 'deleted' AND created_at >= '2026-01-01'
+```
+
+The current builder stores that as a `WHERE` clause pattern for the source query path.
+
+## Step by step
+
+1. Add or open a **Filter** node on the branch.
+2. Choose **Python Expression** or **SQL WHERE**.
+3. Enter the condition.
+4. Save the node.
+5. Validate with source preview, transform preview, and one manual run before scheduling.
+
+## When to use each mode
+
+- Use **Python Expression** when the logic depends on the shaped record fields you already know from the payload.
+- Use **SQL WHERE** when the condition is simple and source-side filtering is clearer.
+
+## Real-world examples
+
+- Python: `record.get("financial_status") == "paid"`
+- Python: `record.get("email") and "@example.com" not in record.get("email")`
+- SQL: `updated_at >= '2026-04-01'`
+- SQL: `status != 'deleted'`
+
+## Current validation guidance
+
+The filter panel is primarily a configuration surface today. Treat source preview, transform preview, destination preview, and a manual pipeline run as the reliable validation path.

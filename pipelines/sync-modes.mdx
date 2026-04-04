@@ -1,30 +1,36 @@
 ---
-title: Sync Modes
-description: Full sync, incremental sync, and CDC explained in plain language.
+title: Sync modes
+description: Choose between full sync, incremental sync, and PostgreSQL CDC based on source behavior, freshness needs, and operational risk.
 ---
 
-Sync mode defines how data is read from the source. Choose the mode that fits your data size, update pattern, and source capabilities.
+Sync mode decides how MantrixFlow reads data from the source. The right choice depends on table size, resource behavior, freshness requirements, and whether deletes matter.
 
-## Full Sync
+## Quick comparison
 
-Reads every record from the source on every run and writes all of them to the destination. The destination is effectively replaced (or appended) with the current state of the source.
+| Mode | Best for | Example | Main tradeoff |
+| --- | --- | --- | --- |
+| Full sync | smaller tables and simpler SaaS resources | nightly Notion pages sync | re-reads everything each run |
+| Incremental sync | growing tables or resources with reliable update fields | `orders` using `updated_at` | depends on correct cursor behavior |
+| PostgreSQL CDC | low-latency inserts, updates, and deletes | operational orders replication | requires PostgreSQL replication setup |
 
-**When to use:** Small tables, sources that do not support incremental reads, or when you need a complete refresh each time.
+## Full sync
 
-**Limitation:** Inefficient for large tables. Every run processes the entire dataset.
+Use full sync when the dataset is modest or the source does not expose a good cursor. This is common for smaller reference tables and some SaaS resources.
 
-## Incremental Sync
+## Incremental sync
 
-Reads only records that are newer than the last run. Uses a cursor column (e.g. updated_at, created_at) to track the last synced value. Only rows with a cursor value greater than the stored value are read.
+Use incremental sync when records have a trustworthy field such as `updated_at`, `modified_at`, or a monotonic ID. This is the most common production mode for application tables and many SaaS resources.
 
-**When to use:** Large tables that grow over time. Much more efficient than full sync for tables with millions of rows.
+## PostgreSQL CDC
 
-**Requirements:** A cursor column that increases monotonically. Avoid columns that can have gaps or be updated out of order.
+Use CDC when you need low-latency inserts, updates, and deletes without relying on an application-level cursor. In the current app, self-serve CDC is documented only for PostgreSQL sources.
 
-## CDC (Change Data Capture)
+## How to choose safely
 
-Reads the database replication log to capture every insert, update, and delete event as it happens. The most powerful mode but requires database-level configuration.
+- Start with **Full sync** for smaller datasets and first-run validation.
+- Move to **Incremental sync** when volume grows and you have a reliable cursor.
+- Use **PostgreSQL CDC** only when the business need justifies the extra database setup.
 
-**When to use:** When you need near-real-time sync and the source database supports CDC (PostgreSQL, MySQL, SQL Server).
+## Companion destination decision
 
-**Requirements:** Database administrator access to enable logical replication (PostgreSQL), binary logging (MySQL), or CDC (SQL Server). See the Sync Reference for setup guides.
+Read mode and write mode are separate concerns. In the current destination panel, the supported production write behavior is **Upsert**, so many teams pair **Incremental sync + Upsert** for the first rollout.

@@ -1,26 +1,46 @@
 ---
-title: Schedule and Automation
-description: Configure automatic sync intervals for pipelines.
+title: Schedule and automation
+description: Configure schedules in the current builder after the pipeline has already succeeded manually.
 ---
 
-You can run pipelines manually at any time, or schedule them to run automatically at intervals you define.
+Scheduling is where a working pipeline becomes an operating system. The safest rollout pattern is simple: **manual first, automation second**.
 
-## Manual Runs
+## Where scheduling lives
 
-Click **Run** on a pipeline to execute it immediately. The run is queued and processed by the ETL service. You can monitor the run status in the run history.
+In the current app, scheduling is available from the builder action bar and destination configuration. You can set:
 
-## Scheduled Runs
+- manual only
+- every X minutes
+- every X hours
+- daily at a fixed time
+- weekly on a chosen day and time
+- monthly on a chosen day and time
+- custom cron
 
-Configure a schedule to run the pipeline automatically. Common intervals:
+## Recommended rollout sequence
 
-- Every 15 minutes
-- Every hour
-- Every 6 hours
-- Daily (e.g. at 2:00 AM)
-- Weekly (e.g. Sunday at midnight)
+1. Save the pipeline.
+2. Run it manually.
+3. Validate the destination output.
+4. Check run history for clean completion.
+5. Add the schedule that matches the business need.
 
-The schedule is stored and executed by the platform. The minimum interval depends on your plan.
+## Real schedule examples
 
-## Pause and Resume
+- Every 15 minutes for Shopify `orders` that feed support dashboards.
+- Hourly for PostgreSQL `orders` and `customers` into an analytics database.
+- Daily at 02:00 for Stripe payouts and invoice reporting.
+- Weekly for a Notion workspace snapshot that powers team planning reports.
 
-You can pause a pipeline to stop scheduled runs. Manual runs may still be allowed depending on configuration. Resume the pipeline to re-enable the schedule.
+## Timezone matters
+
+Always set the schedule timezone intentionally. This matters for finance closes, sales reporting windows, and business-hour sync expectations.
+
+## When to stay manual
+
+Keep a pipeline manual when:
+
+- you are still validating a new connector
+- the source schema is unstable
+- the destination table is used for a one-time migration
+- the pipeline depends on a process that is not yet reliable enough to automate

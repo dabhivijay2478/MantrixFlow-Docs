@@ -1,27 +1,34 @@
 ---
 title: Introduction
-description: Get started with MantrixFlow. Learn what the platform does and how to begin.
+description: Learn the current MantrixFlow workflow and prepare the exact source, destination, and access you need before building your first pipeline.
 ---
 
-MantrixFlow is a data integration platform that syncs data from your sources to your destinations. You connect your data sources (databases, SaaS apps, cloud warehouses), configure pipelines that define what to sync and how, and run syncs on demand or on a schedule.
+The live MantrixFlow workflow is straightforward:
 
-## What You Need
+1. Create and test connections.
+2. Create the pipeline shell.
+3. Finish stream selection, transforms, and destination settings in the builder.
+4. Run manually.
+5. Schedule only after validation.
 
-- A MantrixFlow account (sign up at [cloud.mantrixflow.com](https://cloud.mantrixflow.com))
-- Access to at least one data source you want to sync from
-- A destination where you want the data to land (e.g. a database, warehouse, or data lake)
+## What you need before you start
 
-## How It Works
+- A MantrixFlow account and an organization you can work in
+- One supported source connection you can authenticate to
+- One supported destination you control
+- A read-only user or token for the source and a write-capable user for the destination
+- The network and SSL settings required by your database or SaaS provider
 
-1. **Create connections** — Add your source and destination credentials. Credentials are encrypted and stored securely.
-2. **Create a pipeline** — Link a source connection to a destination connection. Choose which streams (tables or data feeds) to sync.
-3. **Configure sync** — Set the sync mode (full, incremental, or CDC) and write mode (append, replace, or upsert).
-4. **Run** — Execute the pipeline manually or on a schedule. Monitor run history and sync state.
+## The real app flow
 
-## Next Steps
+1. Create or switch into the correct organization.
+2. Open **Connections** and create the source connection.
+3. Create the destination connection in the same workspace.
+4. Go to **Data Pipelines** and create the pipeline shell.
+5. In the builder, choose the table or resource, add an optional transform script, and configure the destination table.
+6. Save, run manually, and verify the result in the destination and **Run History**.
 
-<Info>
-**Recommended path**
+## Where to go next
 
-Follow the [Quick Start](/getting-started/quick-start) to create your first pipeline using the Faker source and PostgreSQL destination. No external accounts required.
-</Info>
+- Use [Quick Start](/getting-started/quick-start) for a full first pipeline.
+- Use [Core Concepts](/getting-started/core-concepts) if you want the product model first.

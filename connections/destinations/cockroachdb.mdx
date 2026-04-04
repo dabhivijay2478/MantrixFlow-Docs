@@ -1,0 +1,61 @@
+---
+title: CockroachDB
+description: Write MantrixFlow pipeline output into CockroachDB for distributed SQL read models and operational marts.
+---
+
+CockroachDB is a supported live destination when teams want SQL landing tables in a distributed database environment.
+
+## Current connection form
+
+The current **CockroachDB** destination form asks for:
+
+- `Connection Name`
+- `Host`
+- `Port`
+- `Database`
+- `Username`
+- `Password`
+
+- `Port` defaults to `26257`.
+- `Database` defaults to `defaultdb` in the current form.
+- Use the builder to set the final `Schema`, `Table`, and `Write mode`.
+
+## Good first use cases
+
+- distributed SQL read models
+- application-facing tables in CockroachDB
+- operational marts that should stay close to product infrastructure
+
+## Before you connect
+
+- Create a write-capable SQL user for the target cluster and database.
+- Confirm the exact cluster endpoint and target database.
+- Start with one table that downstream users can validate quickly.
+
+## Step by step
+
+1. Open **Connections** and click **+ New Connection**.
+2. Set the role to **Destination** and choose **CockroachDB**.
+3. Fill the form with real values, for example:
+   - `Connection Name`: `Cockroach Reporting`
+   - `Host`: `northstar-cluster.aws-us-east-1.cockroachlabs.cloud`
+   - `Port`: `26257`
+   - `Database`: `defaultdb`
+   - `Username`: `mf_writer`
+4. Click **Test Connection** and save the connection after the test succeeds.
+5. In the builder's **Destination** panel, configure:
+   - `Connection`: `Cockroach Reporting`
+   - `Schema`: `analytics`
+   - `Table`: `customer_orders`
+   - `Write mode`: `Upsert`
+6. Save the pipeline and run one manual sync before enabling a schedule.
+
+## Real-world example
+
+A platform team lands PostgreSQL customer and order summaries into CockroachDB so product services can query a distributed read model without hitting the operational source directly.
+
+## Troubleshooting
+
+- If the connection test fails, verify the cluster endpoint, port, and SQL credentials.
+- If validation fails in the builder, double-check the target schema and table naming.
+- Run the first pipeline manually and inspect the destination rows before scheduling automated writes.

@@ -1,37 +1,38 @@
 ---
 title: Pipelines Overview
-description: Understand how pipelines link sources to destinations and define what to sync and how.
+description: Understand the real MantrixFlow pipeline lifecycle: pipeline shell creation, builder configuration, branch design, scheduling, and run operations.
 ---
 
-A pipeline is the core unit of work in MantrixFlow. It links one source connection to one destination connection and defines what data to sync and how.
+A MantrixFlow pipeline is the operational definition of how data should move from one source connection into one or more destinations.
 
-## What a Pipeline Does
+## The current lifecycle
 
-1. **Connects** a source (e.g. PostgreSQL, Shopify) to a destination (e.g. BigQuery, PostgreSQL).
-2. **Selects** which streams (tables or data feeds) to sync from the source.
-3. **Configures** the sync mode (full, incremental, or CDC) and write mode (append, replace, or upsert).
-4. **Runs** on demand or on a schedule. Each run reads from the source and writes to the destination.
+1. Create a pipeline shell from **Data Pipelines**.
+2. Open the builder canvas.
+3. Select the source table or SaaS resource.
+4. Add transforms or filters if needed.
+5. Configure the destination connection, schema, table, and schedule.
+6. Save, run manually, and validate the result.
 
-<img src="/images/workspace/pipelines-list.png" alt="Pipelines in the MantrixFlow workspace" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+## The parts of a pipeline
 
-## Pipeline Components
+- **Pipeline shell**: name plus source connection
+- **Source configuration**: the concrete table or resource to sync
+- **Transform branch**: optional Python logic that reshapes each record
+- **Destination configuration**: connection, schema, table, write mode, preview, and schedule
+- **Run history**: the operational record of every execution
+- **Sync state**: the stored cursor or CDC checkpoint for incremental and CDC flows
 
-- **Source connection** — The credentials and config for reading data.
-- **Destination connection** — The credentials and config for writing data.
-- **Stream selection** — Which tables or feeds to sync.
-- **Sync mode** — How to read (full, incremental, CDC).
-- **Write mode** — How to write (append, replace, upsert).
-- **Column mapping** — Optional renaming or column selection.
-- **Transformation rules** — Optional transforms (rename, cast, filter, etc.).
-- **Schedule** — Optional automatic run interval.
+## What is true in the live builder today
 
-## Next Steps
+- Stream selection happens in **Source Configuration**.
+- The transform editor uses Python and supports sample-data preview.
+- The destination panel handles validation, preview, and scheduling.
+- **Upsert** is the supported production write mode documented here.
 
-<CardGroup cols={2}>
-  <Card title="Creating a Pipeline" href="/pipelines/creating">
-  Step-by-step walkthrough of the pipeline builder
-</Card>
-  <Card title="Sync Modes" href="/pipelines/sync-modes">
-  Full, incremental, and CDC explained
-</Card>
-</CardGroup>
+## Typical production patterns
+
+- one PostgreSQL table feeding one PostgreSQL reporting table
+- one Shopify or Stripe resource feeding one SQL destination table
+- one source stream branching to PostgreSQL for analytics and MySQL for internal operations
+- a PostgreSQL source starting with incremental sync and moving to CDC later

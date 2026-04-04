@@ -1,0 +1,45 @@
+---
+title: Preview and validation
+description: Validate a transformation end to end with source preview, transform preview, destination preview, and a manual run.
+---
+
+The safest production habit is to validate each stage in order instead of trusting one preview alone.
+
+## The four checks that matter
+
+### 1. Source preview
+
+Use **Source Configuration** to confirm the selected table or resource, schema, and sample records.
+
+### 2. Transform preview
+
+Use **Preview with sample data** in the **Transform** panel after each meaningful edit. In the current builder flow, this preview loads a small sample of source rows and shows the post-transform output.
+
+### 3. Destination preview
+
+After saving the destination, use the **Schema Preview** tab in **Destination** to inspect the target table and recent rows.
+
+### 4. Manual run
+
+Run the pipeline manually once before turning on a schedule. This is the step that proves the full source, transform, and destination path together.
+
+## Step by step
+
+1. Refresh tables or resources in **Source Configuration**.
+2. Select the exact table or resource you want.
+3. Preview source rows.
+4. Update the transform script.
+5. Preview transform output.
+6. Save the script.
+7. Save the destination settings.
+8. Check destination preview.
+9. Run the pipeline manually.
+10. Verify the written rows in the destination and in **Run History**.
+
+## What to look for
+
+- unexpected nulls after a cast or flatten step
+- missing keys that break upsert behavior
+- dropped rows you did not intend to filter out
+- destination column names that do not match the script output
+- differences between source preview and final destination rows

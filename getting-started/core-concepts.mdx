@@ -1,34 +1,50 @@
 ---
 title: Core Concepts
-description: "Understand the five fundamental concepts of MantrixFlow: connections, pipelines, streams, sync modes, and write modes."
+description: Understand the current MantrixFlow model: organizations, connections, pipelines, branches, sync modes, and run history.
 ---
 
-MantrixFlow is built around five core concepts. Understanding these will help you configure pipelines correctly.
+## Organizations
+
+An organization is the workspace boundary for connections, pipelines, team members, activity, and schedules. Many teams keep one organization for production and one for staging so credentials and run history stay separate.
 
 ## Connections
 
-A connection is a saved set of credentials for a source or destination. When you add a connection, you enter the host, credentials, and other configuration. MantrixFlow encrypts and stores these credentials. You never send credentials in pipeline requests — only the connection ID is used. Each connection can be reused across multiple pipelines.
+A connection is a reusable credential set plus connector-specific configuration. Connections live under **Connections** and are created with a role of **Source** or **Destination**.
+
+Examples in the current product:
+
+- a PostgreSQL source connection for an application database
+- a Shopify source connection for store data
+- a GitHub source connection for one repository
+- a PostgreSQL or MySQL destination connection for reporting tables
 
 ## Pipelines
 
-A pipeline links one source connection to one destination connection. It defines what to sync (which streams), how to read from the source (sync mode), and how to write to the destination (write mode). A pipeline can sync one or more streams. You run a pipeline manually or on a schedule.
+A pipeline begins as a lightweight shell created from **Data Pipelines**. The builder is where the operational details are finished: source selection, sync mode, transform script, destination table, and schedule.
 
-## Streams
+## Branches
 
-Streams are the individual tables or data feeds within a connected source. For a database, each table is a stream. For a SaaS app, each API resource (e.g. orders, customers) is a stream. When you create a pipeline, you choose which streams to sync. Each stream maps to a table or collection in the destination.
+A branch is a path on the canvas from the selected source stream to a destination. A realistic branching pattern today is:
 
-## Sync Modes
+- Branch A writes cleaned `orders` data to PostgreSQL for analytics.
+- Branch B writes a narrower version of the same records to MySQL for an internal application view.
 
-Sync mode defines how data is read from the source:
+## Sync modes
 
-- **Full sync** — Reads every record on every run. Suitable for small tables or sources that do not support incremental reads.
-- **Incremental sync** — Reads only records newer than the last run using a cursor column (e.g. `updated_at`). Efficient for large tables.
-- **CDC (Change Data Capture)** — Reads the database replication log to capture inserts, updates, and deletes in real time. Requires database configuration.
+The app currently supports three read patterns:
 
-## Write Modes
+- **Full sync** for smaller datasets and first-run validation
+- **Incremental sync** for tables or resources with a dependable cursor field
+- **CDC** for PostgreSQL sources that complete the in-product CDC setup flow
 
-Write mode defines how data is written to the destination:
+## Destination behavior
 
-- **Append** — Adds new rows to the existing table. Does not update or delete.
-- **Replace** — Drops and recreates the table on every sync. Full replacement.
-- **Upsert** — Inserts new rows and updates existing rows using a primary key column. Requires specifying the upsert key.
+The current destination panel is centered on **Upsert**. Append and Replace are not part of the supported production flow documented here.
+
+## Run history and sync state
+
+Every run stores operational metadata such as status, timing, processed rows, and errors. Incremental and CDC pipelines also maintain sync state so later runs know where to resume.
+
+## Mental model to keep in mind
+
+An organization owns connections, a pipeline shell points to a source connection, the builder turns that shell into one or more branches, and run history tells you whether the configured flow actually worked.

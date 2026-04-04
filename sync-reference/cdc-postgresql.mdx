@@ -1,76 +1,57 @@
 ---
-title: CDC Setup for PostgreSQL
-description: Enable logical replication and create a publication. Exact PostgreSQL commands.
+title: CDC setup for PostgreSQL
+description: Use the current PostgreSQL CDC setup flow in MantrixFlow, verify prerequisites, and move safely into log-based sync.
 ---
 
-<Warning>
-**Database Admin Required**
+PostgreSQL is the database where CDC is currently surfaced end to end in the standard MantrixFlow workspace. The app gives you an in-product CDC setup tab so you can verify prerequisites before switching a pipeline to log-based sync.
 
-You need superuser or replication privileges to perform these steps.
-</Warning>
+## When PostgreSQL CDC is the right choice
 
-Follow these steps to enable CDC for PostgreSQL.
+- you need inserts, updates, and deletes reflected quickly downstream
+- `updated_at` is not reliable enough for incremental sync
+- the table is operationally important, such as `orders`, `payments`, or `subscriptions`
+- your database team can enable logical replication prerequisites
 
-<Steps>
-  <Step>
+## Current in-app flow
 
-### 1. Set wal_level to logical
+1. Create and save a PostgreSQL **source** connection in **Connections**.
+2. Open or create a pipeline that uses that PostgreSQL source.
+3. In the builder, open **Source Configuration**.
+4. Open the **CDC Setup** tab.
+5. Work through the verification steps shown by the app:
+   - enable logical replication
+   - verify `pgoutput`
+   - grant replication permission
+   - test the replication connection
+6. Refresh status until the panel shows a healthy verified state.
+7. Set the pipeline to use the log-based sync mode.
+8. Run the pipeline manually and confirm downstream results before scheduling.
 
-Edit postgresql.conf or use ALTER SYSTEM:
+## What the CDC panel is checking
 
-```sql
-ALTER SYSTEM SET wal_level = 'logical';
-```
+The current UI verifies the same prerequisites reflected by the app implementation:
 
-Restart PostgreSQL for the change to take effect.
+- `wal_level` is ready for logical replication
+- `pgoutput` is available
+- the source user has replication access
+- the connection can complete a replication test
 
-  </Step>
-  <Step>
+## Real-world example
 
-### 2. Create a replication slot (optional)
+Northstar Commerce uses PostgreSQL CDC for `public.orders` and `public.order_items` so refunds, cancellations, and fulfillment updates land in `analytics.orders_live` quickly. The team starts with incremental sync, validates the destination table shape, and then moves the busiest tables to CDC once lower latency matters.
 
-The connector may create the slot automatically. If you need to create it manually:
+## Database-side preparation checklist
 
-```sql
-SELECT * FROM pg_create_logical_replication_slot('mantrixflow_slot', 'pgoutput');
-```
+Work with your PostgreSQL administrator on these items:
 
-  </Step>
-  <Step>
+- enable logical replication
+- confirm the connector user can perform replication
+- use SSL where required
+- keep enough WAL retention to tolerate short downstream interruptions
 
-### 3. Create a publication
+## Before you schedule it
 
-Create a publication for the tables you want to sync:
-
-```sql
-CREATE PUBLICATION mantrixflow_pub FOR TABLE schema1.table1, schema1.table2;
-```
-
-Or for all tables in a schema:
-
-```sql
-CREATE PUBLICATION mantrixflow_pub FOR ALL TABLES IN SCHEMA public;
-```
-
-  </Step>
-  <Step>
-
-### 4. Grant replication permissions
-
-The user must have REPLICATION privilege:
-
-```sql
-ALTER USER mantrixflow_read REPLICATION;
-```
-
-Or create a dedicated replication user:
-
-```sql
-CREATE USER mantrixflow_repl WITH REPLICATION PASSWORD 'your_password';
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO mantrixflow_repl;
-```
-
-  </Step>
-</Steps>
-
-After completing these steps, configure the PostgreSQL source connection with the publication name and run a pipeline with CDC sync mode.
+- Confirm the CDC status in the source panel shows healthy verification.
+- Run the pipeline manually once after the switch.
+- Compare a recent insert, update, and delete path in source versus destination.
+- Make sure the destination table design can handle the replicated primary key behavior.

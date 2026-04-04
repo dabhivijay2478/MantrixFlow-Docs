@@ -1,50 +1,73 @@
 ---
 title: FAQ
-description: Frequently asked questions about MantrixFlow.
+description: Common questions about supported connectors, setup flow, sync behavior, and operating MantrixFlow in real teams.
 ---
 
-## Supported Connectors
+## Connectors and availability
 
-**Which sources and destinations does MantrixFlow support?**
+**Which connectors are documented as supported today?**
 
-MantrixFlow supports many sources (PostgreSQL, MySQL, MongoDB, Snowflake, BigQuery, Shopify, Stripe, HubSpot, Salesforce, GitHub, and more) and destinations (PostgreSQL, BigQuery, Snowflake, DuckDB, MongoDB, S3, and others). See the [Connections Overview](/connections/overview) for the full list.
+The current docs only cover the connectors that complete the live create, test, save, and pipeline flow.
 
-## Data Security
+If a connector tile appears earlier in rollout but does not complete that full workflow yet, it is intentionally excluded from the supported docs set.
 
-**How are my credentials stored?**
+Sources:
+- PostgreSQL
+- MySQL
+- MariaDB
+- CockroachDB
+- Stripe
+- Shopify
+- HubSpot
+- GitHub
+- Notion
 
-All connection credentials are encrypted at rest using AES-256. The encryption key is stored as an environment variable on the ETL server and is never exposed through any API. Credentials are decrypted only during a sync run and are discarded from memory immediately after.
+Destinations:
+- PostgreSQL
+- MySQL
+- MariaDB
+- CockroachDB
 
-**Does MantrixFlow store my data?**
+**Why are some future connectors missing from the docs?**
 
-MantrixFlow does not store your source data. Data flows from your source through the ETL service to your destination. Only metadata (connection IDs, pipeline configs, sync state) is stored in the platform database.
+Because this documentation is intentionally product-aligned. Connectors that are not fully available in the app are not documented as supported.
 
-## Sync Frequency
+## Pipeline behavior
 
-**How often can I run a pipeline?**
+**Why does pipeline creation only ask for a source connection?**
 
-You can run pipelines manually at any time. For scheduled runs, you configure the interval (e.g. every hour, every day). The minimum interval depends on your plan.
+Because the current app creates the pipeline shell first and then sends you into the builder for stream selection, sync mode, transforms, destination settings, and scheduling.
 
-**Does incremental sync miss data?**
+**Where do I choose the source table or resource?**
 
-Incremental sync uses a cursor column to track the last synced value. If you choose a stable cursor (e.g. `updated_at`), you will not miss records. Avoid cursor columns that can have gaps or be updated out of order.
+In the builder's **Source Configuration** panel.
 
-## Troubleshooting
+**Where do I choose the destination table?**
 
-**My pipeline run failed. What should I do?**
+In the builder's **Destination** panel.
 
-Check the run details for the error message. Common causes include invalid credentials, network access (e.g. IP allowlist), insufficient permissions, or schema mismatches. See the connector documentation for required permissions and setup.
+## Transforms and write behavior
 
-**How do I reset sync state?**
+**How do transformations work today?**
 
-If you need to re-sync from the beginning, you can reset the sync state for a pipeline. This clears the stored cursor and CDC position. The next run will behave like a full sync. See [Sync State](/sync-reference/sync-state) for details.
+The current transformation flow is built around a Python `transform(record)` script plus a separate filter node. Renaming, casting, derived columns, null handling, and nested-payload cleanup all happen in the script rather than in a separate visual mapping UI.
 
-## Billing and Limits
+**Which write mode should I use?**
 
-**How is billing calculated?**
+Use **Upsert**. That is the current supported production write mode in the destination panel.
 
-Billing is typically based on the number of rows synced or the number of pipeline runs. Check the [Billing](/platform/billing) page for your plan details.
+## Operations
 
-**Is there a free tier?**
+**Can I reset sync state from the UI?**
 
-Check [cloud.mantrixflow.com](https://cloud.mantrixflow.com) for current pricing and free tier availability.
+Not as a standard self-serve workflow in the current app. Treat sync-state changes as an operational recovery task and verify the pipeline with a manual run before restoring schedules.
+
+**How do I troubleshoot a failed first run?**
+
+Check these in order:
+
+1. Re-test the source and destination connections.
+2. Confirm the selected source table or resource still exists.
+3. Preview the transform if you use one.
+4. Validate the destination configuration.
+5. Review pipeline **Run History** and the org-wide **Activity Log** for the exact failure.

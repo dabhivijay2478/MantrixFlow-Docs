@@ -1,175 +1,48 @@
 ---
 title: Connections Overview
-description: Browse all source and destination connectors supported by MantrixFlow.
+description: Understand how source and destination connections work in the current app, then choose the guide that matches a supported connector.
 ---
 
-Connections are saved credential sets for your data sources and destinations. Each connection type has its own configuration fields. This page lists every connector and links to its documentation.
+Connections are reusable credentials and connector settings. This section only documents connectors that complete the current create, test, save, and pipeline flow in the live app.
 
-<img src="/images/workspace/connections.png" alt="Connections list in the workspace" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+If a connector tile appears in the catalog ahead of its full rollout, it is intentionally left out of this section until the end-to-end workflow is ready.
 
-## Source Connectors
+## How the connection flow works today
+
+1. Go to **Connections**.
+2. Click **+ New Connection**.
+3. Set the role to **Source** or **Destination**.
+4. Pick one of the supported connector tiles.
+5. Fill the exact form fields shown on screen.
+6. Click **Test Connection**.
+7. Save the connection and reuse it in pipelines.
+
+## Documented production source connectors
 
 ### Database
 
-<CardGroup cols={2}>
-<Card title="PostgreSQL" href="/connections/sources/database/postgresql">
-Database. Supports CDC.
-</Card>
-<Card title="MySQL" href="/connections/sources/database/mysql">
-Database. Supports CDC.
-</Card>
-<Card title="SQL Server" href="/connections/sources/database/sql-server">
-Database. Supports CDC.
-</Card>
-<Card title="MongoDB" href="/connections/sources/database/mongodb">
-Database.
-</Card>
+- [PostgreSQL](/connections/sources/database/postgresql)
+- [MySQL](/connections/sources/database/mysql)
+- [MariaDB](/connections/sources/database/mariadb)
+- [CockroachDB](/connections/sources/database/cockroachdb)
 
-</CardGroup>
+### SaaS
 
-### Cloud Warehouse
+- [Shopify](/connections/sources/ecommerce/shopify)
+- [Stripe](/connections/sources/finance/stripe)
+- [HubSpot](/connections/sources/crm/hubspot)
+- [GitHub](/connections/sources/developer-tools/github)
+- [Notion](/connections/sources/productivity/notion)
 
-<CardGroup cols={2}>
-<Card title="Snowflake" href="/connections/sources/warehouse/snowflake">
-Warehouse.
-</Card>
-<Card title="BigQuery" href="/connections/sources/warehouse/bigquery">
-Warehouse.
-</Card>
-<Card title="Amazon S3" href="/connections/sources/warehouse/s3">
-Warehouse.
-</Card>
+## Documented production destination connectors
 
-</CardGroup>
+- [PostgreSQL](/connections/destinations/postgresql)
+- [MySQL](/connections/destinations/mysql)
+- [MariaDB](/connections/destinations/mariadb)
+- [CockroachDB](/connections/destinations/cockroachdb)
 
-### E-Commerce
+## What this section does not cover
 
-<CardGroup cols={2}>
-<Card title="Shopify" href="/connections/sources/ecommerce/shopify">
-E-Commerce.
-</Card>
-
-</CardGroup>
-
-### CRM
-
-<CardGroup cols={2}>
-<Card title="HubSpot" href="/connections/sources/crm/hubspot">
-CRM.
-</Card>
-<Card title="Salesforce" href="/connections/sources/crm/salesforce">
-CRM.
-</Card>
-
-</CardGroup>
-
-### Finance
-
-<CardGroup cols={2}>
-<Card title="Stripe" href="/connections/sources/finance/stripe">
-Finance.
-</Card>
-
-</CardGroup>
-
-### Marketing
-
-<CardGroup cols={2}>
-<Card title="Facebook Marketing" href="/connections/sources/marketing/facebook-marketing">
-Marketing.
-</Card>
-<Card title="Google Analytics" href="/connections/sources/marketing/google-analytics">
-Marketing.
-</Card>
-
-</CardGroup>
-
-### Developer Tools
-
-<CardGroup cols={2}>
-<Card title="GitHub" href="/connections/sources/developer-tools/github">
-Developer.
-</Card>
-
-</CardGroup>
-
-### Productivity
-
-<CardGroup cols={2}>
-<Card title="Google Sheets" href="/connections/sources/productivity/google-sheets">
-Productivity.
-</Card>
-<Card title="Airtable" href="/connections/sources/productivity/airtable">
-Productivity.
-</Card>
-<Card title="Notion" href="/connections/sources/productivity/notion">
-Productivity.
-</Card>
-<Card title="Slack" href="/connections/sources/productivity/slack">
-Productivity.
-</Card>
-
-</CardGroup>
-
-### Testing
-
-<CardGroup cols={2}>
-<Card title="Faker" href="/connections/sources/testing/faker">
-Testing.
-</Card>
-<Card title="File" href="/connections/sources/testing/file">
-Testing.
-</Card>
-
-</CardGroup>
-
-## Destination Connectors
-
-<Card title="PostgreSQL" href="/connections/destinations/postgresql">
-Database.
-</Card>
-<Card title="BigQuery" href="/connections/destinations/bigquery">
-Warehouse.
-</Card>
-<Card title="Snowflake" href="/connections/destinations/snowflake">
-Warehouse.
-</Card>
-<Card title="DuckDB" href="/connections/destinations/duckdb">
-Database.
-</Card>
-<Card title="MotherDuck" href="/connections/destinations/motherduck">
-Warehouse.
-</Card>
-<Card title="MySQL" href="/connections/destinations/mysql">
-Database.
-</Card>
-<Card title="MongoDB" href="/connections/destinations/mongodb">
-Database.
-</Card>
-<Card title="Amazon S3" href="/connections/destinations/s3">
-Warehouse.
-</Card>
-<Card title="Redshift" href="/connections/destinations/redshift">
-Warehouse.
-</Card>
-<Card title="ClickHouse" href="/connections/destinations/clickhouse">
-Database.
-</Card>
-<Card title="MSSQL" href="/connections/destinations/mssql">
-Database.
-</Card>
-<Card title="Elasticsearch" href="/connections/destinations/elasticsearch">
-Search.
-</Card>
-<Card title="Pinecone" href="/connections/destinations/pinecone">
-Vector.
-</Card>
-<Card title="Weaviate" href="/connections/destinations/weaviate">
-Vector.
-</Card>
-<Card title="Qdrant" href="/connections/destinations/qdrant">
-Vector.
-</Card>
-<Card title="Chroma" href="/connections/destinations/chroma">
-Vector.
-</Card>
+- future or coming-soon connectors
+- placeholder rollout checklists for features that are not in the app yet
+- any unpublished developer reference surface

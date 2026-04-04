@@ -1,31 +1,40 @@
 ---
-title: CDC Overview
-description: Change data capture at a conceptual level.
+title: CDC overview
+description: What change data capture means in MantrixFlow today, when to use it, and where the current UI supports it.
 ---
 
-CDC (Change Data Capture) reads the database replication log to capture every insert, update, and delete as it happens. It is the most powerful sync mode for databases but requires database-level configuration.
+Change data capture, or CDC, reads database change logs instead of rereading whole tables. It is the right choice when you need inserts, updates, and deletes with lower latency and stronger fidelity than cursor-based incremental sync can provide.
 
-## How CDC Differs
+## What CDC solves
 
-- **Full sync** — Reads the current state of the table. No history of changes.
-- **Incremental sync** — Reads rows that changed since the last run. May miss updates if the cursor column is not updated.
-- **CDC** — Reads the replication log. Captures every change with the exact operation (insert, update, delete). Near-real-time.
+- captures hard deletes without relying on application-level soft-delete logic
+- tracks updates even when the app does not maintain a perfect `updated_at`
+- reduces repeated full-table reads on busy production systems
+- supports near-real-time replication workflows
 
-## When to Use CDC
+## Current product reality
 
-- You need near-real-time sync (seconds or minutes of latency).
-- You need to capture deletes (incremental sync typically does not).
-- You need to replicate updates even when the cursor column is not updated.
-- Your database supports CDC and you have admin access to enable it.
+In the current standard workspace UI, self-serve CDC is exposed for **PostgreSQL sources**. The builder includes a dedicated **CDC Setup** tab for PostgreSQL and the documented supported flow stops there.
 
-## Supported Databases
+## How CDC compares to other sync modes
 
-- **PostgreSQL** — Logical replication. See [CDC Setup for PostgreSQL](/sync-reference/cdc-postgresql).
-- **MySQL** — Binary log. See [CDC Setup for MySQL](/sync-reference/cdc-mysql).
-- **SQL Server** — Native CDC. See [CDC Setup for SQL Server](/sync-reference/cdc-sql-server).
+| Mode | Reads from | Best for | Main tradeoff |
+| --- | --- | --- | --- |
+| Full sync | current table contents | smaller datasets and first validation | re-reads everything |
+| Incremental sync | rows newer than a cursor | most production app tables | depends on a trustworthy cursor |
+| PostgreSQL CDC | replication or change log | low-latency operational replication | needs database admin setup |
 
-<Warning>
-**Database Admin Required**
+## When teams justify CDC
 
-CDC requires database administrator access. You must enable replication, create publications, and grant replication permissions.
-</Warning>
+- order, payment, or fulfillment systems where deletes and fast updates matter
+- operational reporting that must stay close to source-of-truth timing
+- PostgreSQL tables where application timestamps are incomplete or unreliable
+- pipelines that are already proven with incremental sync but now need lower latency or delete handling
+
+## Safe adoption flow
+
+1. Prove the source and destination with a manual run first.
+2. Complete the PostgreSQL CDC prerequisites inside the source panel.
+3. Verify the CDC status before enabling log-based sync.
+4. Run manually and confirm downstream tables behave as expected.
+5. Only then schedule production cadence.

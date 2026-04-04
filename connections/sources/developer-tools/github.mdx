@@ -1,58 +1,67 @@
 ---
 title: GitHub
-description: Connect to GitHub using a personal access token or fine-grained token.
+description: Connect GitHub as a source for issues, pull requests, commits, releases, and repository activity.
 ---
 
-GitHub hosts code repositories. MantrixFlow connects using a personal access token (classic) or fine-grained token to sync repositories, commits, pull requests, issues, and more.
+GitHub is a practical engineering source in the current app. The live form captures one repository at a time so the first rollout stays easy to validate.
 
-## Prerequisites
+## Current connection form
 
-You need a GitHub account. For organisation repositories, the token may need to be approved in the organisation settings.
+The current **GitHub** source form asks for:
 
-## Connection Setup
+- `Connection Name`
+- `Repository Owner`
+- `Repository Name`
+- `Personal Access Token`
 
-<Steps>
-  <Step>
+- The token field accepts personal access tokens such as `ghp_...` or `github_pat_...`.
+- Each connection is scoped to one repository owner and one repository name in the current form.
 
-### 1. Create a Token
+## Good first use cases
 
-In GitHub, go to Settings → Developer settings → Personal access tokens. Create a classic token or fine-grained token. For classic tokens, select scopes: `repo`, `read:org` (if needed for private org repos).
+- engineering metrics and delivery reporting
+- release and commit reporting for one product repository
+- joining PR activity with incident or deployment data downstream
 
-  </Step>
-  <Step>
+## Before you connect
 
-### 2. Organisation Approval
+- Create a GitHub token with the repository access your team approves.
+- Confirm the exact owner and repository name before testing.
+- Choose one resource such as `pull_requests` or `issues` for the first validation run.
 
-If the token is for an organisation's private repositories, the organisation may require approval. Go to the organisation's Settings → Third-party access to approve the token.
+## Step by step
 
-  </Step>
-  <Step>
+1. Open **Connections** and click **+ New Connection**.
+2. Keep the role set to **Source** and choose **GitHub**.
+3. Fill the form with real values, for example:
+   - `Connection Name`: `Platform App Repo`
+   - `Repository Owner`: `northstar`
+   - `Repository Name`: `platform-app`
+   - `Personal Access Token`: `github_pat_...`
+4. Click **Test Connection** and save only after the test succeeds.
+5. Create a pipeline and start with one high-value resource so validation stays simple.
 
-### 3. Repositories
+## Resources available in the current source preview
 
-Enter the list of repository slugs in the format `owner/repo` (e.g. `mantrixflow/ai-bi`). Comma-separated. Leave empty to sync all accessible repositories.
+- `issues`
+- `pull_requests`
+- `stargazers`
+- `events`
+- `commits`
+- `releases`
+- `branches`
+- `tags`
+- `contributors`
+- `milestones`
+- `labels`
+- `forks`
 
-  </Step>
-  <Step>
+## Real-world example
 
-### 4. Start Date
+An engineering operations team syncs GitHub `pull_requests`, `issues`, and `commits` from `northstar/platform-app` into PostgreSQL so delivery metrics can be combined with deployment and incident data.
 
-Enter an ISO 8601 date to control how far back the initial sync goes. Only data from this date onward is synced initially.
+## Troubleshooting
 
-  </Step>
-</Steps>
-
-## Available Streams
-
-- Repositories
-- Commits
-- Pull requests
-- Issues
-- Releases
-- Workflows
-- Workflow runs
-
-## Supported Sync Modes
-
-- **Full sync** — Reads all records on every run.
-- **Incremental sync** — Uses `updated_at` or similar to read only new or updated records.
+- If the test fails, re-check the owner, repo, and token permissions.
+- If expected records are missing, confirm whether the repository is private or restricted by organization policy.
+- Keep the first rollout to one repository per connection so debugging stays clear.

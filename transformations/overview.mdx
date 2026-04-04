@@ -1,0 +1,40 @@
+---
+title: Transformations overview
+description: Understand the current transformation surface in MantrixFlow: branch-scoped Python scripts, filter nodes, preview, and save flow.
+---
+
+The live transformation surface has two main parts:
+
+- a branch-scoped Python script in the **Transform** panel
+- a separate **Filter** node for simple keep-or-drop rules
+
+There is no standalone visual rename, cast, or visual-mapping workflow in the supported product path today. Those outcomes are implemented in Python.
+
+## What is live today
+
+- branch labels in the **Transform** panel
+- source table or resource selection from inside that panel
+- a Python editor that expects `def transform(record):`
+- a **Load Example** menu when example packs exist for the current source type
+- **Preview with sample data** before saving
+- a dedicated **Save Script** action
+- a **Filter** node with **Python Expression** and **SQL WHERE** tabs
+
+## What is not the supported workflow
+
+- a point-and-click rename screen
+- a separate cast wizard
+- a visual fill-nulls screen
+- standalone visual-mapping documentation as the primary production path
+- a separate transform administration workflow
+- a user-facing toggle for skipping transform errors; saved scripts currently use fail-on-error behavior
+
+## Fast path
+
+1. Select the source table or resource.
+2. Keep the default pass-through script first.
+3. Preview the current payload.
+4. Add one transformation step.
+5. Preview again.
+6. Save the script.
+7. Validate the destination preview and then run manually.

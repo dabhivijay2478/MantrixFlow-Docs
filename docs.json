@@ -10,7 +10,7 @@
   },
   "thumbnails": {
     "fonts": {
-      "family": "Nunito"
+      "family": "Geist"
     }
   },
   "logo": {
@@ -26,12 +26,12 @@
     "library": "lucide"
   },
   "fonts": {
-    "family": "Nunito",
+    "family": "Geist",
     "body": {
-      "family": "Nunito"
+      "family": "Geist"
     },
     "heading": {
-      "family": "Merriweather",
+      "family": "Georgia",
       "weight": 500
     }
   },
@@ -72,7 +72,9 @@
           {
             "group": "Introduction",
             "icon": "sparkles",
-            "pages": ["index"]
+            "pages": [
+              "index"
+            ]
           },
           {
             "group": "Getting started",
@@ -97,58 +99,18 @@
                     "pages": [
                       "connections/sources/database/postgresql",
                       "connections/sources/database/mysql",
-                      "connections/sources/database/sql-server",
-                      "connections/sources/database/mongodb"
+                      "connections/sources/database/mariadb",
+                      "connections/sources/database/cockroachdb"
                     ]
                   },
                   {
-                    "group": "Cloud warehouse",
+                    "group": "SaaS",
                     "pages": [
-                      "connections/sources/warehouse/snowflake",
-                      "connections/sources/warehouse/bigquery",
-                      "connections/sources/warehouse/s3"
-                    ]
-                  },
-                  {
-                    "group": "E-Commerce",
-                    "pages": ["connections/sources/ecommerce/shopify"]
-                  },
-                  {
-                    "group": "CRM",
-                    "pages": [
+                      "connections/sources/ecommerce/shopify",
+                      "connections/sources/finance/stripe",
                       "connections/sources/crm/hubspot",
-                      "connections/sources/crm/salesforce"
-                    ]
-                  },
-                  {
-                    "group": "Finance",
-                    "pages": ["connections/sources/finance/stripe"]
-                  },
-                  {
-                    "group": "Marketing",
-                    "pages": [
-                      "connections/sources/marketing/facebook-marketing",
-                      "connections/sources/marketing/google-analytics"
-                    ]
-                  },
-                  {
-                    "group": "Developer tools",
-                    "pages": ["connections/sources/developer-tools/github"]
-                  },
-                  {
-                    "group": "Productivity",
-                    "pages": [
-                      "connections/sources/productivity/google-sheets",
-                      "connections/sources/productivity/airtable",
-                      "connections/sources/productivity/notion",
-                      "connections/sources/productivity/slack"
-                    ]
-                  },
-                  {
-                    "group": "Testing",
-                    "pages": [
-                      "connections/sources/testing/faker",
-                      "connections/sources/testing/file"
+                      "connections/sources/developer-tools/github",
+                      "connections/sources/productivity/notion"
                     ]
                   }
                 ]
@@ -157,21 +119,9 @@
                 "group": "Destinations",
                 "pages": [
                   "connections/destinations/postgresql",
-                  "connections/destinations/bigquery",
-                  "connections/destinations/snowflake",
-                  "connections/destinations/duckdb",
-                  "connections/destinations/motherduck",
                   "connections/destinations/mysql",
-                  "connections/destinations/mongodb",
-                  "connections/destinations/s3",
-                  "connections/destinations/redshift",
-                  "connections/destinations/clickhouse",
-                  "connections/destinations/mssql",
-                  "connections/destinations/elasticsearch",
-                  "connections/destinations/pinecone",
-                  "connections/destinations/weaviate",
-                  "connections/destinations/qdrant",
-                  "connections/destinations/chroma"
+                  "connections/destinations/mariadb",
+                  "connections/destinations/cockroachdb"
                 ]
               }
             ]
@@ -183,7 +133,6 @@
               "pipelines/overview",
               "pipelines/creating",
               "pipelines/sync-modes",
-              "pipelines/column-mapping",
               "pipelines/transformation-rules",
               "pipelines/schedule",
               "pipelines/run-history"
@@ -197,22 +146,18 @@
               "sync-reference/incremental-sync",
               "sync-reference/cdc-overview",
               "sync-reference/cdc-postgresql",
-              "sync-reference/cdc-mysql",
-              "sync-reference/cdc-sql-server",
-              "sync-reference/sync-state",
-              "sync-reference/reset"
+              "sync-reference/sync-state"
             ]
           },
           {
             "group": "Transformations",
             "icon": "wand-sparkles",
             "pages": [
-              "transformations/rename",
-              "transformations/cast",
-              "transformations/filter",
-              "transformations/add-column",
-              "transformations/fill-nulls",
-              "transformations/custom"
+              "transformations/overview",
+              "transformations/script-editor",
+              "transformations/filter-node",
+              "transformations/preview-and-validation",
+              "transformations/script-patterns"
             ]
           },
           {
@@ -221,7 +166,6 @@
             "pages": [
               "platform/organisation",
               "platform/team-members",
-              "platform/billing",
               "platform/security",
               "platform/data-privacy"
             ]
@@ -247,27 +191,11 @@
         ]
       },
       {
-        "tab": "API reference",
-        "icon": "square-terminal",
-        "groups": [
-          {
-            "group": "HTTP API",
-            "icon": "code",
-            "pages": [
-              "api-reference/authentication",
-              "api-reference/connections",
-              "api-reference/pipelines",
-              "api-reference/sync-state",
-              "api-reference/webhooks",
-              "api-reference/error-codes"
-            ]
-          }
-        ]
-      },
-      {
         "tab": "Changelog",
         "icon": "newspaper",
-        "pages": ["changelog"]
+        "pages": [
+          "changelog"
+        ]
       }
     ]
   },

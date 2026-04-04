@@ -1,87 +1,82 @@
 ---
-title: Connections (sources & destinations)
-description: Create, validate, edit, and delete database connections in MantrixFlow—with screenshots from the Connections workspace.
+title: Connections in the workspace
+description: A guided walkthrough for creating, validating, editing, and retiring source and destination connections in the current MantrixFlow UI.
 ---
 
-All **source** and **destination** credentials are managed on the **Connections** page. Routes:
+Connections are the starting point for almost every successful deployment. A clean connection setup makes the rest of the pipeline flow much easier because the builder only works well after credentials, reachability, and permissions are correct.
+
+## Relevant routes
 
 - List: `/workspace/connections`
-- Add (catalog): `/workspace/connections/new?role=source` or `role=destination`
-- New PostgreSQL (example): `/workspace/connections/new/postgres?role=source` (or `destination`)
-- Edit: `/workspace/connections/[connectionId]/edit`
+- Catalog: `/workspace/connections/new?role=source` or `role=destination`
+- Connector form: `/workspace/connections/new/[type]`
+- Edit: `/workspace/connections/[id]/edit`
 
-## View all connections
+## Supported connectors in the current flow
 
-Use **All**, **Sources**, or **Destinations** tabs and the search field to filter. Each row shows connector type, host/database summary, whether it is used in pipelines, and last test status when available.
+This guide tracks the connectors that complete the live create, test, save, and pipeline workflow. Partial rollout tiles are intentionally not treated as supported here until the end-to-end path is ready.
 
-<img src="/images/user-guide/ug-connections-list-after-neon-save.png" alt="Connections list with filters" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+Sources:
+- PostgreSQL
+- MySQL
+- MariaDB
+- CockroachDB
+- Stripe
+- Shopify
+- HubSpot
+- GitHub
+- Notion
 
-## Create a connection
+Destinations:
+- PostgreSQL
+- MySQL
+- MariaDB
+- CockroachDB
 
-1. Click **+ New Connection**.
-2. Choose **Source** or **Destination** at the top of the catalog (same page supports both roles).
-3. Pick a connector (e.g. **PostgreSQL** under *Available now*).
+## Recommended operator pattern
 
-<img src="/images/user-guide/ug-new-connection-catalog.png" alt="New connection catalog — source vs destination" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+1. Create the source connection first.
+2. Test it until the result is clean.
+3. If it is a database source, refresh or discover tables before building the first pipeline.
+4. Create the destination connection.
+5. Test again before you build a pipeline.
 
-4. Fill **Connection name**, **Host**, **Port**, **Database**, **Username**, **Password**, **Schema**, and **SSL mode** as required by your provider (Neon, RDS, self-hosted Postgres, etc.).
+## Create a new connection
 
-<img src="/images/user-guide/ug-postgres-connection-form.png" alt="PostgreSQL connection form (new source)" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+1. Click **+ New Connection** from the list page.
+2. Choose **Source** when MantrixFlow should read from the system or **Destination** when it should write into it.
+3. Pick the connector tile.
+4. Fill the connector-specific fields exactly as shown in the form.
+5. Click **Test Connection**. The save action is only useful after a successful test.
+6. Save the connection and move into the pipeline flow.
 
-5. Click **Test Connection** before **Save Connection** when you want to validate reachability and credentials without persisting, or save first if your workflow tests after save.
+## Discover tables and resources
 
-## Validate (test) a connection
+For database sources, use **Discover Tables** or refresh the source metadata before the first pipeline. This is the fastest way to confirm that grants, schemas, and table visibility are correct.
 
-- On the **create** or **edit** form, use **Test Connection**.
-- From the list, open the row **⋯** menu and choose **Test Connection**.
+For SaaS sources, validate one concrete resource first. In practice that usually means:
 
-<img src="/images/user-guide/ug-connection-actions-menu.png" alt="Connection row menu — Test, Edit, Delete" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+- Shopify: `orders` or `customers`
+- Stripe: `invoices` or `subscriptions`
+- HubSpot: `deals` or `contacts`
+- GitHub: `pull_requests` or `issues`
+- Notion: `databases` or `pages`
 
-**Source-only shortcuts** (when the row is a **SOURCE**): the menu also includes **Discover Tables** and **Source configuration** — open these after the connection tests successfully.
+## Edit a connection safely
 
-<img src="/images/user-guide/ug-neon-source-menu.png" alt="Neon Source row menu with Discover Tables" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+Use **Edit** when credentials rotate, hosts change, or a default schema needs to be updated. After any edit:
 
-If the test fails, fix host/firewall/SSL/user grants and test again. The list may show a **Never tested** warning until a successful test has been recorded.
+1. Re-test the connection.
+2. Refresh source metadata if schemas or permissions changed.
+3. Run at least one manual pipeline sync before trusting the schedule again.
 
-## Example walkthrough: Neon PostgreSQL
+## Delete with care
 
-The following captures use a **Neon** branch (`ep-nameless-lab-…aws.neon.tech`), database **`neondb`**, user **`neondb_owner`**, **SSL required**. Credential values are shown **only inside the screenshots** (not repeated in this page text).
+Deleting a connection that is still attached to a pipeline will break future runs. Before deletion, confirm that no active pipeline uses it and that any schedules have been moved to a replacement connection.
 
-**Edit source** — fill the form, reveal the password field if you need to verify typing, then **Test Connection**:
+## Good production habits
 
-<img src="/images/user-guide/ug-neon-source-connection-filled.png" alt="Neon source — filled form" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
-
-**Successful validation** (inline status under **Test Connection**):
-
-<img src="/images/user-guide/ug-neon-connection-test-result.png" alt="Neon source — test succeeded" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
-
-**Edit destination** — toggle **Destination** on the same PostgreSQL connector type, name the connection (e.g. `Neon Destination`), use the same host/database/user, test, then **Save**:
-
-<img src="/images/user-guide/ug-neon-destination-connection-filled.png" alt="Neon destination — filled form" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
-
-<img src="/images/user-guide/ug-neon-destination-test-result.png" alt="Neon destination — test succeeded" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
-
-## Discover tables (source)
-
-From a **SOURCE** row **⋯** menu, choose **Discover Tables**. The app opens the **Neon Source** explorer with schemas and tables (cached metadata refreshes on a schedule; use **Source configuration** for details).
-
-<img src="/images/user-guide/ug-discover-tables-explorer.png" alt="Discover Tables — schema explorer & SQL editor" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
-
-<img src="/images/user-guide/ug-source-configuration-tab.png" alt="Source configuration tab — metadata refresh" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
-
-## Edit or update a connection
-
-1. From **⋯** on the row, choose **Edit** (or open the connection and use the same form).
-2. Update fields; **Save Connection** commits changes. **Reset** (where shown) discards unsaved edits.
-
-<img src="/images/user-guide/ug-connection-edit.png" alt="Edit connection — PostgreSQL" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
-
-For CDC (PostgreSQL logical replication), use **Set up CDC** when available after the connection is saved.
-
-## Delete a connection
-
-From the row **⋯** menu, choose **Delete** and confirm. **Do not delete** a connection that still backs an active pipeline until you have retargeted or removed that pipeline, or runs may fail with disconnect warnings.
-
-## “Data sources” URLs vs the Connections page
-
-The primary **list** UI is **Connections** (`/workspace/connections`). Some tools (table/query explorer, **Discover** flows) still use routes under **`/workspace/data-sources/...`** after you pick a connection—these are the same saved connections, not a second catalog.
+- Use separate connections for staging and production.
+- Use least-privilege users instead of reusing admin credentials.
+- Put environment names in the connection name, such as `Shopify Production` or `Postgres Staging`.
+- Re-test connections after network, SSL, or password changes.

@@ -1,48 +1,47 @@
 ---
 title: End-to-end user guide
-description: Step-by-step workflows in the MantrixFlow app—connections, pipelines, transformations, organizations, and operations—with screenshots from the live product.
+description: Follow the live MantrixFlow app from organization setup through connections, pipeline building, schedules, and operational troubleshooting.
 ---
 
-This guide matches the **current workspace shell** in the MantrixFlow app (sidebar order and routes as implemented in the product).
+This guide is written against the current workspace behavior, not an abstract ETL concept model. The page names, routes, and actions below match the product you see in the app.
 
-**Workspace sidebar (typical)**
+## The end-to-end flow this guide follows
 
-1. **Dashboard** — `/workspace`
-2. **Connections** — `/workspace/connections` (sources and destinations; **+ New Connection** starts at `/workspace/connections/new`, optional `?role=destination`)
-3. **Data Pipelines** — `/workspace/data-pipelines`
-4. **Activity Log** — `/workspace/activity`
-5. **Settings** — `/workspace/settings` (includes **Organization** for the active org)
-6. **Team** — `/workspace/team` (shown for **Owner** and **Admin** roles)
+1. Make sure you are in the right organization.
+2. Create and test source and destination connections.
+3. Create a pipeline shell from **Data Pipelines**.
+4. Finish the real configuration in the builder.
+5. Run manually, validate the destination, and only then add a schedule.
+6. Use **Run History** and **Activity Log** when something breaks.
 
-**Terminology**
+## Product terminology to keep straight
 
 | Concept | Where it lives in the app |
-|--------|---------------------------|
-| Source / destination credentials | **Connections** (`/workspace/connections`) |
-| Table/query explorer for a saved connection | Often `/workspace/data-sources/[id]/query` (opened from connection actions—URLs keep the **data-sources** segment even though the main list is under **Connections**) |
-| Sync configuration & canvas | **Data Pipelines** → **Open Builder** (`/workspace/data-pipelines/[id]/builder`) |
-| Run metrics & run history | Pipeline detail (`/workspace/data-pipelines/[id]`) |
-| Org-wide audit events | **Activity Log** (`/workspace/activity`) |
-| Pipeline branch | A **branch** on the builder canvas (transform → destination path)—not a separate Git/environment screen |
+| --- | --- |
+| Source and destination credentials | **Connections** (`/workspace/connections`) |
+| Pipeline shell creation | **Data Pipelines** (`/workspace/data-pipelines/new`) |
+| Table selection, transforms, destination settings | Builder canvas (`/workspace/data-pipelines/[id]/builder`) |
+| Operational history for one pipeline | Pipeline detail page |
+| Org-wide operational events | **Activity Log** (`/workspace/activity`) |
+| Access and roles | **Team** and **Settings** |
 
-Screenshots in this section are **real captures** from a logged-in workspace. Redact or replace them before publishing if they expose hostnames, emails, or internal IDs.
-
-## Sections
+## Read these pages in order
 
 <CardGroup cols={2}>
-  <Card title="Connections" icon="database" href="/user-guide/connections">
-  Create, edit, test, and delete source and destination connections
-</Card>
-  <Card title="Pipelines & runs" icon="git-branch" href="/user-guide/pipelines">
-  Create pipelines, open the builder, view run history and status
-</Card>
-  <Card title="Transformations & branches" icon="wand-sparkles" href="/user-guide/transformations-and-branches">
-  Python transforms, branch labels, add destination paths
-</Card>
-  <Card title="Organizations" icon="building-2" href="/user-guide/organizations">
-  Create orgs, switch context, update details in Settings
-</Card>
-  <Card title="Activity & edge cases" icon="scroll-text" href="/user-guide/activity-and-edge-cases">
-  Activity log, deletes, validation, and error banners
-</Card>
+  <Card title="Connections" href="/user-guide/connections">
+    Create, test, edit, and retire source and destination connections
+  </Card>
+  <Card title="Pipelines and runs" href="/user-guide/pipelines">
+    Create the pipeline shell, configure the builder, run, and verify
+  </Card>
+  <Card title="Transformations and branches" href="/user-guide/transformations-and-branches">
+    Shape records, preview changes, and create multi-destination branches
+  </Card>
+  <Card title="Organizations" href="/user-guide/organizations">
+    Create orgs, switch contexts, and keep environments separated
+  </Card>
+  <Card title="Activity and edge cases" href="/user-guide/activity-and-edge-cases">
+    Diagnose failed runs, broken credentials, and common operator mistakes
+  </Card>
 </CardGroup>
+

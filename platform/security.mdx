@@ -1,26 +1,41 @@
 ---
-title: Security and Encryption
-description: How credentials are protected and stored.
+title: Security and encryption
+description: The current security model in MantrixFlow, including account controls, credential handling, and practical hardening guidance.
 ---
 
-MantrixFlow protects your credentials with encryption and secure handling.
+MantrixFlow security has two parts in day-to-day operations: securing user access to the workspace and securing the credentials used by pipelines.
 
-## Encryption at Rest
+## What the product exposes today
 
-All connection credentials are encrypted at rest using AES-256 symmetric encryption. The encryption key is stored as an environment variable on the ETL server and is never accessible through any API endpoint.
+In **Workspace -> Settings -> Security**, users can review their verified email and change their password. Organization-level administration stays in the team and organization settings flows.
 
-## Decryption
+## Credential handling
 
-Credentials are decrypted only at the moment of a sync run. The ETL service fetches the decrypted config, uses it for the sync, and discards it from memory immediately after. Credentials are never written to logs.
+Based on the current connection experience and supporting product copy:
 
-## API Security
+- connection credentials are encrypted at rest using AES-256
+- credentials are not returned in normal API responses
+- credentials are not meant to be written to logs
+- connections should be tested before they are saved into production workflows
 
-- No credentials travel in pipeline request bodies. Only connection UUIDs are used. The ETL server resolves connection IDs to decrypted configs via an internal API.
-- All public API endpoints require a Bearer token (Supabase Auth). Unauthorised requests are rejected.
+## Access model
 
-## Best Practices
+- users authenticate with bearer-token based application access
+- organization membership controls what resources a user can see
+- roles determine whether a user can edit settings, manage members, or build pipelines
 
-- Use dedicated database users with minimum required privileges.
-- Rotate credentials periodically.
-- Use IP allowlists where possible to restrict access to the ETL server.
-- Enable SSL for database connections.
+## Practical hardening checklist
+
+- use dedicated service accounts for databases and SaaS sources
+- grant minimum required privileges
+- enable SSL for database connections where the form and provider support it
+- rotate credentials periodically
+- keep the owner role limited to a very small set of users
+
+## Real-world example
+
+A finance team connecting PostgreSQL and Stripe uses separate read-only credentials for each system, stores reporting output in a dedicated destination schema, and limits workspace ownership to one or two administrators while day-to-day operators work as admins or editors.
+
+## What security is not solved by the platform alone
+
+The platform cannot compensate for an over-privileged database user, shared passwords, or unreviewed production schedules. Good operational security still depends on how your team provisions and rotates source and destination access.
