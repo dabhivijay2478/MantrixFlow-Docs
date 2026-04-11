@@ -87,6 +87,13 @@
             ]
           },
           {
+            "group": "Pricing",
+            "icon": "credit-card",
+            "pages": [
+              "pricing"
+            ]
+          },
+          {
             "group": "Connections",
             "icon": "database",
             "pages": [
