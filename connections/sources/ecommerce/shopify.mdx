@@ -1,66 +1,67 @@
 ---
 title: Shopify
-description: Connect to Shopify using a Custom App and Admin API access token.
+description: Connect Shopify as a source for store orders, products, customers, collections, and content resources.
 ---
 
-Shopify is an e-commerce platform. MantrixFlow connects to Shopify via the Admin API using a Custom App access token.
+Shopify is one of the clearest SaaS sources in the current app. The live form captures the store URL and the Admin API access token you need for testing and syncs.
 
-## Prerequisites
+## Current connection form
 
-You need a Shopify store and admin access to create a Custom App. The app must have the required API access scopes for the data you want to sync.
+The current **Shopify** source form asks for:
 
-## Connection Setup
+- `Connection Name`
+- `Shop URL`
+- `Admin API Access Token`
 
-<Steps>
-  <Step>
+- The shop URL should be the real store URL, for example `https://your-store.myshopify.com`.
+- The token field expects the Admin API access token, usually starting with `shpat_...`.
 
-### 1. Create a Custom App
+## Good first use cases
 
-In your Shopify admin, go to Settings → Apps and sales channels → Develop apps → Create an app. Or use the Shopify Partners dashboard to create a custom app for a development store.
+- order and customer analytics
+- product catalog replication into SQL
+- support and operations reporting built around store activity
 
-  </Step>
-  <Step>
+## Before you connect
 
-### 2. Configure API Scopes
+- Create a custom app with read access to the resources you plan to sync.
+- Confirm the exact shop URL before testing the connection.
+- Start with one high-value resource such as `orders` so the first validation run is easy to review.
 
-Select the required scopes. For orders, products, customers, and inventory, you need read access to: `read_orders`, `read_products`, `read_customers`, `read_inventory`, `read_fulfillments`, and related scopes. Configure based on the streams you need.
+## Step by step
 
-  </Step>
-  <Step>
+1. Open **Connections** and click **+ New Connection**.
+2. Keep the role set to **Source** and choose **Shopify**.
+3. Fill the form with real values, for example:
+   - `Connection Name`: `Northstar Home`
+   - `Shop URL`: `https://northstar-home.myshopify.com`
+   - `Admin API Access Token`: `shpat_...`
+4. Click **Test Connection** and save only after the test succeeds.
+5. Create a pipeline and start with one high-value resource so validation stays simple.
 
-### 3. Install the App
+## Resources available in the current source preview
 
-Install the app on your store. This generates the Admin API access token.
+- `products`
+- `orders`
+- `customers`
+- `draft_orders`
+- `custom_collections`
+- `smart_collections`
+- `pages`
+- `blogs`
+- `articles`
+- `locations`
+- `price_rules`
+- `themes`
+- `countries`
+- `collects`
 
-  </Step>
-  <Step>
+## Real-world example
 
-### 4. Copy the Access Token
+An ecommerce team syncs Shopify `orders`, `customers`, and `products` into PostgreSQL so support, merchandising, and finance can all work from the same reporting tables.
 
-After installation, copy the Admin API access token. Store it securely. You cannot view it again after closing the dialog.
+## Troubleshooting
 
-  </Step>
-  <Step>
-
-### 5. Shop Name
-
-Enter only the subdomain of your store URL. For `mystore.myshopify.com`, enter `mystore`. Do not include `myshopify.com`.
-
-  </Step>
-</Steps>
-
-## Available Streams
-
-- Orders
-- Order line items
-- Products
-- Product variants
-- Customers
-- Inventory levels
-- Transactions
-- Collections
-
-## Supported Sync Modes
-
-- **Full sync** — Reads all records on every run.
-- **Incremental sync** — Uses `updated_at` or similar to read only new or updated records.
+- If the test fails, confirm the shop URL format and the token scopes.
+- If resources are unexpectedly empty, start with `orders` or `customers` and validate against the Shopify admin UI.
+- One validated store connection is better than several broad first-time rollouts.

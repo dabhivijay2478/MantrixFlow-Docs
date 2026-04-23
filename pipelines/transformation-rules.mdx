@@ -1,40 +1,60 @@
 ---
-title: Transformation Rules
-description: Rename, cast, filter, add column, fill nulls, and custom rules.
+title: Transformation rules
+description: "The current MantrixFlow transformation model: branch-scoped Python scripts, filter nodes, example packs, preview, and save behavior."
 ---
 
-Transformation rules are applied to the data after it is read from the source and before it is written to the destination. Rules are executed in order.
+The current builder centers transformation work around a branch-scoped Python `transform(record)` function. Renaming, casting, derived columns, null handling, and nested-payload cleanup are implemented inside that script rather than through separate point-and-click mapping screens.
 
-## Rename
+## What the current implementation includes
 
-Changes a column name. Equivalent to column mapping but applied as a transformation. Use when you need to rename in the transform stage rather than the mapping stage.
+- a **Transform** panel with a branch label, source-table selector, Python editor, example loader, preview button, and **Save Script**
+- source-specific example packs for PostgreSQL, MySQL, Stripe, Shopify, HubSpot, Notion, and GitHub
+- fallback default SQL examples for source types without their own example pack
+- sample-data preview for the current transform, using up to 10 source rows in the builder flow
+- a separate **Filter** node with Python-expression and SQL-`WHERE` modes
+- destination-side schema preview after the destination is saved
 
-**Example:** Rename `user_id` to `userId`.
+## What is not the supported workflow
 
-## Cast
+- a standalone visual rename screen
+- a dedicated cast wizard
+- a separate null-fill product surface
+- visual mapping docs as the main production path
+- a user-facing toggle for skipping transform errors; current saved scripts default to failing the run on transform errors
 
-Changes the data type of a column. Use when the inferred type is wrong (e.g. a string that contains a number should be numeric).
+## What a script must do
 
-**Example:** Cast `price` from string to float.
+Use a Python function with this shape:
 
-## Filter Rows
+```python
+def transform(record):
+    return record
+```
 
-Removes rows that do not match a condition. Use to sync only a subset of data.
+The function should:
 
-**Example:** Keep only rows where `status = 'completed'`.
+- return a `dict` when the record should continue
+- return `None` when the record should be dropped
+- stay focused on record shaping rather than filesystem, network, or environment access
 
-## Add Column
+## Preview every meaningful change
 
-Creates a new column derived from existing columns using a simple expression. Use for computed fields.
+Use preview whenever you:
 
-**Example:** Add `full_name` as `first_name + ' ' + last_name`.
+- change field names
+- cast types
+- filter rows
+- touch nested JSON structures
+- prepare a destination table that other teams will query immediately
 
-## Fill Nulls
+## Recommended workflow
 
-Replaces null values in a column with a specified default value. Use when the destination does not accept nulls or you want a fallback.
+1. Select the source table or resource first.
+2. Start with the pass-through script.
+3. Load an example only if it matches the current payload shape closely.
+4. Make one change at a time.
+5. Run **Preview with sample data** after each meaningful edit.
+6. Save the script.
+7. Validate the destination preview and then run the pipeline manually.
 
-**Example:** Fill nulls in `country` with `'Unknown'`.
-
-## Custom Rules
-
-Some connectors support custom transformation logic (e.g. SQL expressions or script-based transforms). See the connector documentation for details.
+Read the detailed guides in the [Transformations](/transformations/overview) section for the current editor, filter, and preview behavior.

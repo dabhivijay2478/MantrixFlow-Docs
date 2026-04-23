@@ -1,22 +1,46 @@
 ---
-title: Data Privacy
-description: What data the platform stores and what it does not store.
+title: Data privacy
+description: What MantrixFlow stores, what it uses transiently during sync and preview, and how operators should handle sensitive data responsibly.
 ---
 
-## What We Store
+Data privacy in MantrixFlow is mostly about understanding the difference between configuration metadata, operational metadata, and the underlying business data flowing through your pipelines.
 
-- **Connection metadata** — Connection names, types, and organisation association. Not credentials (those are encrypted).
-- **Pipeline configuration** — Source, destination, stream selection, sync mode, write mode, transformation rules.
-- **Sync state** — Cursor values and CDC positions for incremental and CDC syncs.
-- **Run metadata** — Run IDs, status, row counts, timestamps, error messages. Not the actual synced data.
-- **User and organisation data** — Account info, team membership, roles.
+## What the platform stores
 
-## What We Do Not Store
+- connection metadata such as names, types, and organization association
+- encrypted credentials
+- pipeline configuration, including selected source tables, transform logic, destination naming, and schedule settings
+- run metadata such as status, timestamps, and row counts
+- sync-state checkpoints for incremental or CDC pipelines
+- user, organization, and membership records
 
-- **Your source data** — Data flows from your source through the ETL service to your destination. We do not persist it.
-- **Credentials in logs** — Credentials are never written to logs. Only connection IDs and metadata may appear.
-- **Synced data** — The platform does not retain a copy of the data you sync. It exists only in your source and destination.
+## What the platform does not treat as long-term workspace content
 
-## Data Flow
+- your full source dataset as a product-owned warehouse copy
+- raw credentials in logs or standard product responses
+- destination business data as a separate durable MantrixFlow dataset
 
-Source → ETL (transient) → Destination. The ETL service reads from the source, applies transformations, and writes to the destination. Data is held in memory only during the sync.
+## How data moves during normal operation
+
+1. A pipeline reads from the source.
+2. MantrixFlow applies transform logic and branch configuration.
+3. The processed records are written to the destination.
+4. Run metadata is retained so the team can audit and troubleshoot the flow.
+
+Preview and validation actions use live sample data so operators can verify behavior before scheduling. That makes preview powerful, but it also means sensitive sample rows should be treated thoughtfully.
+
+## Real-world example
+
+A healthcare-adjacent operations team syncs appointment events into a reporting warehouse but masks patient contact details inside the transform step before the data lands. The pipeline configuration and run metadata remain in the platform, while the long-term analytical copy lives in the destination warehouse.
+
+## Recommended privacy practices
+
+- sync only the fields you actually need
+- mask or hash sensitive identifiers in the transform layer
+- avoid sending production PII into sandbox destinations
+- use separate organizations or destinations for testing versus production
+- review destination access controls, not just source access controls
+
+## The privacy mindset that works best
+
+Think of MantrixFlow as the control plane for movement and transformation, not as the permanent home for your business dataset. That framing leads to better decisions about field selection, masking, and destination governance.

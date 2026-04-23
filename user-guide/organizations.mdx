@@ -1,53 +1,51 @@
 ---
-title: Organization management
-description: Create organizations, switch the active organization, and update org details from Settings—all in the MantrixFlow app.
+title: Organizations and workspace context
+description: Manage organizations in the live app so production, staging, teams, and audit history stay clearly separated.
 ---
 
-Organizations scope **connections**, **pipelines**, **activity**, and **team** membership. Routes and entry points:
+Organizations are the top-level boundary in MantrixFlow. Every connection, pipeline, activity event, and team role is scoped to the active organization.
 
-- Full list & create: `/organizations` and `/organizations/new`
-- Switcher: bottom of the **sidebar** (workspace layout)
-- **Organization** tab under **Settings**: `/workspace/settings` → **Organization**
+## Relevant routes
 
-## View organizations
+- Organizations list: `/organizations`
+- Create organization: `/organizations/new`
+- Edit organization: `/organizations/[id]/edit`
+- Workspace settings: `/workspace/settings?tab=organization`
 
-The **Organizations** page lists every org you belong to with **Slug**, **Description**, **Created**, **Status** (e.g. **Current**), and row actions (e.g. edit).
+## Why organizations matter operationally
 
-<img src="/images/user-guide/ug-organizations-list.png" alt="Organizations table" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+Use organizations to separate:
 
-## Create an organization
+- production from staging
+- internal data from client-facing workloads
+- regulated datasets from general analytics work
+- different business units with different operators
 
-1. Click **+ Create Organization** (from the list) or **Add organization** in the sidebar switcher.
-2. Enter **Organization name** (slug auto-fills from the name; adjust if needed).
-3. Optional **Description**.
-4. Submit **Create Organization**.
+## Create a new organization
 
-<img src="/images/user-guide/ug-organization-create-form.png" alt="Create organization form" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+From the organizations list or sidebar switcher, create a new organization with a clear name, slug, and optional description. A good naming pattern is environment plus team, such as `Growth Production` or `Data Platform Staging`.
 
-After creation, the app typically sets the new org as current or returns you to the list—follow the toast and navigation you see in your tenant.
+![Create organization form](/images/user-guide/ug-organization-create-form.png)
 
-## Switch organization
+## Switch context before making changes
 
-1. Click the org chip at the bottom of the sidebar (shows current org name).
-2. Pick another org from the list, or **View all organizations** / **Add organization** shortcuts.
+The organization switcher in the sidebar controls which connections and pipelines you are editing. Always confirm the active organization before rotating credentials or changing schedules.
 
-<img src="/images/user-guide/ug-organization-switcher.png" alt="Organization switcher menu" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+![Organization switcher menu](/images/user-guide/ug-organization-switcher.png)
 
-Switching refreshes workspace data (connections, pipelines, logs) for the selected org.
+## Update organization details
 
-## View current organization
+Owners can manage name, slug, and description from **Settings -> Organization**.
 
-- Sidebar footer chip (always visible in workspace).
-- **Organizations** list: **Current** badge on the active row.
-- **Settings → Organization**: name and slug for the active org context.
+![Settings - Organization tab](/images/user-guide/ug-settings-organization.png)
 
-## Update organization details (owners)
+## A practical operating pattern
 
-1. Go to **Settings** in the sidebar.
-2. Open the **Organization** tab.
-3. Edit **Organization name**, **Slug**, or **Description**.
-4. **Save Changes** (owners; other roles may see read-only messaging).
+Many teams keep:
 
-<img src="/images/user-guide/ug-settings-organization.png" alt="Settings — Organization tab" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+- one production organization with live credentials and schedules
+- one staging organization with test data and manual-only runs
+- identical connection names across both, prefixed by environment
 
-Deep link pattern for table-driven edit from **Organizations**: `/organizations/[organizationId]/edit` (pencil icon on the row).
+That makes promotion and troubleshooting much safer.
+

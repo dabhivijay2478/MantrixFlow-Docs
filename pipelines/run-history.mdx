@@ -1,32 +1,41 @@
 ---
-title: Run History
-description: Status badges, sync state, and how to reset.
+title: Run history
+description: Use pipeline run history to validate new deployments, diagnose failures, and understand the sync state that powers incremental and CDC pipelines.
 ---
 
-Each pipeline run is recorded in the run history. You can see the status, rows synced, duration, and any error messages.
+Run history is where operational truth lives. It tells you whether a pipeline actually succeeded after the builder looked correct on screen.
 
-## Status Badges
+## What to look for after every important change
 
-- **Completed** — The run finished successfully. Data was synced to the destination.
-- **Failed** — The run encountered an error. Check the error message for details.
-- **Running** — The run is in progress.
-- **Cancelled** — The run was cancelled by a user or the system.
+- run status
+- start and end time
+- row counts or records processed
+- error messages
+- whether the run happened manually or from a schedule
 
-## Sync State
+## Healthy first-run checklist
 
-For incremental and CDC syncs, the platform stores sync state:
+A healthy first production run usually looks like this:
 
-- **Cursor value** — The last value of the cursor column (incremental sync).
-- **CDC position** — The position in the replication log (CDC).
+1. source and destination connections both test successfully
+2. pipeline saves without validation errors
+3. manual run completes
+4. destination contains the expected table updates
+5. only after that does the team enable the schedule
 
-This state is used for the next run to know where to resume. Do not modify it unless you are resetting the sync.
+## Sync state in run operations
 
-## Reset Sync State
+Incremental and CDC pipelines keep state between runs so MantrixFlow knows where to resume. That state is why later runs are faster and more targeted than the first one.
 
-If you need to re-sync from the beginning (e.g. after a schema change or data correction), you can reset the sync state. This clears the stored cursor and CDC position. The next run will behave like a full sync.
+## When to investigate immediately
 
-<Warning>
-**Data implications**
+Investigate right away if you see:
 
-Resetting sync state does not delete data in the destination. For replace mode, the next run will overwrite. For append and upsert, you may get duplicates if you do not also truncate or clean the destination.
-</Warning>
+- a run that fails immediately after a credential rotation
+- row counts unexpectedly dropping to zero
+- repeated transform errors on the same branch
+- a schedule firing but producing no destination changes
+
+## Good operator habit
+
+When a run fails, inspect both the pipeline detail page and the org-wide **Activity Log**. The detail page tells you what happened to one pipeline. The Activity Log shows whether the failure is part of a broader incident.

@@ -1,96 +1,68 @@
 ---
 title: PostgreSQL
-description: Connect to PostgreSQL databases including self-hosted, Supabase, Railway, Render, Neon, and AWS RDS.
+description: Connect PostgreSQL as a source for application tables, reporting replicas, and CDC-ready syncs.
 ---
 
-PostgreSQL is a powerful open-source relational database. MantrixFlow can sync data from any PostgreSQL instance, including self-hosted servers and managed services such as Supabase, Railway, Render, Neon, and AWS RDS.
+PostgreSQL is the most complete database source in the current app. It supports table discovery, transform preview, incremental sync, and the in-product CDC setup flow.
 
-## Prerequisites
+## Current connection form
 
-You need a PostgreSQL database and a user with read access to the tables you want to sync. For CDC, you need database administrator access to enable logical replication.
+The current **PostgreSQL** source form asks for:
 
-## Connection Setup
+- `Connection Name`
+- `Host`
+- `Port`
+- `Database`
+- `Username`
+- `Password`
+- `Schema`
+- `SSL Mode`
 
-<Steps>
-  <Step>
+- `Port` defaults to `5432`.
+- `Schema` defaults to `public`.
+- `SSL Mode` options are `disable`, `allow`, `prefer`, `require`, `verify-ca`, and `verify-full`.
 
-### 1. Connection Name
+## Good first use cases
 
-Enter a friendly name (e.g. "Production PostgreSQL") to identify this connection.
+- replicate operational app tables into a reporting database
+- start with incremental sync on `updated_at` and move selected tables to CDC later
+- validate one high-value business table before broadening the rollout
 
-  </Step>
-  <Step>
+## Before you connect
 
-### 2. Host
+- Create a dedicated read-only user with schema and table access.
+- Confirm the host, database, and schema you want to read first.
+- Pick one table to validate first, usually `public.orders` or `public.customers`.
 
-Enter the database server hostname or IP address. For cloud providers, find this in your database dashboard (e.g. Supabase Project Settings, Neon connection string).
+## Step by step
 
-  </Step>
-  <Step>
+1. Open **Connections** and click **+ New Connection**.
+2. Keep the role set to **Source** and choose **PostgreSQL**.
+3. Fill the form with real values, for example:
+   - `Connection Name`: `Neon Production`
+   - `Host`: `ep-lighthouse-prod-123456.us-east-2.aws.neon.tech`
+   - `Port`: `5432`
+   - `Database`: `app`
+   - `Username`: `mf_readonly`
+   - `Schema`: `public`
+   - `SSL Mode`: `require`
+4. Click **Test Connection**. Save the connection only after the test succeeds.
+5. Create a pipeline, pick the first table in **Source Configuration**, and run one manual sync before enabling a schedule.
 
-### 3. Port
+## Good first tables
 
-Enter the port. Default is **5432**. Most managed PostgreSQL services use 5432.
+- `public.orders`
+- `public.customers`
+- `public.order_items`
 
-  </Step>
-  <Step>
+## Real-world example
 
-### 4. Database
+Lighthouse Commerce copies `public.orders` and `public.order_items` from Neon into an analytics PostgreSQL destination. The team starts with incremental sync on `updated_at` and later moves `orders` to CDC when refunds and deletes need faster visibility.
 
-Enter the database name. For Supabase, this is usually `postgres`. For Neon, it is shown in the connection string.
+## Troubleshooting
 
-  </Step>
-  <Step>
+- If table discovery is empty, re-check `USAGE` on the schema and `SELECT` on the tables.
+- If the connection test fails with a TLS message, keep `SSL Mode` on `require` unless your DBA gives you a different value.
+- If preview works but later runs fail, verify that the selected source table still exists and the saved connection still passes testing.
 
-### 5. Username and Password
-
-Enter the username and password for the database user. Create a dedicated read-only user for MantrixFlow (see below).
-
-  </Step>
-  <Step>
-
-### 6. Enable SSL
-
-For cloud databases, enable SSL. For local development, you may disable it.
-
-  </Step>
-</Steps>
-
-### Create a Read-Only User
-
-Run the following SQL as a superuser to create a dedicated user for MantrixFlow:
-
-```sql
-CREATE USER mantrixflow_read WITH PASSWORD 'your_secure_password';
-
--- Grant connect
-GRANT CONNECT ON DATABASE your_database TO mantrixflow_read;
-
--- Grant usage on schema
-GRANT USAGE ON SCHEMA public TO mantrixflow_read;
-
--- Grant select on all tables (adjust schema/table names as needed)
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO mantrixflow_read;
-
--- For incremental sync, ensure the user can read the cursor column
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO mantrixflow_read;
-```
-
-## Available Streams
-
-Streams correspond to database tables. When you create a pipeline, you select which tables to sync. MantrixFlow discovers the schema from the database and lets you choose streams per pipeline.
-
-## Supported Sync Modes
-
-- **Full sync** — Reads every row on every run. Supported for all tables.
-- **Incremental sync** — Uses a cursor column (e.g. `updated_at`, `created_at`) to read only new or updated rows. Choose a column that increases monotonically.
-
-## CDC Setup
-
-<Warning>
-**Database Admin Required**
-
-CDC requires database administrator access to enable logical replication and create a publication.
-</Warning>
-
-See the [CDC Setup for PostgreSQL](/sync-reference/cdc-postgresql) page for the exact commands to enable logical replication, set `wal_level` to `logical`, create a replication slot, create a publication, and grant replication permissions.
+If you need log-based replication, save the connection first and then use [CDC setup for PostgreSQL](/sync-reference/cdc-postgresql).

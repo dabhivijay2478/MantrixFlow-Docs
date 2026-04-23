@@ -1,64 +1,108 @@
 ---
-title: Pipelines & run history
-description: Create pipelines, open the visual builder, monitor runs, status, and errors on the pipeline detail page.
+title: Pipelines and run history
+description: The current end-to-end pipeline flow in MantrixFlow, from pipeline shell creation through builder configuration, manual validation, and scheduled runs.
 ---
 
-Key routes:
+The pipeline flow in the current app is intentionally split into two stages:
+
+1. create the pipeline shell from **Data Pipelines**
+2. finish the operational setup in the builder canvas
+
+That means the builder is where most production decisions actually happen.
+
+## Key routes
 
 - List: `/workspace/data-pipelines`
-- Create: `/workspace/data-pipelines/new`
-- Builder (canvas): `/workspace/data-pipelines/[pipelineId]/builder`
-- Detail (runs, tabs): `/workspace/data-pipelines/[pipelineId]`
+- Create shell: `/workspace/data-pipelines/new`
+- Builder: `/workspace/data-pipelines/[id]/builder`
+- Detail page: `/workspace/data-pipelines/[id]`
 
-## Pipeline list
+## Create the pipeline shell
 
-Open **Data Pipelines** in the sidebar (`/workspace/data-pipelines`). The page title may read **Pipelines**. Filter by **All**, **Running**, **Failed**, or **Scheduled**. Search narrows the list. Each card shows name, last status, source connector, branch or destination labels when present, and last run time.
+Start with a pipeline name and a source connection. The create page does not ask for every configuration option up front because the builder owns stream selection, transform logic, destination setup, and schedule.
 
-<img src="/images/user-guide/ug-pipelines-list.png" alt="Pipelines list" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+![Create pipeline form](/images/user-guide/ug-new-pipeline-form.png)
 
-## Create a pipeline
+## Configure the builder
 
-1. Click **+ New Pipeline**.
-2. Enter a **Pipeline name** and select a **Source connection**.
-3. Click **Create & open canvas** to land in the builder (you configure transforms and destinations on the canvas).
+The builder is the real control room for the pipeline.
 
-<img src="/images/user-guide/ug-new-pipeline-form.png" alt="Create pipeline form" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+- **Source panel** chooses the table or API resource.
+- **Transform panel** edits the Python script and branch label.
+- **Destination panel** chooses the destination connection, schema, table, preview, and schedule.
+- **Action bar** lets you save, run manually, and open schedule or settings.
 
-## Open the builder (edit pipeline graph)
+![Pipeline builder - branches on canvas](/images/user-guide/ug-pipeline-builder-branches.png)
 
-- Click the pipeline row to open the canvas, or use **⋯** → **Open Builder**.
+## The recommended first-run sequence
 
-The canvas shows the **source** node, optional **transform** nodes, and **destination** nodes with listen/run states and quick actions (**Add transform**, **Add emitter (destination)**, **Run pipeline**, etc.).
+<Steps>
+  <Step>
 
-<img src="/images/user-guide/ug-pipeline-builder-branches.png" alt="Pipeline builder — branches on canvas" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+### 1. Select one source table or resource
 
-## Run history, status, and errors
+Start with one high-value object such as `public.orders`, `stripe.customers`, or `github.pull_requests`. This keeps validation focused.
 
-Open the pipeline’s **detail** page (not only the builder). You will see:
+  </Step>
+  <Step>
 
-- Summary metrics (rows processed, success/fail counts, last sync time).
-- Tabs such as **Run History**, **Code**, **Explore**, **Incoming/Outgoing Data**, **Configuration**, **Settings**.
-- **Recent runs** with status, trigger, rows written, failures, duration.
+### 2. Keep the first transform simple
 
-If the source or destination connection is disconnected, a **banner** explains that the pipeline cannot run until you reconnect under **Connections**.
+Either pass records through unchanged or add one small enrichment field so debugging stays straightforward.
 
-<img src="/images/user-guide/ug-pipeline-detail-runs.png" alt="Pipeline detail — run history and warning banner" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+  </Step>
+  <Step>
 
-## Row actions: run and delete
+### 3. Configure the destination carefully
 
-Use **Run now** on the list to trigger a manual run. **⋯** opens:
+Pick the destination connection, confirm the schema and table name, and keep the first write behavior conservative. In current builder releases, **Upsert** is the primary live option.
 
-- **Open Builder**
-- **Run Now**
-- **Delete** (destructive; confirm in the modal)
+  </Step>
+  <Step>
 
-<img src="/images/user-guide/ug-pipeline-row-menu.png" alt="Pipeline row overflow menu" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+### 4. Save before you run
 
-<img src="/images/user-guide/ug-pipeline-delete-confirm.png" alt="Delete pipeline confirmation" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+Use **Save** in the action bar so the selected stream, transform script, destination, and schedule are persisted.
 
-Cancel the dialog if you only wanted to inspect the warning; deletion is permanent.
+  </Step>
+  <Step>
 
-## Edit metadata vs graph
+### 5. Run manually
 
-- **Graph** (streams, branches, transforms, destinations): **Open Builder** and **Save** on the canvas toolbar where applicable.
-- **Schedule, sync options, detail tabs**: use the pipeline **detail** page tabs (**Configuration** / **Settings**) as implemented for your org’s API version.
+Use **Run Now** to validate the pipeline with operator attention before you introduce automation.
+
+  </Step>
+</Steps>
+
+## Review run history
+
+After the run, open the detail page and inspect **Run History**. This is where you confirm status, row counts, runtime, and whether a pipeline succeeded after a credential or schema change.
+
+![Pipeline detail - run history and warning banner](/images/user-guide/ug-pipeline-detail-runs.png)
+
+## Typical reasons a run fails
+
+- the source or destination connection was edited but not re-tested
+- the selected source table no longer exists or permissions were removed
+- the transform script returns invalid records
+- the destination schema or table name is wrong
+- a schedule fired after a credential rotation
+
+## Row actions on the pipeline list
+
+Use the list page for fast operations:
+
+- **Open Builder** to change the graph
+- **Run Now** for manual validation
+- **Delete** when you intentionally retire the pipeline
+
+![Pipeline row overflow menu](/images/user-guide/ug-pipeline-row-menu.png)
+
+## When to schedule a pipeline
+
+Schedule only after three things are true:
+
+1. the source connection tests cleanly
+2. the destination receives the correct shape
+3. at least one manual run has succeeded end to end
+

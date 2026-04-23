@@ -1,47 +1,61 @@
 ---
-title: Transformations & pipeline branches
-description: Configure Python transform scripts, branch labels, error handling, and additional destinations on the pipeline builder canvas.
+title: Transformations and branches
+description: Use the current transform panel to shape records, preview output, and create multiple destination branches from one selected source stream.
 ---
 
-In MantrixFlow, a **pipeline branch** is a path on the builder: **source → (optional) transform → destination**. You can add more branches to send the same (or filtered) data to another destination or to apply different transforms.
+In the builder, a branch is a concrete path from the selected source stream to a destination. Each branch can have its own label, transform script, filter logic, destination connection, and schedule behavior.
 
-This is **not** a separate “environment” or “Git branch” screen—branching is modeled **on the canvas** only.
+## What the transform panel controls today
 
-## Open the transform editor
+The live transform panel is centered around a Python function:
 
-1. Open **Data Pipelines** → select your pipeline → **Open Builder** (or click the pipeline row).
-2. Click the **transform** node (e.g. labelled with **PYTHON** and a short code preview).
-3. Use **Transform settings** (gear) on the node, or click the node body to open the side panel.
+```python
+def transform(record):
+    return record
+```
 
-## Configure branch label, table, script, and errors
+From that panel, you can:
 
-The transform panel includes:
+- rename the branch so operators know its purpose
+- switch the selected source table when needed
+- load source-specific example scripts when examples are available
+- preview output against sample source rows
+- save the script into the pipeline graph
 
-- **Branch label** — shown on the canvas; rename to match the destination or use case (e.g. “Analytics warehouse”, “Support replica”).
-- **Source table** — which stream/table this transform receives.
-- **Python script** — must define `transform(record)` (or the pattern shown in the template). Return a dict matching the shape you want downstream.
-- **On error** — **Stop run on error** vs **Skip record and continue**.
-- **Preview with sample data** — validates logic against sample rows.
-- **Save Script** — persists changes to the pipeline graph.
+The live transform panel does not expose a separate visual rename, cast, or null-fill UI. Those patterns are implemented directly in `transform(record)`.
 
-<img src="/images/user-guide/ug-transform-panel.png" alt="Transform panel with Python script and branch label" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+## A realistic branching example
 
-## Add another branch (destination path)
+A commerce team might branch one `orders` stream two ways:
 
-On the canvas:
+- **Analytics branch** writes cleaned rows to PostgreSQL in `analytics.orders_live`.
+- **Operations branch** writes a narrower customer-service view to MySQL in `ops.order_lookup`.
 
-- Use **Add transform** after the source (or between nodes) when you need a new transform step.
-- Use **Add emitter (destination)** / **Add destination** to attach another destination connection for a parallel branch.
+That pattern keeps one source read while allowing two different SQL destinations to serve different teams.
 
-Each branch can target a different destination connection, schema/table, and **append / merge / overwrite** (emit) behaviour configured on the destination node (**Destination / emit settings**).
+## Safe transform workflow
 
-<img src="/images/user-guide/ug-pipeline-builder-branches.png" alt="Builder showing source, transform, and destination branch" className="rounded-lg border border-zinc-700/50 max-w-full h-auto w-auto block my-4 dark:border-zinc-600/60" loading="lazy" />
+1. Pick the source table or resource first so previews use the right record shape.
+2. Start with a pass-through script and change one thing at a time.
+3. Use **Preview with sample data** after every meaningful edit.
+4. Save the transform before running the pipeline.
+5. Validate the destination output before turning the schedule on.
 
-## AI-assisted edits
+## Good use cases for a transform
 
-**Ask AI** on the builder toolbar can suggest graph changes; always review suggestions before saving or running in production.
+- standardize enum values such as `paid`, `Paid`, and `PAID`
+- derive reporting-friendly columns such as `order_date` or `mrr`
+- remove fields that should not leave the source system
+- flatten nested SaaS payloads before they reach SQL destinations
+- add metadata such as `loaded_from` or `sync_batch_id`
 
-## Operational tips
+## Filter nodes in the current builder
 
-- After editing transforms, **Save** on the builder and run a **test sync** or small manual run before scheduling.
-- If a run fails, use **Run History** on the pipeline detail page and the **Activity Log** for correlated events.
+The builder also includes a dedicated **Filter** node with two modes:
+
+- a Python expression such as `record.get('status') != 'deleted'`
+- a SQL `WHERE` clause for source-side filtering patterns
+
+Use the filter node for simple keep-or-drop logic. Use the transform script when you need filtering plus reshaping in one place.
+
+Current limitation: the filter panel is primarily a configuration surface. Treat source preview, transform preview, destination preview, and a manual run as the authoritative validation path.

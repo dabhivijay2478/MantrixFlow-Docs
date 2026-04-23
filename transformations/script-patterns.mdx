@@ -1,0 +1,95 @@
+---
+title: Script patterns
+description: Real transformation patterns and example-library coverage from the current builder implementation.
+---
+
+The **Load Example** menu is driven by the source type. Today, dedicated example packs exist for:
+
+- PostgreSQL
+- MySQL
+- Stripe
+- Shopify
+- HubSpot
+- Notion
+- GitHub
+
+Connectors without their own pack start from the default SQL examples, then adapt from there.
+
+## Examples available today
+
+### PostgreSQL and MySQL
+
+- `Rename & filter columns`
+- `Mask PII data`
+- `Convert types`
+
+### Stripe
+
+- `Flatten customer data`
+- `Invoice amount summary`
+- `Filter active subscriptions`
+- `Payment intent summary`
+- `Refund tracking`
+- `Dispute summary`
+- `Payout summary`
+
+### Shopify
+
+- `Flatten order data`
+- `Product inventory summary`
+- `Customer summary`
+- `Draft order summary`
+- `Collection catalog`
+- `Price rule / discount summary`
+
+### HubSpot
+
+- `Flatten contact properties`
+- `Deal pipeline summary`
+- `Company summary`
+- `Ticket support summary`
+- `Activity / engagement summary`
+- `Owner / team roster`
+
+### Notion
+
+- `Flatten database properties`
+- `Database catalog`
+- `Page summary`
+- `User roster`
+
+### GitHub
+
+- `Flatten issue data`
+- `PR review summary`
+- `Commit log`
+- `Release changelog`
+- `Branch summary`
+- `Contributor stats`
+- `Milestone tracker`
+
+## Common production patterns
+
+- rename source fields into a stable SQL naming convention
+- cast string amounts into numeric types
+- flatten nested SaaS payloads before loading into SQL
+- derive business fields such as `gross_revenue` or `payment_bucket`
+- return `None` to drop records that fail a business rule
+
+## Example pattern
+
+```python
+def transform(record):
+    plan = record.get("plan", {}) or {}
+
+    return {
+        "subscription_id": record.get("id"),
+        "customer_id": record.get("customer"),
+        "status": record.get("status"),
+        "plan_id": plan.get("id"),
+        "plan_amount": (plan.get("amount", 0) or 0) / 100,
+        "plan_interval": plan.get("interval"),
+    }
+```
+
+Use the closest built-in example first, then trim it down to the exact fields and rules your branch really needs.

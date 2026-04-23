@@ -1,60 +1,70 @@
 ---
 title: Stripe
-description: Connect to Stripe using a restricted API key. Charges, customers, invoices, and more.
+description: Connect Stripe as a source for payments, subscriptions, invoices, disputes, and payout reporting.
 ---
 
-Stripe is a payment processing platform. MantrixFlow connects using a restricted API key with read-only permissions.
+Stripe is a high-value finance source in the current app. The live connection form is intentionally simple: a connection name plus a secret key.
 
-## Prerequisites
+## Current connection form
 
-You need a Stripe account and access to create API keys in the Dashboard.
+The current **Stripe** source form asks for:
 
-## Connection Setup
+- `Connection Name`
+- `Secret Key`
 
-<Steps>
-  <Step>
+- The token field expects a Stripe secret key such as `sk_live_...` or `sk_test_...`.
+- Save the connection only after a successful test because the builder depends on that validated credential.
 
-### 1. Create a Restricted Key
+## Good first use cases
 
-In Stripe Dashboard, go to Developers → API keys. Create a restricted key. Do not use the secret key for live mode with full access.
+- revenue reporting from invoices and subscriptions
+- payout reconciliation and cash movement tracking
+- refund and dispute monitoring in a SQL destination
 
-  </Step>
-  <Step>
+## Before you connect
 
-### 2. Set Permissions
+- Create or retrieve a Stripe secret key with the access level your team approves.
+- Decide which resource you will validate first, usually `invoices`, `subscriptions`, or `customers`.
+- Make sure you are using the correct Stripe account and mode before testing.
 
-Grant read-only access to the resources you need: Charges, Customers, Invoices, Payment Intents, Subscriptions, Products, Prices, Refunds, Balance transactions. Restrict to the minimum required.
+## Step by step
 
-  </Step>
-  <Step>
+1. Open **Connections** and click **+ New Connection**.
+2. Keep the role set to **Source** and choose **Stripe**.
+3. Fill the form with real values, for example:
+   - `Connection Name`: `Stripe Production`
+   - `Secret Key`: `sk_live_...`
+4. Click **Test Connection** and save only after the test succeeds.
+5. Create a pipeline and start with one high-value resource so validation stays simple.
 
-### 3. Copy the Secret Key
+## Resources available in the current source preview
 
-After creating the restricted key, copy the secret key. It starts with `rk_` for restricted keys. Paste it into MantrixFlow.
+- `customers`
+- `charges`
+- `invoices`
+- `subscriptions`
+- `products`
+- `prices`
+- `events`
+- `balance_transactions`
+- `coupons`
+- `payment_intents`
+- `payment_methods`
+- `refunds`
+- `disputes`
+- `payouts`
+- `plans`
+- `tax_rates`
+- `credit_notes`
+- `promotion_codes`
+- `setup_intents`
 
-  </Step>
-  <Step>
+## Real-world example
 
-### 4. Start Date
+A finance team syncs Stripe `invoices`, `subscriptions`, and `payouts` into PostgreSQL so revenue operations, cash reporting, and reconciliation all use the same destination tables.
 
-Enter an ISO 8601 date (e.g. `2024-01-01`) to control how far back the initial sync goes. Only records created or updated after this date are synced initially.
+## Troubleshooting
 
-  </Step>
-</Steps>
-
-## Available Streams
-
-- Charges
-- Customers
-- Invoices
-- Payment Intents
-- Subscriptions
-- Products
-- Prices
-- Refunds
-- Balance transactions
-
-## Supported Sync Modes
-
-- **Full sync** — Reads all records (within start date) on every run.
-- **Incremental sync** — Uses `created` or `updated` timestamps to read only new or updated records.
+- If the test fails, confirm that the key is active and belongs to the correct Stripe account.
+- Start with one resource such as `invoices` so row-level validation is easy.
+- If business users dispute counts, confirm that you are comparing the same account mode and time window.

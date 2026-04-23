@@ -1,20 +1,52 @@
 ---
-title: Organisation Setup
-description: Create and manage your organisation in MantrixFlow.
+title: Organization setup
+description: Create organizations, switch workspace context, and manage organization details using the current app flows.
 ---
 
-An organisation is the top-level container for your team, connections, and pipelines. All resources belong to an organisation.
+An organization is the workspace boundary for connections, pipelines, members, and activity. If you work in multiple organizations, the currently selected one determines what data and settings you see in the app.
 
-## Creating an Organisation
+## What lives inside an organization
 
-When you sign up, you may be prompted to create an organisation. Enter a name and optionally a slug. The organisation ID (UUID) is used in API requests.
+- source and destination connections
+- data pipelines
+- team members and roles
+- activity scoped to that workspace
 
-## Organisation Settings
+## Create a new organization
 
-- **Name** — Display name for the organisation.
-- **Slug** — URL-friendly identifier (e.g. for subdomains or vanity URLs).
-- **Current organisation** — If you belong to multiple organisations, you can switch the current one. The current organisation is used for API requests and the UI.
+1. Open **Organizations**.
+2. Click **Create Organization**.
+3. Enter the organization name.
+4. Let MantrixFlow generate the slug.
+5. Add an optional description.
+6. Submit the form.
+7. The new organization becomes the current workspace context.
 
-## Switching Organisations
+## Important current behavior
 
-Use the organisation switcher in the sidebar or header to change the current organisation. All connections and pipelines are scoped to the organisation.
+Invited users may not be allowed to create organizations. The creation flow checks that permission explicitly, so a team member who joined by invitation should expect to work inside an existing organization unless granted broader access.
+
+## Switch between organizations
+
+1. Open **Organizations**.
+2. Review the list of organizations you belong to.
+3. Click **Switch** on the organization you want to work in.
+4. Return to **Workspace** and confirm you are looking at the correct connections and pipelines.
+
+## Update organization details in workspace settings
+
+1. Open **Workspace → Settings → Organization**.
+2. If you are the **Owner**, edit the name, slug, or description.
+3. Save changes.
+
+Non-owners can still view the organization details there, but the page is read-only for them.
+
+## Real-world example
+
+A services company keeps one organization for customer-facing production pipelines and a separate one for internal sandbox testing. That separation prevents accidental edits and keeps activity history easier to interpret.
+
+## Practical governance advice
+
+- Use a clear organization name that reflects environment or business unit.
+- Avoid mixing unrelated customers or environments in one org.
+- Switch context deliberately before creating connections or pipelines.

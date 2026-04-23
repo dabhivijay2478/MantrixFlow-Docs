@@ -1,45 +1,56 @@
 ---
 title: Notion
-description: Connect to Notion using an internal integration token. Connect integration to pages and databases.
+description: Connect Notion as a source for workspace databases, pages, and users that need to land in SQL destinations.
 ---
 
-Notion is a workspace and documentation tool. MantrixFlow connects using an internal integration token. You must connect the integration to specific pages and databases for them to appear as streams.
+Notion is useful when operational planning, editorial calendars, release checklists, or internal knowledge bases need to be pulled into structured reporting tables.
 
-## Prerequisites
+## Current connection form
 
-You need a Notion workspace and admin access to create an integration. The integration must be shared with the pages and databases you want to sync.
+The current **Notion** source form asks for:
 
-## Connection Setup
+- `Connection Name`
+- `Integration Token`
 
-<Steps>
-  <Step>
+- The token field expects a Notion integration token, usually starting with `secret_...`.
+- The integration must be explicitly shared to the databases or pages you want to read.
 
-### 1. Create an Integration
+## Good first use cases
 
-In Notion, go to Settings & members → Connections → Develop or manage integrations. Create a new integration. Copy the Internal Integration Token.
+- planning database exports for reporting
+- release checklist visibility outside Notion
+- operational page snapshots in a SQL destination
 
-  </Step>
-  <Step>
+## Before you connect
 
-### 2. Connect to Pages and Databases
+- Create a Notion integration with the access level your workspace allows.
+- Share the target databases or pages with that integration before testing.
+- Start with `databases` or `pages` so you can confirm the visible content quickly.
 
-Open each database or page you want to sync. Click the `...` menu → Add connections. Select your integration. The integration must have access to the database for it to be discovered.
+## Step by step
 
-  </Step>
-  <Step>
+1. Open **Connections** and click **+ New Connection**.
+2. Keep the role set to **Source** and choose **Notion**.
+3. Fill the form with real values, for example:
+   - `Connection Name`: `Product Wiki`
+   - `Integration Token`: `secret_...`
+4. Click **Test Connection** and save only after the test succeeds.
+5. Create a pipeline and start with one high-value resource so validation stays simple.
 
-### 3. Paste the Token
+## Common resources in the current source preview
 
-Paste the Internal Integration Token into MantrixFlow.
+- `databases`
+- `pages`
+- `users`
 
-  </Step>
-</Steps>
+The current Notion preview is intentionally narrow. It does not document extra unpublished resource variants beyond these three surfaces.
 
-## Available Streams
+## Real-world example
 
-Each database shared with the integration becomes a stream. MantrixFlow discovers databases the integration has access to.
+An operations team syncs a Notion release checklist database into PostgreSQL so engineering managers can combine planning status with GitHub and deployment reporting.
 
-## Supported Sync Modes
+## Troubleshooting
 
-- **Full sync** — Reads all records on every run.
-- **Incremental sync** — Uses `last_edited_time` or similar to read only new or updated records.
+- If the test succeeds but the expected content is missing, confirm that the integration was shared to the specific pages or databases.
+- Notion resources are often better validated with a manual full-sync run first.
+- Start with one workspace area before expanding the connection scope.

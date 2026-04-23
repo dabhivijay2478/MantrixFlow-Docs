@@ -1,28 +1,63 @@
 ---
-title: MySQL (Destination)
-description: Write synced data to MySQL. Upsert uses ON DUPLICATE KEY UPDATE.
+title: MySQL
+description: Write MantrixFlow pipeline output into MySQL for application-facing tables and operational reporting stores.
 ---
 
-MySQL is a relational database destination. MantrixFlow supports append, replace, and upsert write modes.
+MySQL is a supported SQL destination in the current app and is useful when downstream tools or applications already expect MySQL tables.
 
-## Prerequisites
+## Current connection form
 
-You need a MySQL database and a user with CREATE, INSERT, UPDATE, and DELETE permissions on the target database.
+The current **MySQL** destination form asks for:
 
-## Connection Setup
+- `Connection Name`
+- `Host`
+- `Port`
+- `Database`
+- `Username`
+- `Password`
+- `SSL Mode`
 
-Use the same connection fields as the [MySQL source](/connections/sources/database/mysql): host, port (3306), database, username, and password.
+- `Port` defaults to `3306`.
+- `SSL Mode` options are available in the connection form.
+- Use the builder to set the final destination `Schema` and `Table`.
 
-## Write Modes
+## Good first use cases
 
-### Append
+- operational reporting tables
+- internal tool read models
+- application-facing SQL tables fed by a pipeline
 
-Inserts new rows. The table is created if it does not exist.
+## Before you connect
 
-### Replace
+- Create a dedicated write user for the target MySQL database.
+- Decide which schema and table name you want to use in the destination panel.
+- Validate one destination table manually before broadening the rollout.
 
-Drops and recreates the table on every sync.
+## Step by step
 
-### Upsert
+1. Open **Connections** and click **+ New Connection**.
+2. Set the role to **Destination** and choose **MySQL**.
+3. Fill the form with real values, for example:
+   - `Connection Name`: `MySQL Reporting`
+   - `Host`: `reporting.cluster-abcdefghijkl.us-east-1.rds.amazonaws.com`
+   - `Port`: `3306`
+   - `Database`: `reporting`
+   - `Username`: `mf_writer`
+   - `SSL Mode`: `require`
+4. Click **Test Connection** and save the connection after the test succeeds.
+5. In the builder's **Destination** panel, configure:
+   - `Connection`: `MySQL Reporting`
+   - `Schema`: `analytics`
+   - `Table`: `orders_live`
+   - `Write mode`: `Upsert`
+6. Save the pipeline and run one manual sync before enabling a schedule.
 
-Uses `ON DUPLICATE KEY UPDATE` syntax. The upsert key column must be set as a primary key or unique key in the destination table. MySQL requires the key to be part of a unique constraint for upsert to work correctly.
+## Real-world example
+
+A support operations team lands GitHub and HubSpot data into MySQL so an internal application can query recent issues, pull requests, and CRM records from one operational store.
+
+## Troubleshooting
+
+- If the test fails, confirm the database host, SSL mode, and write user credentials.
+- If destination validation fails, make sure the target schema and table names are correct for the environment.
+- Keep the first rollout on `Upsert` and validate the rows with SQL before adding a schedule.

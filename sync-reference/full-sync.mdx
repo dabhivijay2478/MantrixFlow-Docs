@@ -1,28 +1,34 @@
 ---
-title: Full Sync
-description: When to use full sync, how it works, and its limitations.
+title: Full sync
+description: How full sync works in the current product, when to use it, and how teams roll it out safely.
 ---
 
-Full sync reads every record from the source on every run and writes all of them to the destination. It is the simplest sync mode and works with every source.
+Full sync re-reads the selected table or resource on every run. It is the safest place to start when you are onboarding a new source, validating a transform, or syncing a small dataset that changes infrequently.
 
-## When to Use
+## When teams use full sync
 
-- **Small tables** — Tables with fewer than a few hundred thousand rows.
-- **Sources without incremental support** — Some SaaS APIs or file sources only support full reads.
-- **Complete refresh** — When you want the destination to exactly match the source state each run.
-- **Infrequent syncs** — When the pipeline runs rarely (e.g. daily or weekly), full sync may be acceptable even for larger tables.
+- small reference tables such as `countries`, `tax_rates`, or `warehouse_locations`
+- SaaS resources where a reliable cursor field is not available or not needed
+- first-run validation before moving a larger table to incremental sync
+- controlled nightly refreshes where simplicity matters more than read efficiency
 
-## How It Works
+## Step by step in MantrixFlow
 
-1. The pipeline connects to the source.
-2. It reads every row from the selected stream(s).
-3. It applies transformation rules (if any).
-4. It writes to the destination according to the write mode (append, replace, or upsert).
+1. Create and test the source and destination connections.
+2. Create a new pipeline from **Data Pipelines**.
+3. Select the source connection and choose the table or resource you want to sync.
+4. Keep the sync mode set to **Full sync**.
+5. Open the builder and use the **Transform** panel if you need cleanup, renaming, or filtering.
+6. Open **Destination**, choose the destination connection, confirm the schema and table name, and keep the write behavior on **Upsert**.
+7. Save the pipeline and run it manually.
+8. Review **Run History** before adding a schedule.
 
-For replace mode, the destination table is dropped and recreated (or truncated and repopulated). For append, rows are added. For upsert, rows are inserted or updated by primary key.
+## Real-world example
 
-## Limitations
+Lighthouse Commerce keeps a small `public.tax_rates` table in PostgreSQL and syncs it into a PostgreSQL reporting database every night. Because the dataset is small and correctness matters more than optimization, full sync is the cleanest option.
 
-- **Performance** — Every run processes the entire dataset. For large tables (millions of rows), this can be slow and resource-intensive.
-- **Source load** — The source may be under heavy load during a full sync. Consider off-peak scheduling.
-- **Network** — Large full syncs transfer more data than incremental syncs.
+## Why full sync is a good first production step
+
+- it removes cursor and CDC complexity while you validate field shape
+- it makes debugging easier because every run processes the same logical dataset
+- it is usually the fastest way to prove that the connection, transform, and destination naming are correct

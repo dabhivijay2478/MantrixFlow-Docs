@@ -1,30 +1,31 @@
 ---
-title: Sync State
-description: What the sync state stores and how it is used.
+title: Sync state
+description: What MantrixFlow tracks for incremental and CDC pipelines, how operators should think about it, and where it shows up in the current workflow.
 ---
 
-For incremental and CDC syncs, MantrixFlow stores sync state. This state tells the next run where to resume.
+Sync state is the checkpoint MantrixFlow uses to decide where the next run should resume. It matters most for incremental and CDC pipelines.
 
-## What Is Stored
+## What sync state contains
 
-### Incremental Sync
+For incremental sync, the state typically represents the latest successful cursor value. For CDC, it represents the latest successful replication checkpoint used by the pipeline service.
 
-- **Cursor value** — The maximum value of the cursor column from the last successful run. The next run reads only rows with a cursor value greater than this.
+## What operators see today
 
-### CDC
+In the standard workspace flow, operators mostly experience sync state indirectly through:
 
-- **CDC position** — The position in the database replication log (e.g. LSN for PostgreSQL, binlog position for MySQL). The next run continues from this position.
+- successful incremental runs only pulling newer rows
+- CDC pipelines resuming from the last processed log position
+- run history showing whether the pipeline is progressing normally
 
-## How It Is Used
+The state itself is not exposed as a standard self-serve reset screen in the current product.
 
-On each run:
+## Practical example
 
-1. The pipeline loads the stored sync state.
-2. It uses the state to determine what to read (incremental: rows after cursor; CDC: log events after position).
-3. After a successful run, it updates the state with the new cursor value or CDC position.
+Suppose Lighthouse Commerce runs an incremental sync on `orders.updated_at` every 15 minutes. After a successful run at 10:00, MantrixFlow stores the latest processed high-water mark. The 10:15 run uses that checkpoint so it reads only rows newer than the prior successful state.
 
-## When State Is Cleared
+## Recommended operator workflow
 
-- **Reset** — You can manually reset the sync state. The next run will behave like a full sync (or CDC from the current position).
-- **Pipeline deletion** — Deleting a pipeline removes its sync state.
-- **Stream reconfiguration** — Changing the cursor column or stream may require a reset.
+1. Check **Run History** first.
+2. Confirm whether the issue is source-side, transform-side, or destination-side.
+3. If the cursor or CDC assumptions changed, treat that as an operational recovery task instead of a casual reset.
+4. Re-run manually before restoring the schedule.

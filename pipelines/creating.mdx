@@ -1,65 +1,31 @@
 ---
-title: Creating a Pipeline
-description: Step-by-step walkthrough of the pipeline builder wizard.
+title: Creating a pipeline
+description: Step-by-step instructions for the current MantrixFlow workflow, from pipeline shell creation through builder configuration and first validation run.
 ---
 
-The pipeline builder guides you through each step. Follow this walkthrough to create a pipeline from start to finish.
+This page reflects the current app flow, not an older all-in-one wizard. In practice, you create the shell first and then finish configuration in the builder.
 
-<Steps>
-  <Step>
+## Step by step
 
-### 1. Choose source connection
+1. Create and test the source and destination connections from **Connections**.
+2. Go to **Data Pipelines**, click **+ New Pipeline**, give it a clear name, choose the source connection, and click **Create & open canvas**.
+3. In **Source Configuration**, pick the exact table or resource to sync, such as `public.orders`, `orders`, `deals`, or `pull_requests`.
+4. Set the sync mode that matches the source: full, incremental, or PostgreSQL CDC.
+5. Keep the first transform simple. A light rename, cast, or derived column is easier to validate than a large rewrite.
+6. Open **Destination**, choose the destination connection, set the target `Schema` and `Table`, and keep `Write mode` on `Upsert`.
+7. Save the pipeline.
+8. Click **Run Now** and inspect **Run History**.
+9. Verify the destination rows before adding a recurring schedule.
 
-Select the source connection from the dropdown. Only connections you have created appear. If you need a new connection, create it first in Connections.
+## A realistic first pipeline
 
-  </Step>
-  <Step>
+A good first production rollout is:
 
-### 2. Choose destination connection
+- source connection: `Shopify Production`
+- selected resource: `orders`
+- transform: normalize currency codes and add `loaded_from`
+- destination: `Analytics Postgres`
+- target table: `raw_shopify_orders`
+- cadence: hourly after one successful manual run
 
-Select the destination connection. Again, create the connection in Connections if it does not exist.
-
-  </Step>
-  <Step>
-
-### 3. Select streams
-
-Choose which streams (tables or data feeds) to sync. You can select one or more. Each stream will sync to a table or collection in the destination.
-
-  </Step>
-  <Step>
-
-### 4. Set sync mode
-
-For each stream, choose the sync mode: Full sync, Incremental sync, or CDC (if supported). For incremental, select the cursor column (e.g. updated_at).
-
-  </Step>
-  <Step>
-
-### 5. Set write mode
-
-Choose how to write to the destination: Append, Replace, or Upsert. For upsert, specify the primary key column.
-
-  </Step>
-  <Step>
-
-### 6. Column mapping (optional)
-
-Optionally rename columns or select only specific columns. By default, all columns are synced with their original names.
-
-  </Step>
-  <Step>
-
-### 7. Transformation rules (optional)
-
-Add transformation rules: rename, cast, filter, add column, fill nulls, or custom rules. Rules are applied in order before writing to the destination.
-
-  </Step>
-  <Step>
-
-### 8. Review and save
-
-Review the configuration. Click Save to create the pipeline. You can run it immediately or configure a schedule.
-
-  </Step>
-</Steps>
+That sequence exercises the full live app flow without introducing unnecessary risk on day one.
