@@ -1,13 +1,13 @@
 ---
 title: PostgreSQL
-description: Write MantrixFlow pipeline output into PostgreSQL for reporting, operational marts, and downstream applications.
+description: Write MantrixFlow pipeline output into PostgreSQL for the Postgres-to-Postgres live release.
 ---
 
-PostgreSQL is the clearest first destination in the current app because it is easy to test, easy to validate with SQL, and fully aligned with the live destination panel flow.
+PostgreSQL is the primary destination for the live Postgres-to-Postgres release. Use it for analytics tables, operational reporting schemas, and clean downstream tables that should not read directly from production.
 
-## Current connection form
+## Connection fields
 
-The current **PostgreSQL** destination form asks for:
+The PostgreSQL destination form asks for:
 
 - `Connection Name`
 - `Host`
@@ -18,48 +18,53 @@ The current **PostgreSQL** destination form asks for:
 - `Schema`
 - `SSL Mode`
 
-- `Port` defaults to `5432`.
-- `Schema` defaults to `public` in the connection form.
-- You still choose the final destination `Schema` and `Table` in the builder.
+`Port` defaults to `5432`. The connection form stores the default schema, and the pipeline builder still lets you choose the final destination schema and table for each branch.
 
-## Good first use cases
+## Network access
 
-- analytics tables for BI and reporting
-- operational marts that should not read production directly
-- clean SQL tables for downstream apps or internal tools
+The destination database must be reachable from MantrixFlow's ELT server. If your destination provider restricts inbound connections, copy MantrixFlow's static outbound IP from the connection form and add it as a `/32` rule for PostgreSQL port `5432`.
 
-## Before you connect
+Use [Private database access](/connections/private-database-access) for provider-specific allowlist steps.
 
-- Create a dedicated write user for the reporting database.
-- Decide which schema MantrixFlow should own, such as `analytics` or `raw`.
-- Pick the first target table name before you configure the branch.
+Private-only destinations with no public endpoint are not supported in this release. SSH tunnel and self-hosted agent support are planned as later releases.
+
+## Provider setup
+
+| Provider | What to configure |
+| --- | --- |
+| AWS RDS / Aurora PostgreSQL | Use a reachable DB endpoint and add an inbound security group rule for `5432` from MantrixFlow's `/32`. See [AWS RDS security groups](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.RDSSecurityGroups.html). |
+| GCP Cloud SQL for PostgreSQL | Enable public IP and add MantrixFlow's `/32` as an authorized network. See [Google authorized networks](https://cloud.google.com/sql/docs/postgres/authorize-networks). |
+| Azure Database for PostgreSQL | Use public access and add a firewall rule with start and end IP set to MantrixFlow's IP. See [Azure firewall rules](https://learn.microsoft.com/en-us/azure/postgresql/security/security-firewall-rules). |
+| Supabase | Use the host, port, database, and SSL settings from the dashboard. Add MantrixFlow's `/32` if Network Restrictions are enabled. See [Supabase Network Restrictions](https://supabase.com/docs/guides/platform/network-restrictions). |
+| Neon | Use the direct or pooled connection details. Add MantrixFlow to IP Allow when the feature is enabled for the project. See [Neon IP Allow](https://neon.com/docs/reference/cli-ip-allow). |
+| Aiven for PostgreSQL | Use service connection details and include MantrixFlow's `/32` in the service IP filter. See [Aiven access restrictions](https://aiven.io/docs/platform/howto/restrict-access). |
+| DigitalOcean Managed PostgreSQL | Add MantrixFlow's IP as a trusted source for the cluster. See [DigitalOcean trusted sources](https://docs.digitalocean.com/products/databases/postgresql/how-to/secure/). |
+| Render Postgres | Use the external connection details and restrict external access to MantrixFlow's IP if you lock down networking. See [Render Postgres networking](https://render.com/docs/databases). |
+
+## Permissions
+
+Create a dedicated destination user for MantrixFlow. For a pre-created destination table flow, the user should have:
+
+- `CONNECT` on the database
+- `USAGE` on the destination schema
+- `SELECT`, `INSERT`, and `UPDATE` on destination tables
+
+If your pipeline creates or replaces objects in a schema, grant only the additional schema privileges that workflow requires. Avoid using a database owner account for routine syncs.
 
 ## Step by step
 
-1. Open **Connections** and click **+ New Connection**.
-2. Set the role to **Destination** and choose **PostgreSQL**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Analytics Postgres`
-   - `Host`: `analytics-db.internal.lighthouse.io`
-   - `Port`: `5432`
-   - `Database`: `warehouse`
-   - `Username`: `mf_writer`
-   - `Schema`: `analytics`
-   - `SSL Mode`: `require`
-4. Click **Test Connection** and save the connection after the test succeeds.
-5. In the builder's **Destination** panel, configure:
-   - `Connection`: `Analytics Postgres`
-   - `Schema`: `analytics`
-   - `Table`: `orders_live`
-   - `Write mode`: `Upsert`
-6. Save the pipeline and run one manual sync before enabling a schedule.
-
-## Real-world example
-
-Lighthouse Commerce lands `public.orders` from Neon into `analytics.orders_live` on a dedicated PostgreSQL reporting instance so BI queries never hit production directly.
+1. Create or choose the destination database and schema, such as `analytics`.
+2. Create a dedicated write-capable user.
+3. Add MantrixFlow's `/32` to the provider firewall if required.
+4. Open **Connections** and click **+ New Connection**.
+5. Set the role to **Destination** and choose **PostgreSQL**.
+6. Fill in the connection fields and click **Test Connection**.
+7. Save only after the test succeeds.
+8. In the pipeline builder, choose this connection and configure the destination schema, table, and write mode.
 
 ## Troubleshooting
 
-- If the connection test fails, confirm host reachability, SSL requirements, and whether the user can connect to the database.
-- If the run fails at write time, check schema ownership and whether the write user can create or update objects.
-- If rows duplicate unexpectedly, inspect the upstream unique identifier and the way the destination table expects upsert behavior.
+- Connection timeout usually means the destination firewall or public endpoint is blocking MantrixFlow.
+- Permission errors at run time usually mean the write user cannot access the destination schema or table.
+- Duplicate rows usually mean the destination table and write mode do not have the expected key behavior.
+- TLS failures usually mean the provider expects `SSL Mode` to be `require` or stricter.

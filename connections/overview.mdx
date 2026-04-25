@@ -7,6 +7,8 @@ Connections are reusable credentials and connector settings. This section only d
 
 If a connector tile appears in the catalog ahead of its full rollout, it is intentionally left out of this section until the end-to-end workflow is ready.
 
+For the Postgres-to-Postgres live release, managed PostgreSQL databases can be connected through a public endpoint protected by a provider firewall allowlist. See [Private database access](/connections/private-database-access) before connecting AWS RDS/Aurora, GCP Cloud SQL, Azure PostgreSQL, Supabase, Neon, Aiven, DigitalOcean, or Render Postgres.
+
 ## How the connection flow works today
 
 1. Go to **Connections**.
@@ -48,3 +50,4 @@ If a connector tile appears in the catalog ahead of its full rollout, it is inte
 - future or coming-soon connectors
 - placeholder rollout checklists for features that are not in the app yet
 - any unpublished developer reference surface
+- SSH tunnel or self-hosted agent runtime, which are planned later

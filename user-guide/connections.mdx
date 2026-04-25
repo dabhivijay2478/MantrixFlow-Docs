@@ -43,6 +43,8 @@ Destinations:
 4. Create the destination connection.
 5. Test again before you build a pipeline.
 
+For PostgreSQL source or destination connections that are protected by a provider firewall, open the **Private database access** panel in the form and copy MantrixFlow's `/32` allowlist value before testing. Private-only databases with no public endpoint require a later SSH tunnel or self-hosted agent release.
+
 ## Create a new connection
 
 1. Click **+ New Connection** from the list page.

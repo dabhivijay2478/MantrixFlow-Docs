@@ -29,6 +29,7 @@ Based on the current connection experience and supporting product copy:
 - use dedicated service accounts for databases and SaaS sources
 - grant minimum required privileges
 - enable SSL for database connections where the form and provider support it
+- for managed PostgreSQL providers, allow MantrixFlow's static IP as a `/32` on port `5432` instead of opening broad database access
 - rotate credentials periodically
 - keep the owner role limited to a very small set of users
 
