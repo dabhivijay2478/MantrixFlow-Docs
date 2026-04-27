@@ -142,6 +142,8 @@
             "pages": [
               "pipelines/overview",
               "pipelines/creating",
+              "pipelines/postgres-to-postgres",
+              "pipelines/data-type-compatibility",
               "pipelines/sync-modes",
               "pipelines/transformation-rules",
               "pipelines/schedule",
