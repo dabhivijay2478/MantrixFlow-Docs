@@ -3,7 +3,7 @@ title: Sync modes
 description: Choose between full sync and incremental sync based on source behavior, table size, and freshness requirements.
 ---
 
-Sync mode decides how MantrixFlow reads data from the source. The right choice depends on table size, resource behavior, and freshness requirements.
+Sync mode controls how MantrixFlow reads from the source on each run. It is configured in the **Destination node → Config tab → Sync mode** dropdown in the canvas builder.
 
 ## Quick comparison
 
@@ -29,6 +29,15 @@ Use incremental sync when records have a trustworthy field such as `updated_at`,
 - **Start with full sync** for all new pipelines. Validate that data looks correct end-to-end.
 - Consider **incremental sync** only once full sync is confirmed working and table volume makes full re-reads expensive.
 
+## Where sync mode lives in the UI
+
+In the canvas builder, click ⚙️ on the **Destination** node, open the **Config** tab, and choose from the **Sync mode** dropdown:
+
+- `FULL_TABLE` — re-reads all rows on every run (recommended default)
+- `INCREMENTAL` — reads only rows newer than the cursor column value stored in sync state (beta)
+
+The **Replication key** field below the dropdown is where you set the cursor column for incremental mode (e.g. `updated_at`).
+
 ## Companion destination decision
 
-Read mode and write mode are separate concerns. The only available destination write mode today is **Upsert**.
+Sync mode and write mode are separate concerns. The only available write mode today is **Upsert**. Append and Replace are coming soon.

@@ -36,9 +36,12 @@ Have these values ready:
    - `Username`: `mf_writer`
    - `Schema`: `analytics`
    - `SSL Mode`: `require`
-6. Go to **Data Pipelines**, click **+ New Pipeline**, name it `Orders to Analytics`, choose the PostgreSQL source connection, and open the canvas.
-7. In **Source Configuration**, select `public.orders` and save the stream selection.
-8. In **Transform**, keep it as a pass-through or add a light SQL transform such as:
+6. Go to **Data Pipelines → + New Pipeline**, name it `Orders to Analytics`, choose `Neon Production Orders` as the source, and click **Create & open canvas**.
+7. On the canvas, click ⚙️ on the **Source** node:
+   - Click **Discover schema** to load available tables.
+   - Tick **Include** next to `public.orders`.
+   - Click **Preview** to verify rows.
+8. Optionally add a SQL transform. Use `{{ source }}` as the table reference:
 
 ```sql
 SELECT
@@ -52,11 +55,15 @@ FROM {{ source }}
 WHERE order_status IS NOT NULL
 ```
 
-9. Use **Preview** to confirm the columns look correct before saving.
-10. In **Destination**, choose `Analytics Postgres`, set `Schema` to `analytics`, `Table` to `orders_live`, and keep `Write mode` on `Upsert`.
-11. Save the pipeline and click **Run Now**.
-12. Check **Run History** and confirm that `analytics.orders_live` contains the expected rows.
-13. After the manual run looks correct, add an hourly schedule.
+9. Click ⚙️ on the **Destination** node. In the **Config** tab:
+   - **Connection**: `Analytics Postgres`
+   - **Final delivery schema**: `analytics`
+   - **Sync mode**: `FULL_TABLE`
+   - **Write mode**: `Upsert`
+   - Click **Validate config**, then open the **Preview** tab to confirm the target schema.
+10. Click ▷ on the Destination node to start the first manual run.
+11. Click the history icon in the top bar and confirm `analytics.orders_live` contains the expected rows.
+12. Once the manual run succeeds, open the **Scheduling** tab in the Destination panel and set an hourly schedule.
 
 ## What success looks like
 

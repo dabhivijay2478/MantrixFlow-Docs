@@ -7,9 +7,9 @@ The live MantrixFlow workflow is straightforward:
 
 1. Create and test connections.
 2. Create the pipeline shell.
-3. Finish stream selection, transforms, and destination settings in the builder.
-4. Run manually.
-5. Schedule only after validation.
+3. In the canvas builder, click ⚙️ on the **Source** node to pick tables and preview rows.
+4. Click ⚙️ on the **Destination** node to set the schema, sync mode, and write mode.
+5. Run manually first, verify rows, then schedule.
 
 ## What you need before you start
 
@@ -25,8 +25,9 @@ The live MantrixFlow workflow is straightforward:
 2. Open **Connections** and create the source connection.
 3. Create the destination connection in the same workspace.
 4. Go to **Data Pipelines** and create the pipeline shell.
-5. In the builder, choose the table or resource, add an optional transform script, and configure the destination table.
-6. Save, run manually, and verify the result in the destination and **Run History**.
+5. In the canvas builder, click ⚙️ on the **Source** node to select tables, then click ⚙️ on the **Destination** node to configure the **Config** tab (schema, sync mode, write mode).
+6. Optionally add a SQL Transform node, or configure **Normalisation** and **dbt Layer** in the Destination panel.
+7. Click ▷ to run manually. Check run results via the history icon in the top bar and the **Activity Log** page.
 
 ## Where to go next
 

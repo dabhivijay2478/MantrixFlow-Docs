@@ -1,21 +1,29 @@
 ---
 title: Creating a pipeline
-description: Step-by-step instructions for the current MantrixFlow workflow, from pipeline shell creation through builder configuration and first validation run.
+description: Step-by-step instructions for the current MantrixFlow builder — canvas-based, node-driven, with source and destination configuration panels.
 ---
 
-This page reflects the current app flow, not an older all-in-one wizard. In practice, you create the shell first and then finish configuration in the builder.
+Pipelines are built in a canvas where a **Source** node connects to one or more **Destination** nodes. Configuration happens by clicking the ⚙️ gear icon on each node.
 
 ## Step by step
 
-1. Create and test the source and destination connections from **Connections**.
-2. Go to **Data Pipelines**, click **+ New Pipeline**, give it a clear name, choose the source connection, and click **Create & open canvas**.
-3. In **Source Configuration**, pick the exact table or resource to sync, such as `public.orders`, `orders`, `deals`, or `pull_requests`.
-4. Set the sync mode: use **Full sync** for first runs and all production PostgreSQL pipelines today. **Incremental sync** is available but beta — use it only after full sync is confirmed working.
-5. Keep the first transform simple. For PostgreSQL-to-PostgreSQL pipelines write a SQL `SELECT`. For SaaS sources write a Python `transform(record)` function.
-6. Open **Destination**, choose the destination connection, set the target `Schema` and `Table`, and keep `Write mode` on `Upsert`.
-7. Save the pipeline.
-8. Click **Run Now** and inspect **Run History**.
-9. Verify the destination rows before adding a recurring schedule.
+1. Create and test source and destination connections from **Connections** first.
+2. Go to **Data Pipelines → + New Pipeline**. Enter a pipeline name, choose the source connection, and click **Create & open canvas**.
+3. The builder canvas opens. You will see a **Source** node on the left and a **Destination** node on the right connected by a sync line.
+4. Click ⚙️ on the **Source** node to open the Source panel:
+   - Use **Discover schema** to list available tables.
+   - Tick **Include** next to each table you want to sync.
+   - Click **Preview** on any table to inspect raw source rows.
+5. Click ⚙️ on the **Destination** node to open the Destination panel. Configure the **Config** tab:
+   - **Connection** — select the destination connection
+   - **Final delivery schema** — e.g. `analytics`
+   - **Sync mode** — use `FULL_TABLE` for all first runs
+   - **Write mode** — select `Upsert`
+   - Click **Validate config** before saving.
+6. Use the **Preview** tab in the Destination panel to inspect the target table before the first run.
+7. Click ▷ on the Destination node (or use the top-bar **Run** button) to trigger a manual run.
+8. Click the history icon in the top bar to inspect run results.
+9. Once the manual run succeeds, open the **Scheduling** tab in the Destination panel to add a schedule.
 
 ## A realistic first pipeline
 

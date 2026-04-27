@@ -27,10 +27,10 @@ Start with a pipeline name and a source connection. The create page does not ask
 
 The builder is the real control room for the pipeline.
 
-- **Source panel** chooses the table or API resource.
-- **Transform panel** edits the Python script and branch label.
-- **Destination panel** chooses the destination connection, schema, table, preview, and schedule.
-- **Action bar** lets you save, run manually, and open schedule or settings.
+- **Source panel** (⚙️ on Source node) — choose tables, Discover schema, Preview raw rows.
+- **Transform node** (on canvas) — SQL editor using `{{ source }}` for quick reshaping.
+- **Destination panel** (⚙️ on Destination node) — 5 tabs: **Config**, **Normalisation**, **dbt Layer**, **Preview**, **Scheduling**.
+- **Action bar** — save, run manually, and open settings.
 
 ![Pipeline builder - branches on canvas](/images/user-guide/ug-pipeline-builder-branches.png)
 
@@ -84,7 +84,7 @@ After the run, open the detail page and inspect **Run History**. This is where y
 
 - the source or destination connection was edited but not re-tested
 - the selected source table no longer exists or permissions were removed
-- the transform script returns invalid records
+- the SQL transform or dbt model has a syntax error
 - the destination schema or table name is wrong
 - a schedule fired after a credential rotation
 

@@ -143,6 +143,8 @@
               "pipelines/overview",
               "pipelines/creating",
               "pipelines/postgres-to-postgres",
+              "pipelines/normalisation",
+              "pipelines/dbt-layer",
               "pipelines/data-type-compatibility",
               "pipelines/sync-modes",
               "pipelines/transformation-rules",
@@ -160,17 +162,6 @@
             ]
           },
           {
-            "group": "Transformations",
-            "icon": "wand-sparkles",
-            "pages": [
-              "transformations/overview",
-              "transformations/script-editor",
-              "transformations/filter-node",
-              "transformations/preview-and-validation",
-              "transformations/script-patterns"
-            ]
-          },
-          {
             "group": "Platform",
             "icon": "building-2",
             "pages": [
@@ -178,19 +169,6 @@
               "platform/team-members",
               "platform/security",
               "platform/data-privacy"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "Examples",
-        "icon": "terminal",
-        "groups": [
-          {
-            "group": "Postgres-to-Postgres",
-            "icon": "database",
-            "pages": [
-              "example/postgres-to-postgres"
             ]
           }
         ]

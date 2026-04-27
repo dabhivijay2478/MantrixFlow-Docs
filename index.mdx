@@ -35,7 +35,7 @@ Future connectors and unpublished developer surfaces are intentionally not docum
 - Getting started guides that follow the real connection-first, builder-second app flow
 - Source and destination setup pages that mirror the actual connection forms
 - Pipeline and sync references for full sync and incremental sync (beta)
-- Transformation guides: SQL transforms for PostgreSQL-to-PostgreSQL pipelines, Python script transforms for SaaS sources
+- Transformation guides: SQL Transform node, Normalisation, and dbt Layer for reshaping data
 - Platform guidance for organizations, team access, security, and data privacy
 
 ## A representative production flow
@@ -45,7 +45,7 @@ A common first rollout looks like this:
 1. Create a PostgreSQL or Shopify source connection in **Connections**.
 2. Create a PostgreSQL destination connection.
 3. Create the pipeline shell from **Data Pipelines**.
-4. In the builder, pick one table or resource, add an optional SQL or Python transform, and set the destination table.
+4. In the builder, pick one table or resource, optionally add a SQL transform or configure Normalisation + dbt Layer, and set the destination.
 5. Run manually, validate the destination rows, and only then turn on a schedule.
 
 ## Recommended reading order

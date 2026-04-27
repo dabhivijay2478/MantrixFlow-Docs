@@ -1,28 +1,42 @@
 ---
 title: Transformations and branches
-description: Use the current transform panel to shape records, preview output, and create multiple destination branches from one selected source stream.
+description: Use SQL transforms, Normalisation, and dbt Layer to shape data — and create multiple destination branches from one source stream.
 ---
 
-In the builder, a branch is a concrete path from the selected source stream to a destination. Each branch can have its own label, transform script, filter logic, destination connection, and schedule behavior.
+In the builder, a branch is a concrete path from the selected source stream to a destination. Each branch can have its own transform logic, filter, destination connection, and schedule.
 
-## What the transform panel controls today
+## Transform approaches
 
-The live transform panel is centered around a Python function:
+MantrixFlow provides three SQL-based approaches:
 
-```python
-def transform(record):
-    return record
+| Approach | Where | Source reference |
+| --- | --- | --- |
+| **SQL Transform node** | Canvas (between Source and Destination) | `{{ source }}` |
+| **Normalisation tab** | Destination panel → Normalisation | Automatic (rename/exclude) |
+| **dbt Layer tab** | Destination panel → dbt Layer | `{{ source('raw', 'schema__tablename') }}` |
+
+### SQL Transform node
+
+Add a Transform node on the canvas and write a `SELECT` using `{{ source }}`:
+
+```sql
+SELECT
+  id,
+  LOWER(email) AS email,
+  first_name || ' ' || last_name AS full_name,
+  amount_cents::NUMERIC / 100 AS amount_usd
+FROM {{ source }}
+WHERE is_deleted = false
 ```
 
-From that panel, you can:
+### Normalisation + dbt Layer
 
-- rename the branch so operators know its purpose
-- switch the selected source table when needed
-- load source-specific example scripts when examples are available
-- preview output against sample source rows
-- save the script into the pipeline graph
+For production pipelines, use the Destination panel tabs:
 
-The live transform panel does not expose a separate visual rename, cast, or null-fill UI. Those patterns are implemented directly in `transform(record)`.
+1. **Normalisation tab** — Rename or Exclude source columns before data lands in the raw layer.
+2. **dbt Layer tab** — Write a dbt SQL model on `{{ source('raw', 'schema__tablename') }}` using the renamed column names.
+
+See [Normalisation](/pipelines/normalisation) and [dbt Layer](/pipelines/dbt-layer) for the full reference.
 
 ## A realistic branching example
 
@@ -35,9 +49,9 @@ That pattern keeps one source read while allowing two different SQL destinations
 
 ## Safe transform workflow
 
-1. Pick the source table or resource first so previews use the right record shape.
-2. Start with a pass-through script and change one thing at a time.
-3. Use **Preview with sample data** after every meaningful edit.
+1. Pick the source table first so previews use the right record shape.
+2. Start with a pass-through (`SELECT * FROM {{ source }}`) and change one thing at a time.
+3. Use **Preview** after every meaningful edit.
 4. Save the transform before running the pipeline.
 5. Validate the destination output before turning the schedule on.
 
@@ -46,16 +60,17 @@ That pattern keeps one source read while allowing two different SQL destinations
 - standardize enum values such as `paid`, `Paid`, and `PAID`
 - derive reporting-friendly columns such as `order_date` or `mrr`
 - remove fields that should not leave the source system
-- flatten nested SaaS payloads before they reach SQL destinations
+- flatten JSONB payloads before they reach the destination
 - add metadata such as `loaded_from` or `sync_batch_id`
 
-## Filter nodes in the current builder
+## Filter node
 
-The builder also includes a dedicated **Filter** node with two modes:
+The builder includes a dedicated **Filter** node that applies a SQL `WHERE` clause:
 
-- a Python expression such as `record.get('status') != 'deleted'`
-- a SQL `WHERE` clause for source-side filtering patterns
+```sql
+is_deleted = false AND status IN ('active', 'pending')
+```
 
-Use the filter node for simple keep-or-drop logic. Use the transform script when you need filtering plus reshaping in one place.
+Use the Filter node for simple keep-or-drop logic. Use the Transform node or dbt Layer when you also need reshaping.
 
-Current limitation: the filter panel is primarily a configuration surface. Treat source preview, transform preview, destination preview, and a manual run as the authoritative validation path.
+Current limitation: the filter panel is primarily a configuration surface. Treat source preview, destination preview, and a manual run as the authoritative validation path.

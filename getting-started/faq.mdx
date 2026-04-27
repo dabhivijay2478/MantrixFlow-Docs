@@ -38,26 +38,34 @@ Because this documentation is intentionally product-aligned. Connectors that are
 
 **Why does pipeline creation only ask for a source connection?**
 
-Because the current app creates the pipeline shell first and then sends you into the builder for stream selection, sync mode, transforms, destination settings, and scheduling.
+The app creates a pipeline shell first, then opens the canvas builder where you configure everything else. Click **Create & open canvas** to enter the builder.
 
-**Where do I choose the source table or resource?**
+**Where do I choose the source tables?**
 
-In the builder's **Source Configuration** panel.
+Click ⚙️ on the **Source** node in the canvas. The Source panel opens with **Discover schema**, **Refresh tables**, and per-table **Include** and **Preview** controls.
 
-**Where do I choose the destination table?**
+**Where do I configure the destination?**
 
-In the builder's **Destination** panel.
+Click ⚙️ on the **Destination** node. The Destination panel has five tabs: **Config**, **Normalisation**, **dbt Layer**, **Preview**, and **Scheduling**. Set the connection, **Final delivery schema**, sync mode, and write mode in the **Config** tab.
+
+**Where do I set the sync mode?**
+
+In the **Destination node → Config tab → Sync mode** dropdown (`FULL_TABLE` or `INCREMENTAL`).
+
+**Where do I set the schedule?**
+
+In the **Destination node → Scheduling tab**. Always run the pipeline manually first and validate the output before enabling a schedule.
 
 ## Transforms and write behavior
 
 **How do transformations work today?**
 
-Transform type depends on the pipeline:
+MantrixFlow transforms are SQL-based. There are two approaches:
 
-- **PostgreSQL-to-PostgreSQL pipelines** use a SQL `SELECT` transform written directly in the builder. Use `{{ source }}` as the table reference and write any `SELECT` with casts, filters, derived columns, or aggregations.
-- **SaaS source pipelines** (Shopify, Stripe, HubSpot, GitHub, Notion) use a Python `transform(record)` function. Renaming, casting, derived columns, null handling, and nested-payload cleanup all happen inside that function.
+- **SQL Transform node** — add a Transform node on the canvas and write a `SELECT` using `{{ source }}`. Supports casts, filters, derived columns, aggregations, and JSONB operators.
+- **Normalisation + dbt Layer** — use the Destination panel tabs: **Normalisation** (rename/exclude columns) then **dbt Layer** (write a dbt SQL model on `{{ source('raw', 'schema__tablename') }}`). Best for production pipelines with complex transformations.
 
-Both approaches support preview before saving.
+Both approaches support preview before saving. See [Transformation rules](/pipelines/transformation-rules) for the full reference.
 
 **Which write mode should I use?**
 
@@ -73,8 +81,10 @@ Not as a standard self-serve workflow in the current app. Treat sync-state chang
 
 Check these in order:
 
-1. Re-test the source and destination connections.
-2. Confirm the selected source table or resource still exists.
-3. Preview the transform if you use one.
-4. Validate the destination configuration.
-5. Review pipeline **Run History** and the org-wide **Activity Log** for the exact failure.
+1. Re-test the source and destination connections (Source panel → **Test connection**).
+2. Confirm the selected source table exists (Source panel → **Refresh tables**).
+3. Preview source rows (Source panel → **Preview** on the table).
+4. Click **Validate config** in the Destination **Config** tab.
+5. Use the Destination **Preview** tab to inspect the target table.
+6. Check the history icon in the builder top bar for run errors.
+7. Check the org-wide **Activity Log** for the full event trace.

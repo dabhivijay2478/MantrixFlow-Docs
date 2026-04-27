@@ -70,19 +70,20 @@ GRANT CREATE ON DATABASE your_db TO mxf_dest;
   <Step title="Add the destination connection in MantrixFlow">
     Open **Connections → + New Connection**. Set the role to **Destination** and choose **PostgreSQL**. Fill in all fields and click **Test Connection**. Save after the test passes.
   </Step>
-  <Step title="Configure the pipeline destination">
-    In the pipeline builder, select this connection and set the destination schema, table name, and write mode. Preview the output before running.
+  <Step title="Configure the Destination node">
+    In the builder canvas, click ⚙️ on the **Destination** node. In the **Config** tab: select this connection, set the **Final delivery schema**, choose **Sync mode** (`FULL_TABLE`), and set **Write mode** to `Upsert`. Click **Validate config**, then use the **Preview** tab to inspect the target table.
   </Step>
 </Steps>
 
 ## Write modes
 
-The current production write mode in the MantrixFlow UI is **Upsert**. Append mode is not available in the UI today.
+The current production write mode in the MantrixFlow UI is **Upsert**. Append and Replace are visible in the UI but marked **Soon**.
 
 | Mode | Status | Behavior |
 | --- | --- | --- |
-| `upsert` | **Available** | Inserts new rows and updates existing rows matched by primary key |
-| `append` | Coming soon | Inserts every row on every run without deduplication |
+| `Upsert` | **Available** | Inserts new rows and updates existing rows matched by primary key |
+| `Append` | Coming soon | Insert only — no deduplication |
+| `Replace` | Coming soon | Drops and recreates the destination table on each run |
 
 For upsert, the destination table must have a primary key. MantrixFlow uses it to determine whether to insert or update each row.
 

@@ -15,13 +15,17 @@ Full sync re-reads the selected table or resource on every run. It is the safest
 ## Step by step in MantrixFlow
 
 1. Create and test the source and destination connections.
-2. Create a new pipeline from **Data Pipelines**.
-3. Select the source connection and choose the table or resource you want to sync.
-4. Keep the sync mode set to **Full sync**.
-5. Open the builder and use the **Transform** panel if you need cleanup, renaming, or filtering.
-6. Open **Destination**, choose the destination connection, confirm the schema and table name, and keep the write behavior on **Upsert**.
-7. Save the pipeline and run it manually.
-8. Review **Run History** before adding a schedule.
+2. Go to **Data Pipelines → + New Pipeline**, name the pipeline, pick the source connection, and click **Create & open canvas**.
+3. Click ⚙️ on the **Source** node — click **Discover schema**, tick **Include** on the table, click **Preview** to verify rows.
+4. Add a Transform node if you need cleanup, renaming, or filtering.
+5. Click ⚙️ on the **Destination** node — open the **Config** tab:
+   - Set **Connection**, **Final delivery schema**
+   - Set **Sync mode** to `FULL_TABLE`
+   - Set **Write mode** to `Upsert`
+   - Click **Validate config**
+6. Open the Destination **Preview** tab to confirm the target table.
+7. Click ▷ to run manually and check the history icon for results.
+8. Once the run succeeds, open the **Scheduling** tab to add a schedule.
 
 ## Real-world example
 
