@@ -5,8 +5,6 @@ description: Move data between any two PostgreSQL databases with full type suppo
 
 A Postgres-to-Postgres (P2P) pipeline reads from one PostgreSQL source and writes the result into a PostgreSQL destination. Both databases can be on any managed provider.
 
-For a standalone library of SQL transform patterns (`{{ source }}`), see [Postgres-to-Postgres SQL examples](/example/pipelines/postgres-to-postgres-examples).
-
 P2P pipelines support a 3-stage transformation pipeline inside the Destination panel:
 
 ```
@@ -188,7 +186,7 @@ ALTER TABLE analytics.your_table ADD PRIMARY KEY (id);
 
 ## SQL transform examples
 
-All examples below use `{{ source }}` as the table reference. MantrixFlow substitutes the actual source stream at run time.
+These examples cover the most common SQL patterns for P2P pipelines. All use `{{ source }}` as the table reference; MantrixFlow replaces it with the qualified stream name at run time. None of them are tied to a specific provider.
 
 ### 1. Copy a table as-is
 

@@ -192,8 +192,7 @@
             "group": "Examples",
             "icon": "flask-conical",
             "pages": [
-              "example/pipelines/postgres-to-postgres",
-              "example/pipelines/postgres-to-postgres-examples"
+              "example/pipelines/postgres-to-postgres"
             ]
           }
         ]
