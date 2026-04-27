@@ -11,7 +11,7 @@ A MantrixFlow pipeline is the operational definition of how data should move fro
 2. Open the builder canvas (Source and Destination nodes appear automatically).
 3. Click ⚙️ on the **Source** node — tick tables to include, use **Discover schema** and **Preview**.
 4. **Option A — simple**: Add a SQL Transform node on the canvas and write your `SELECT` using `{{ source }}`.
-5. **Option B — full P2P pipeline**: Click ⚙️ on the **Destination** node:
+5. **Option B — Normalisation + dbt Layer**: Click ⚙️ on the **Destination** node:
    - **Normalisation tab**: Rename or exclude source columns before they land in the raw layer.
    - **dbt Layer tab**: Write a dbt SQL model on `{{ source('raw', 'schema__tablename') }}`.
 6. In the **Config** tab: set connection, final delivery schema, sync mode, write mode, and click **Validate config**.
@@ -31,9 +31,9 @@ A MantrixFlow pipeline is the operational definition of how data should move fro
 - **Run history**: the operational record of every execution
 - **Sync state**: the stored cursor checkpoint for incremental sync pipelines
 
-## 3-stage P2P pipeline
+## 3-stage Normalisation + dbt pipeline
 
-For PostgreSQL-to-PostgreSQL pipelines with complex transformations:
+For pipelines that combine Normalisation and the dbt Layer (any supported source and SQL destination), the flow is:
 
 ```
 Source (public.tablename)
@@ -47,7 +47,7 @@ dbt Layer       ← {{ source('raw', 'public__tablename') }}
 Destination  (analytics.your_model)
 ```
 
-See [Normalisation](/pipelines/normalisation) and [dbt Layer](/pipelines/dbt-layer) for the full reference.
+See [Normalisation](/pipelines/normalisation) and [dbt Layer](/pipelines/dbt-layer) for the full reference. For a Postgres-to-Postgres walkthrough, see the [example guide](/example/pipelines/postgres-to-postgres).
 
 ## What is true in the live builder today
 

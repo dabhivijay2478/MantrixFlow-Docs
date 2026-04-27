@@ -26,7 +26,7 @@ FROM {{ source }}
 WHERE is_deleted = false
 ```
 
-SQL transforms support all PostgreSQL syntax: casts, filters, derived columns, aggregations, JSONB operators, and cross-type widening. See [P2P examples](/pipelines/postgres-to-postgres) for a full pattern library.
+SQL transforms support all PostgreSQL syntax: casts, filters, derived columns, aggregations, JSONB operators, and cross-type widening. See [Postgres-to-Postgres SQL examples](/example/pipelines/postgres-to-postgres-examples) for a full pattern library.
 
 ## Normalisation + dbt Layer
 
@@ -77,4 +77,4 @@ Use preview whenever you:
 8. Use the Destination **Preview** tab to confirm the target schema.
 9. Run the pipeline manually before enabling a schedule.
 
-See [Normalisation](/pipelines/normalisation), [dbt Layer](/pipelines/dbt-layer), and [Postgres-to-Postgres](/pipelines/postgres-to-postgres) for full transform references.
+See [Normalisation](/pipelines/normalisation), [dbt Layer](/pipelines/dbt-layer), and [Postgres-to-Postgres](/example/pipelines/postgres-to-postgres) for a full walkthrough.

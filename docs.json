@@ -142,7 +142,6 @@
             "pages": [
               "pipelines/overview",
               "pipelines/creating",
-              "pipelines/postgres-to-postgres",
               "pipelines/normalisation",
               "pipelines/dbt-layer",
               "pipelines/data-type-compatibility",
@@ -187,6 +186,14 @@
               "user-guide/transformations-and-branches",
               "user-guide/organizations",
               "user-guide/activity-and-edge-cases"
+            ]
+          },
+          {
+            "group": "Examples",
+            "icon": "flask-conical",
+            "pages": [
+              "example/pipelines/postgres-to-postgres",
+              "example/pipelines/postgres-to-postgres-examples"
             ]
           }
         ]
