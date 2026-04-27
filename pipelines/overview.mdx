@@ -18,15 +18,15 @@ A MantrixFlow pipeline is the operational definition of how data should move fro
 
 - **Pipeline shell**: name plus source connection
 - **Source configuration**: the concrete table or resource to sync
-- **Transform branch**: optional Python logic that reshapes each record
+- **Transform branch**: optional SQL transform (PostgreSQL-to-PostgreSQL) or Python script (SaaS sources) that reshapes each record
 - **Destination configuration**: connection, schema, table, write mode, preview, and schedule
 - **Run history**: the operational record of every execution
-- **Sync state**: the stored cursor or CDC checkpoint for incremental and CDC flows
+- **Sync state**: the stored cursor checkpoint for incremental sync pipelines
 
 ## What is true in the live builder today
 
 - Stream selection happens in **Source Configuration**.
-- The transform editor uses Python and supports sample-data preview.
+- For PostgreSQL-to-PostgreSQL pipelines the transform is a SQL `SELECT`. For SaaS sources the transform is a Python script. Both support preview.
 - The destination panel handles validation, preview, and scheduling.
 - **Upsert** is the supported production write mode documented here.
 
@@ -35,4 +35,4 @@ A MantrixFlow pipeline is the operational definition of how data should move fro
 - one PostgreSQL table feeding one PostgreSQL reporting table
 - one Shopify or Stripe resource feeding one SQL destination table
 - one source stream branching to PostgreSQL for analytics and MySQL for internal operations
-- a PostgreSQL source starting with incremental sync and moving to CDC later
+- a PostgreSQL source using full sync for first validation, then incremental sync (beta) for volume efficiency

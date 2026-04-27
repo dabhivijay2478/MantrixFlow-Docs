@@ -52,7 +52,12 @@ In the builder's **Destination** panel.
 
 **How do transformations work today?**
 
-The current transformation flow is built around a Python `transform(record)` script plus a separate filter node. Renaming, casting, derived columns, null handling, and nested-payload cleanup all happen in the script rather than in a separate visual mapping UI.
+Transform type depends on the pipeline:
+
+- **PostgreSQL-to-PostgreSQL pipelines** use a SQL `SELECT` transform written directly in the builder. Use `{{ source }}` as the table reference and write any `SELECT` with casts, filters, derived columns, or aggregations.
+- **SaaS source pipelines** (Shopify, Stripe, HubSpot, GitHub, Notion) use a Python `transform(record)` function. Renaming, casting, derived columns, null handling, and nested-payload cleanup all happen inside that function.
+
+Both approaches support preview before saving.
 
 **Which write mode should I use?**
 

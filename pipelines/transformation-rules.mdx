@@ -1,41 +1,58 @@
 ---
 title: Transformation rules
-description: "The current MantrixFlow transformation model: branch-scoped Python scripts, filter nodes, example packs, preview, and save behavior."
+description: "The current MantrixFlow transformation model: SQL transforms for PostgreSQL-to-PostgreSQL pipelines, Python scripts for SaaS sources, filter nodes, preview, and save behavior."
 ---
 
-The current builder centers transformation work around a branch-scoped Python `transform(record)` function. Renaming, casting, derived columns, null handling, and nested-payload cleanup are implemented inside that script rather than through separate point-and-click mapping screens.
+MantrixFlow uses different transform types depending on the pipeline source:
 
-## What the current implementation includes
+| Pipeline type | Transform language | Editor |
+| --- | --- | --- |
+| PostgreSQL-to-PostgreSQL | SQL `SELECT` statement | SQL editor in the Transform panel |
+| SaaS sources (Shopify, Stripe, HubSpot, GitHub, Notion) | Python `transform(record)` function | Python editor in the Transform panel |
 
-- a **Transform** panel with a branch label, source-table selector, Python editor, example loader, preview button, and **Save Script**
-- source-specific example packs for PostgreSQL, MySQL, Stripe, Shopify, HubSpot, Notion, and GitHub
-- fallback default SQL examples for source types without their own example pack
-- sample-data preview for the current transform, using up to 10 source rows in the builder flow
-- a separate **Filter** node with Python-expression and SQL-`WHERE` modes
-- destination-side schema preview after the destination is saved
+## SQL transforms (PostgreSQL-to-PostgreSQL)
 
-## What is not the supported workflow
+Write a `SELECT` statement using `{{ source }}` as the table reference. MantrixFlow replaces it with the actual source stream at run time.
 
-- a standalone visual rename screen
-- a dedicated cast wizard
-- a separate null-fill product surface
-- visual mapping docs as the main production path
-- a user-facing toggle for skipping transform errors; current saved scripts default to failing the run on transform errors
+```sql
+SELECT
+  id,
+  LOWER(email)                AS email,
+  first_name || ' ' || last_name AS full_name,
+  amount_cents::NUMERIC / 100  AS amount_usd,
+  created_at::TIMESTAMPTZ     AS created_at
+FROM {{ source }}
+WHERE is_deleted = false
+```
 
-## What a script must do
+SQL transforms support all PostgreSQL syntax: casts, filters, derived columns, aggregations, JSONB operators, and cross-type widening. See [P2P examples](/pipelines/postgres-to-postgres) for a full pattern library.
 
-Use a Python function with this shape:
+## Python transforms (SaaS sources)
+
+Write a function that accepts one record and returns a shaped record or `None` to drop it.
 
 ```python
 def transform(record):
-    return record
+    return {
+        "id": record.get("id"),
+        "status": (record.get("status") or "").lower(),
+        "amount": (record.get("amount_due") or 0) / 100,
+    }
 ```
 
 The function should:
-
 - return a `dict` when the record should continue
-- return `None` when the record should be dropped
-- stay focused on record shaping rather than filesystem, network, or environment access
+- return `None` to drop the record
+- avoid filesystem, network, or environment access
+
+## What the Transform panel includes
+
+- branch label and source-table selector
+- SQL editor (P2P pipelines) or Python editor (SaaS pipelines)
+- source-specific example packs for PostgreSQL, Stripe, Shopify, HubSpot, Notion, and GitHub
+- **Preview** using up to 10 live source rows
+- **Save** action
+- a separate **Filter** node with Python-expression and SQL-`WHERE` modes
 
 ## Preview every meaningful change
 

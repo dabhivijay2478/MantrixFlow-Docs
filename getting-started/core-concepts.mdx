@@ -31,11 +31,10 @@ A branch is a path on the canvas from the selected source stream to a destinatio
 
 ## Sync modes
 
-The app currently supports three read patterns:
+The app currently supports two read patterns:
 
-- **Full sync** for smaller datasets and first-run validation
-- **Incremental sync** for tables or resources with a dependable cursor field
-- **CDC** for PostgreSQL sources that complete the in-product CDC setup flow
+- **Full sync** — available now; recommended for all first runs and production pipelines
+- **Incremental sync** — beta; for tables with a dependable cursor field such as `updated_at`; not fully production-tested
 
 ## Destination behavior
 
@@ -43,7 +42,7 @@ The current destination panel is centered on **Upsert**. Append and Replace are 
 
 ## Run history and sync state
 
-Every run stores operational metadata such as status, timing, processed rows, and errors. Incremental and CDC pipelines also maintain sync state so later runs know where to resume.
+Every run stores operational metadata such as status, timing, processed rows, and errors. Incremental pipelines maintain sync state so later runs know where to resume.
 
 ## Mental model to keep in mind
 

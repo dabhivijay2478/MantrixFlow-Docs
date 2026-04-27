@@ -10,8 +10,8 @@ This page reflects the current app flow, not an older all-in-one wizard. In prac
 1. Create and test the source and destination connections from **Connections**.
 2. Go to **Data Pipelines**, click **+ New Pipeline**, give it a clear name, choose the source connection, and click **Create & open canvas**.
 3. In **Source Configuration**, pick the exact table or resource to sync, such as `public.orders`, `orders`, `deals`, or `pull_requests`.
-4. Set the sync mode that matches the source: full, incremental, or PostgreSQL CDC.
-5. Keep the first transform simple. A light rename, cast, or derived column is easier to validate than a large rewrite.
+4. Set the sync mode: use **Full sync** for first runs and all production PostgreSQL pipelines today. **Incremental sync** is available but beta — use it only after full sync is confirmed working.
+5. Keep the first transform simple. For PostgreSQL-to-PostgreSQL pipelines write a SQL `SELECT`. For SaaS sources write a Python `transform(record)` function.
 6. Open **Destination**, choose the destination connection, set the target `Schema` and `Table`, and keep `Write mode` on `Upsert`.
 7. Save the pipeline.
 8. Click **Run Now** and inspect **Run History**.

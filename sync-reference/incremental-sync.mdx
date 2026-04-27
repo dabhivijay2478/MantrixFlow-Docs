@@ -3,6 +3,10 @@ title: Incremental sync
 description: Choose a reliable cursor column, understand which sources use column-based incremental sync, and avoid the most common mistakes.
 ---
 
+<Warning>
+  Incremental sync is in **beta**. It has not been fully tested in production across all source types. Use full sync for any pipeline where correctness is critical. Do not rely on incremental sync for production workloads until this notice is removed.
+</Warning>
+
 Incremental sync reads only records that are newer than the last successful run. In MantrixFlow, this is the most common production choice for application tables and SaaS resources that grow continuously and expose a dependable update field.
 
 ## Best fit use cases

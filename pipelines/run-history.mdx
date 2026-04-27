@@ -1,6 +1,6 @@
 ---
 title: Run history
-description: Use pipeline run history to validate new deployments, diagnose failures, and understand the sync state that powers incremental and CDC pipelines.
+description: Use pipeline run history to validate new deployments, diagnose failures, and understand sync state for incremental pipelines.
 ---
 
 Run history is where operational truth lives. It tells you whether a pipeline actually succeeded after the builder looked correct on screen.
@@ -25,7 +25,7 @@ A healthy first production run usually looks like this:
 
 ## Sync state in run operations
 
-Incremental and CDC pipelines keep state between runs so MantrixFlow knows where to resume. That state is why later runs are faster and more targeted than the first one.
+Incremental pipelines keep state between runs so MantrixFlow knows where to resume. That state is why later incremental runs are faster and more targeted than the first one.
 
 ## When to investigate immediately
 

@@ -38,18 +38,21 @@ Have these values ready:
    - `SSL Mode`: `require`
 6. Go to **Data Pipelines**, click **+ New Pipeline**, name it `Orders to Analytics`, choose the PostgreSQL source connection, and open the canvas.
 7. In **Source Configuration**, select `public.orders` and save the stream selection.
-8. In **Transform**, keep the default pass-through script or use a light cleanup such as:
+8. In **Transform**, keep it as a pass-through or add a light SQL transform such as:
 
-```python
-def transform(record):
-    return {
-        **record,
-        "order_status": str(record.get("order_status", "")).lower(),
-        "loaded_from": "mantrixflow_quick_start",
-    }
+```sql
+SELECT
+  id,
+  customer_id,
+  LOWER(order_status)          AS order_status,
+  total_amount,
+  created_at,
+  updated_at
+FROM {{ source }}
+WHERE order_status IS NOT NULL
 ```
 
-9. Use **Preview with sample data** and save the script.
+9. Use **Preview** to confirm the columns look correct before saving.
 10. In **Destination**, choose `Analytics Postgres`, set `Schema` to `analytics`, `Table` to `orders_live`, and keep `Write mode` on `Upsert`.
 11. Save the pipeline and click **Run Now**.
 12. Check **Run History** and confirm that `analytics.orders_live` contains the expected rows.
@@ -62,7 +65,7 @@ You now have a working pipeline that uses the same flow most teams follow in pro
 - reusable source and destination connections
 - a named pipeline shell
 - a selected source table
-- an optional Python transform
+- an optional SQL transform (for PostgreSQL-to-PostgreSQL pipelines)
 - a configured destination branch
 - saved configuration, run history, and scheduling
 

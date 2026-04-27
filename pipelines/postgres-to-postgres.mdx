@@ -100,7 +100,7 @@ See [PostgreSQL source](/connections/sources/database/postgresql) and [PostgreSQ
     Open the **Destination** panel, select the destination connection, and set:
     - **Destination schema** — the schema to write into (e.g. `analytics`)
     - **Destination table** — the table name (e.g. `users_transformed`)
-    - **Write mode** — `append` for audit logs and event tables, `upsert` for tables with a stable primary key
+    - **Write mode** — select `upsert` (the only available mode in the current UI)
   </Step>
   <Step title="Preview and validate">
     Click **Preview** to fetch sample rows from the source and show how they will land in the destination. Check column types and data before running.
@@ -114,70 +114,28 @@ See [PostgreSQL source](/connections/sources/database/postgresql) and [PostgreSQ
 
 ## Write modes
 
-| Mode | Behavior | Best for |
-| --- | --- | --- |
-| `append` | Inserts every row every run. Does not deduplicate. | Event logs, audit trails, append-only tables |
-| `upsert` | Inserts new rows and updates existing rows by primary key. | Slowly changing dimensions, reporting tables, any table with a stable unique key |
+The current production write mode in the MantrixFlow UI is **Upsert**. Append mode is not available in the UI today.
 
-For `upsert`, the destination table must have a primary key that matches the source or transform output. MantrixFlow uses the key to detect which rows to update.
+| Mode | Status | Behavior |
+| --- | --- | --- |
+| `upsert` | **Available** | Inserts new rows and updates existing rows matched by primary key |
+| `append` | Coming soon | Will insert every row on every run without deduplication |
+
+For upsert to work correctly, the destination table must have a primary key. MantrixFlow uses it to detect which rows to insert and which to update. If the destination table does not have a primary key, create one before the first run:
+
+```sql
+ALTER TABLE analytics.your_table ADD PRIMARY KEY (id);
+```
 
 ---
 
-## SQL transformation examples
+## SQL transform examples
 
-### Rename and cast columns
+For the full pattern library — column selection, renaming, type casting, filtering, JSONB flattening, aggregation, range types, and cross-type widening — see the dedicated examples page:
 
-```sql
-SELECT
-  id,
-  name::TEXT AS display_name,
-  score::NUMERIC(10,2) AS score_decimal
-FROM {{ source }}
-```
-
-### Filter rows before loading
-
-```sql
-SELECT *
-FROM {{ source }}
-WHERE status = 'active'
-  AND created_at >= '2024-01-01'
-```
-
-### Flatten a JSONB column
-
-```sql
-SELECT
-  id,
-  payload->>'event_type' AS event_type,
-  (payload->>'amount')::NUMERIC AS amount,
-  (payload->>'timestamp')::TIMESTAMPTZ AS event_at
-FROM {{ source }}
-```
-
-### Aggregate before writing
-
-```sql
-SELECT
-  customer_id,
-  COUNT(*) AS order_count,
-  SUM(total_amount) AS lifetime_value,
-  MAX(created_at) AS last_order_at
-FROM {{ source }}
-GROUP BY customer_id
-```
-
-### Cross-type widening (source CHAR/VARCHAR to destination TEXT)
-
-When the destination schema uses `TEXT` instead of the source `CHAR` or `VARCHAR`, no cast is needed — the pipeline handles this automatically. If you want to make the widening explicit:
-
-```sql
-SELECT
-  id,
-  short_code::TEXT AS code,
-  varchar_col::TEXT AS description
-FROM {{ source }}
-```
+<Card title="Postgres-to-Postgres examples" icon="terminal" href="/example/postgres-to-postgres">
+  15 ready-to-use SQL transform patterns for P2P pipelines
+</Card>
 
 ---
 
@@ -211,5 +169,5 @@ See [Data type compatibility](/pipelines/data-type-compatibility) for the full t
 | No tables discovered | Source user missing `USAGE` on the schema | Grant `USAGE ON SCHEMA` to the source user |
 | Permission denied at run time | Destination user missing `INSERT` or `UPDATE` | Grant write privileges on the destination table |
 | Type error at load time | Source type not compatible with destination column type | Check the [type compatibility table](/pipelines/data-type-compatibility) and update the destination DDL |
-| Duplicate rows on re-run | Write mode is `append` but table has a unique key | Switch to `upsert` and ensure the destination table has the primary key |
+| Duplicate rows on re-run | Table already has rows and the pipeline ran again | Ensure upsert is configured and the destination table has a primary key |
 | Range type columns empty | PostgreSQL range types (INT4RANGE etc.) pass through as NULL via the dlt normalizer | Cast range columns to `TEXT` in the transform: `int4range_col::TEXT AS int4range_col` |

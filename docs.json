@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "MantrixFlow",
-  "description": "Documentation for MantrixFlow — ETL pipelines, connectors, sync modes, and the workspace app.",
+  "description": "Documentation for MantrixFlow — ELT pipelines, connectors, sync modes, and the workspace app.",
   "theme": "almond",
   "colors": {
     "primary": "#00a859",
@@ -156,8 +156,6 @@
             "pages": [
               "sync-reference/full-sync",
               "sync-reference/incremental-sync",
-              "sync-reference/cdc-overview",
-              "sync-reference/cdc-postgresql",
               "sync-reference/sync-state"
             ]
           },
@@ -185,6 +183,19 @@
         ]
       },
       {
+        "tab": "Examples",
+        "icon": "terminal",
+        "groups": [
+          {
+            "group": "Postgres-to-Postgres",
+            "icon": "database",
+            "pages": [
+              "example/postgres-to-postgres"
+            ]
+          }
+        ]
+      },
+      {
         "tab": "Guides",
         "icon": "layout-dashboard",
         "groups": [
@@ -200,13 +211,6 @@
               "user-guide/activity-and-edge-cases"
             ]
           }
-        ]
-      },
-      {
-        "tab": "Changelog",
-        "icon": "newspaper",
-        "pages": [
-          "changelog"
         ]
       }
     ]

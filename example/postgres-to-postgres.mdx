@@ -1,0 +1,275 @@
+---
+title: Postgres-to-Postgres examples
+description: Practical SQL transform examples for common Postgres-to-Postgres pipeline patterns — column selection, type casting, filtering, aggregation, JSON, arrays, and cross-type widening.
+---
+
+These examples cover the most common SQL patterns used in Postgres-to-Postgres pipelines. All examples use `{{ source }}` as the source table reference, which MantrixFlow replaces with the actual qualified stream name at run time. None of the examples are tied to a specific provider.
+
+---
+
+## 1. Copy a table as-is
+
+No transform needed for a straight copy. Select all columns from the source:
+
+```sql
+SELECT *
+FROM {{ source }}
+```
+
+---
+
+## 2. Select specific columns
+
+Useful for stripping internal, sensitive, or irrelevant columns before landing in the destination:
+
+```sql
+SELECT
+  id,
+  email,
+  first_name,
+  last_name,
+  created_at,
+  updated_at
+FROM {{ source }}
+```
+
+---
+
+## 3. Rename columns
+
+Rename columns to match the destination schema naming convention:
+
+```sql
+SELECT
+  id,
+  usr_email         AS email,
+  usr_created_ts    AS created_at,
+  usr_updated_ts    AS updated_at,
+  acct_status       AS status
+FROM {{ source }}
+```
+
+---
+
+## 4. Cast types explicitly
+
+Use explicit casts when the destination column type differs from the source:
+
+```sql
+SELECT
+  id,
+  smallint_col::INTEGER           AS int_val,
+  integer_col::BIGINT             AS big_val,
+  real_col::DOUBLE PRECISION      AS float_val,
+  numeric_col::NUMERIC(18,4)      AS precise_val,
+  char_col::TEXT                  AS char_text,
+  varchar_col::TEXT               AS varchar_text,
+  timestamp_col::TIMESTAMPTZ      AS ts_utc,
+  date_col::TIMESTAMP             AS date_as_ts
+FROM {{ source }}
+```
+
+---
+
+## 5. Filter rows before loading
+
+Only send rows that meet a condition — useful for reducing destination table size or excluding test/deleted records:
+
+```sql
+SELECT *
+FROM {{ source }}
+WHERE is_deleted = false
+  AND status IN ('active', 'pending')
+  AND created_at >= '2024-01-01'
+```
+
+---
+
+## 6. Compute derived columns
+
+Add calculated columns alongside the original data:
+
+```sql
+SELECT
+  id,
+  first_name,
+  last_name,
+  first_name || ' ' || last_name            AS full_name,
+  UPPER(email)                               AS email_upper,
+  EXTRACT(YEAR FROM created_at)              AS signup_year,
+  CURRENT_TIMESTAMP                          AS loaded_at,
+  CASE
+    WHEN score >= 90 THEN 'high'
+    WHEN score >= 60 THEN 'medium'
+    ELSE 'low'
+  END                                        AS score_tier
+FROM {{ source }}
+```
+
+---
+
+## 7. Convert cents to currency
+
+Common pattern for financial tables that store amounts as integer cents:
+
+```sql
+SELECT
+  id,
+  order_number,
+  CAST(amount_cents AS NUMERIC) / 100.0      AS amount_usd,
+  CAST(tax_cents AS NUMERIC) / 100.0         AS tax_usd,
+  CAST(total_cents AS NUMERIC) / 100.0       AS total_usd,
+  currency,
+  created_at
+FROM {{ source }}
+```
+
+---
+
+## 8. Flatten a JSONB column
+
+Extract fields out of a JSONB column into separate typed columns:
+
+```sql
+SELECT
+  id,
+  payload->>'event_type'                         AS event_type,
+  (payload->>'amount')::NUMERIC                  AS amount,
+  (payload->>'user_id')::UUID                    AS user_id,
+  (payload->>'timestamp')::TIMESTAMPTZ           AS event_at,
+  payload->'metadata'                            AS metadata_jsonb
+FROM {{ source }}
+```
+
+---
+
+## 9. Aggregate before writing
+
+Pre-aggregate at the source to keep the destination table lean:
+
+```sql
+SELECT
+  customer_id,
+  COUNT(*)                                   AS order_count,
+  SUM(total_amount)                          AS lifetime_value,
+  AVG(total_amount)                          AS avg_order_value,
+  MIN(created_at)                            AS first_order_at,
+  MAX(created_at)                            AS last_order_at
+FROM {{ source }}
+GROUP BY customer_id
+```
+
+---
+
+## 10. Pivot status flags into separate columns
+
+Turn a categorical status column into boolean flags:
+
+```sql
+SELECT
+  id,
+  user_id,
+  status,
+  status = 'active'                          AS is_active,
+  status = 'churned'                         AS is_churned,
+  status = 'trial'                           AS is_trial,
+  created_at
+FROM {{ source }}
+```
+
+---
+
+## 11. Cast range types to TEXT
+
+PostgreSQL range types (`INT4RANGE`, `TSTZRANGE`, etc.) must be explicitly cast to `TEXT` before loading, because the extraction layer does not map them natively:
+
+```sql
+SELECT
+  id,
+  int4range_col::TEXT    AS int_range,
+  int8range_col::TEXT    AS bigint_range,
+  numrange_col::TEXT     AS num_range,
+  tsrange_col::TEXT      AS ts_range,
+  tstzrange_col::TEXT    AS tstz_range,
+  daterange_col::TEXT    AS date_range
+FROM {{ source }}
+```
+
+---
+
+## 12. Cast geometric types to TEXT
+
+```sql
+SELECT
+  id,
+  point_col::TEXT        AS point,
+  polygon_col::TEXT      AS polygon,
+  circle_col::TEXT       AS circle,
+  box_col::TEXT          AS box
+FROM {{ source }}
+```
+
+---
+
+## 13. Extract from arrays
+
+Convert a PostgreSQL array to a JSON array for landing in a JSONB column, or unnest it into rows:
+
+```sql
+-- Land as JSONB
+SELECT
+  id,
+  to_jsonb(int_array_col)    AS int_array_json,
+  to_jsonb(text_array_col)   AS text_array_json
+FROM {{ source }}
+```
+
+```sql
+-- Unnest into one row per element
+SELECT
+  id,
+  unnest(text_array_col)     AS tag
+FROM {{ source }}
+```
+
+---
+
+## 14. Combine columns with NULL-safe coalesce
+
+```sql
+SELECT
+  id,
+  COALESCE(preferred_name, first_name, 'Unknown')    AS display_name,
+  COALESCE(mobile_phone, home_phone, work_phone)     AS contact_phone,
+  COALESCE(updated_at, created_at)                   AS last_seen_at
+FROM {{ source }}
+```
+
+---
+
+## 15. Cross-type widening in one transform
+
+Apply all common widenings in a single transform when the destination schema uses broader types:
+
+```sql
+SELECT
+  id,
+  -- Integer widening
+  smallint_col::BIGINT                    AS widened_int,
+  -- Float widening
+  real_col::DOUBLE PRECISION              AS widened_float,
+  -- Character widening
+  char_col::TEXT                          AS widened_char,
+  varchar_col::TEXT                       AS widened_varchar,
+  -- Temporal widening
+  date_col::TIMESTAMPTZ                   AS widened_date,
+  timestamp_col::TIMESTAMPTZ              AS widened_ts,
+  -- Special to TEXT
+  inet_col::TEXT                          AS inet_text,
+  uuid_col::TEXT                          AS uuid_text,
+  bool_col::TEXT                          AS bool_text,
+  jsonb_col::TEXT                         AS json_text
+FROM {{ source }}
+```
+
+See [Data type compatibility](/pipelines/data-type-compatibility) for the full widening rules table.

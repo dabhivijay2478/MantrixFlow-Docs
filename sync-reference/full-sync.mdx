@@ -29,6 +29,6 @@ Lighthouse Commerce keeps a small `public.tax_rates` table in PostgreSQL and syn
 
 ## Why full sync is a good first production step
 
-- it removes cursor and CDC complexity while you validate field shape
+- it removes cursor complexity while you validate field shape
 - it makes debugging easier because every run processes the same logical dataset
 - it is usually the fastest way to prove that the connection, transform, and destination naming are correct

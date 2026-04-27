@@ -1,40 +1,37 @@
 ---
 title: Transformations overview
-description: "Understand the current transformation surface in MantrixFlow: branch-scoped Python scripts, filter nodes, preview, and save flow."
+description: "Understand the current transformation surface in MantrixFlow: SQL transforms for Postgres-to-Postgres pipelines, Python scripts for SaaS sources, filter nodes, and preview."
 ---
 
-The live transformation surface has two main parts:
+The transform type depends on the pipeline source:
 
-- a branch-scoped Python script in the **Transform** panel
-- a separate **Filter** node for simple keep-or-drop rules
+| Pipeline type | Transform | Where to write it |
+| --- | --- | --- |
+| PostgreSQL-to-PostgreSQL | SQL `SELECT` using `{{ source }}` | SQL editor in the Transform panel |
+| SaaS sources (Shopify, Stripe, HubSpot, GitHub, Notion) | Python `transform(record)` function | Python editor in the Transform panel |
 
-There is no standalone visual rename, cast, or visual-mapping workflow in the supported product path today. Those outcomes are implemented in Python.
+There is no visual rename, cast wizard, or point-and-click mapping screen. All shaping is done in SQL or Python directly.
 
-## What is live today
+## What is live in the Transform panel today
 
-- branch labels in the **Transform** panel
-- source table or resource selection from inside that panel
-- a Python editor that expects `def transform(record):`
-- a **Load Example** menu when example packs exist for the current source type
-- **Preview with sample data** before saving
-- a dedicated **Save Script** action
-- a **Filter** node with **Python Expression** and **SQL WHERE** tabs
+- Branch label and source table selector
+- **SQL editor** for PostgreSQL-to-PostgreSQL pipelines
+- **Python editor** for SaaS source pipelines
+- **Load Example** menu (SaaS sources only)
+- **Preview** using live sample rows from the source
+- **Save** action
+- Separate **Filter** node (SQL `WHERE` clause or Python expression)
 
-## What is not the supported workflow
+## Fast path — PostgreSQL-to-Postgres pipeline
 
-- a point-and-click rename screen
-- a separate cast wizard
-- a visual fill-nulls screen
-- standalone visual-mapping documentation as the primary production path
-- a separate transform administration workflow
-- a user-facing toggle for skipping transform errors; saved scripts currently use fail-on-error behavior
+1. Select the source table in **Source Configuration**.
+2. Open the **Transform** panel and write a SQL `SELECT` using `{{ source }}`.
+3. Click **Preview** to confirm the output columns.
+4. Save, configure the destination, and run manually.
 
-## Fast path
+## Fast path — SaaS source pipeline
 
-1. Select the source table or resource.
-2. Keep the default pass-through script first.
-3. Preview the current payload.
-4. Add one transformation step.
-5. Preview again.
-6. Save the script.
-7. Validate the destination preview and then run manually.
+1. Select the resource in **Source Configuration**.
+2. Open the **Transform** panel and write a `def transform(record):` function.
+3. Click **Preview with sample data** to confirm the output.
+4. Save, configure the destination, and run manually.

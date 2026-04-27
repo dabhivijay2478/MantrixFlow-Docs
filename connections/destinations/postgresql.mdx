@@ -77,12 +77,14 @@ GRANT CREATE ON DATABASE your_db TO mxf_dest;
 
 ## Write modes
 
-| Mode | Behavior | Best for |
-| --- | --- | --- |
-| `append` | Inserts every row on every run. Does not deduplicate. | Event logs, audit tables, append-only datasets |
-| `upsert` | Inserts new rows and updates existing rows matched by primary key. | Reporting tables, slowly changing dimensions, any table with a stable unique key |
+The current production write mode in the MantrixFlow UI is **Upsert**. Append mode is not available in the UI today.
 
-For `upsert` the destination table needs a primary key. MantrixFlow uses it to detect which rows to insert and which to update.
+| Mode | Status | Behavior |
+| --- | --- | --- |
+| `upsert` | **Available** | Inserts new rows and updates existing rows matched by primary key |
+| `append` | Coming soon | Inserts every row on every run without deduplication |
+
+For upsert, the destination table must have a primary key. MantrixFlow uses it to determine whether to insert or update each row.
 
 ## Destination schema management
 
