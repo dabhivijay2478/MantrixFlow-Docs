@@ -1,0 +1,215 @@
+---
+title: Postgres-to-Postgres pipelines
+description: Move data between any two PostgreSQL-compatible databases — Neon, RDS, Supabase, Cloud SQL, Aurora, and more — with full type support and optional SQL transformations.
+---
+
+A Postgres-to-Postgres (P2P) pipeline reads from one PostgreSQL source, applies optional SQL transforms, and writes the result into a PostgreSQL destination. Both databases can be on any managed provider.
+
+## When to use this
+
+- Mirror a production Neon or RDS database into a reporting schema on Supabase or Aurora
+- Consolidate multiple application databases into a single analytics PostgreSQL instance
+- Promote data from a staging schema to a clean destination schema with type widening
+- Build a separate analytics replica without touching the production database
+
+---
+
+## Prerequisites
+
+Before creating a pipeline you need:
+
+- A saved **Source** connection pointing to the PostgreSQL database you read from
+- A saved **Destination** connection pointing to the PostgreSQL database you write to
+- The source user has at minimum `CONNECT`, `USAGE` on the schema, and `SELECT` on the tables
+- The destination user has `CONNECT`, `USAGE` on the destination schema, and `INSERT` / `UPDATE` on the tables
+- Both databases are reachable from the MantrixFlow ELT server (public endpoint or IP allowlist)
+
+See [PostgreSQL source](/connections/sources/database/postgresql) and [PostgreSQL destination](/connections/destinations/postgresql) for provider-by-provider setup.
+
+---
+
+## Setting up the source connection
+
+<Steps>
+  <Step title="Open Connections and create a source">
+    Go to **Connections → + New Connection**. Set the role to **Source** and choose **PostgreSQL**.
+  </Step>
+  <Step title="Fill in the connection fields">
+    Enter the host, port (default `5432`), database name, username, password, schema (default `public`), and SSL mode. For Neon and Supabase use `require`. For AWS RDS use `require` unless your DBA specifies otherwise.
+  </Step>
+  <Step title="Test and save">
+    Click **Test Connection**. MantrixFlow will verify credentials and schema access. Save only after the test passes.
+  </Step>
+</Steps>
+
+### Supported source providers
+
+| Provider | Notes |
+| --- | --- |
+| Neon | Use the direct connection string from the Neon Connect modal. Enable IP Allow on paid plans and add MantrixFlow's IP. |
+| AWS RDS / Aurora PostgreSQL | Add MantrixFlow's `/32` to the security group inbound rule for port `5432`. |
+| Supabase | Use the host from the Supabase dashboard connection settings. Add MantrixFlow's IP under Network Restrictions if enabled. |
+| GCP Cloud SQL for PostgreSQL | Enable public IP and add MantrixFlow's `/32` as an authorized network. |
+| Azure Database for PostgreSQL | Add a firewall rule with start and end IP both set to MantrixFlow's static IP. |
+| Aiven for PostgreSQL | Add MantrixFlow's `/32` to the service IP filter. |
+| DigitalOcean Managed PostgreSQL | Add MantrixFlow's IP as a trusted source on the database cluster. |
+| Self-hosted PostgreSQL | The server must have a public IP or be reachable via a port-forward that MantrixFlow can reach. |
+
+---
+
+## Setting up the destination connection
+
+<Steps>
+  <Step title="Create a destination connection">
+    Go to **Connections → + New Connection**. Set the role to **Destination** and choose **PostgreSQL**.
+  </Step>
+  <Step title="Fill in the fields">
+    Enter the same fields as the source form. The destination schema in the connection form is the default; you can override it per-pipeline in the builder.
+  </Step>
+  <Step title="Test and save">
+    Click **Test Connection** and save after the test passes.
+  </Step>
+</Steps>
+
+---
+
+## Creating the pipeline
+
+<Steps>
+  <Step title="Create a pipeline shell">
+    Go to **Data Pipelines → + New Pipeline**. Choose the source connection you just saved and give the pipeline a name.
+  </Step>
+  <Step title="Select the source stream">
+    In the builder, open **Source Configuration** and choose the schema and table to sync. MantrixFlow will discover the table columns automatically.
+  </Step>
+  <Step title="Add a SQL transform (optional)">
+    Click **+ Transform** to open the SQL editor. Write a `SELECT` statement that reshapes, filters, or renames columns. You can reference the source stream directly.
+
+    ```sql
+    SELECT
+      id,
+      first_name || ' ' || last_name AS full_name,
+      email,
+      created_at::date AS signup_date,
+      CAST(revenue_cents AS NUMERIC) / 100.0 AS revenue_usd
+    FROM {{ source }}
+    WHERE active = true
+    ```
+  </Step>
+  <Step title="Configure the destination">
+    Open the **Destination** panel, select the destination connection, and set:
+    - **Destination schema** — the schema to write into (e.g. `analytics`)
+    - **Destination table** — the table name (e.g. `users_transformed`)
+    - **Write mode** — `append` for audit logs and event tables, `upsert` for tables with a stable primary key
+  </Step>
+  <Step title="Preview and validate">
+    Click **Preview** to fetch sample rows from the source and show how they will land in the destination. Check column types and data before running.
+  </Step>
+  <Step title="Run and verify">
+    Click **Run now** to start the first sync. Open **Run History** to track progress and confirm rows written.
+  </Step>
+</Steps>
+
+---
+
+## Write modes
+
+| Mode | Behavior | Best for |
+| --- | --- | --- |
+| `append` | Inserts every row every run. Does not deduplicate. | Event logs, audit trails, append-only tables |
+| `upsert` | Inserts new rows and updates existing rows by primary key. | Slowly changing dimensions, reporting tables, any table with a stable unique key |
+
+For `upsert`, the destination table must have a primary key that matches the source or transform output. MantrixFlow uses the key to detect which rows to update.
+
+---
+
+## SQL transformation examples
+
+### Rename and cast columns
+
+```sql
+SELECT
+  id,
+  name::TEXT AS display_name,
+  score::NUMERIC(10,2) AS score_decimal
+FROM {{ source }}
+```
+
+### Filter rows before loading
+
+```sql
+SELECT *
+FROM {{ source }}
+WHERE status = 'active'
+  AND created_at >= '2024-01-01'
+```
+
+### Flatten a JSONB column
+
+```sql
+SELECT
+  id,
+  payload->>'event_type' AS event_type,
+  (payload->>'amount')::NUMERIC AS amount,
+  (payload->>'timestamp')::TIMESTAMPTZ AS event_at
+FROM {{ source }}
+```
+
+### Aggregate before writing
+
+```sql
+SELECT
+  customer_id,
+  COUNT(*) AS order_count,
+  SUM(total_amount) AS lifetime_value,
+  MAX(created_at) AS last_order_at
+FROM {{ source }}
+GROUP BY customer_id
+```
+
+### Cross-type widening (source CHAR/VARCHAR to destination TEXT)
+
+When the destination schema uses `TEXT` instead of the source `CHAR` or `VARCHAR`, no cast is needed — the pipeline handles this automatically. If you want to make the widening explicit:
+
+```sql
+SELECT
+  id,
+  short_code::TEXT AS code,
+  varchar_col::TEXT AS description
+FROM {{ source }}
+```
+
+---
+
+## Scheduling
+
+Open the **Schedule** tab in the pipeline builder and choose a cron interval or a fixed interval such as `every 1 hour`, `every 6 hours`, or `daily at 02:00 UTC`. MantrixFlow will enqueue a run automatically at each scheduled time.
+
+Leave scheduling off during initial setup and validate data correctness manually before enabling a schedule.
+
+---
+
+## Running multiple destinations from the same source
+
+You can create two pipelines with the same source but different destinations. MantrixFlow serialises runs for the same source connection to avoid connection contention. The second run starts automatically after the first completes.
+
+---
+
+## Supported data types
+
+MantrixFlow supports all standard PostgreSQL data types from source to destination. Complex types that do not have a native representation in the destination (geometric, range, text search, composite, enum) are landed as `TEXT` for maximum compatibility across providers.
+
+See [Data type compatibility](/pipelines/data-type-compatibility) for the full type mapping table and cross-type widening rules.
+
+---
+
+## Troubleshooting
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| Connection test times out | Provider firewall blocking MantrixFlow | Add MantrixFlow's `/32` to the provider allowlist |
+| No tables discovered | Source user missing `USAGE` on the schema | Grant `USAGE ON SCHEMA` to the source user |
+| Permission denied at run time | Destination user missing `INSERT` or `UPDATE` | Grant write privileges on the destination table |
+| Type error at load time | Source type not compatible with destination column type | Check the [type compatibility table](/pipelines/data-type-compatibility) and update the destination DDL |
+| Duplicate rows on re-run | Write mode is `append` but table has a unique key | Switch to `upsert` and ensure the destination table has the primary key |
+| Range type columns empty | PostgreSQL range types (INT4RANGE etc.) pass through as NULL via the dlt normalizer | Cast range columns to `TEXT` in the transform: `int4range_col::TEXT AS int4range_col` |
