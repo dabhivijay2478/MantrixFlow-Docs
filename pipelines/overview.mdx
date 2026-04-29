@@ -8,31 +8,57 @@ A MantrixFlow pipeline is the operational definition of how data should move fro
 ## The current lifecycle
 
 1. Create a pipeline shell from **Data Pipelines**.
-2. Open the builder canvas.
-3. Select the source table or SaaS resource.
-4. Add transforms or filters if needed.
-5. Configure the destination connection, schema, table, and schedule.
-6. Save, run manually, and validate the result.
+2. Open the builder canvas (Source and Destination nodes appear automatically).
+3. Click ⚙️ on the **Source** node — tick tables to include, use **Discover schema** and **Preview**.
+4. **Option A — simple**: Add a SQL Transform node on the canvas and write your `SELECT` using `{{ source }}`.
+5. **Option B — Normalisation + dbt Layer**: Click ⚙️ on the **Destination** node:
+   - **Normalisation tab**: Rename or exclude source columns before they land in the raw layer.
+   - **dbt Layer tab**: Write a dbt SQL model on `{{ source('raw', 'schema__tablename') }}`.
+6. In the **Config** tab: set connection, final delivery schema, sync mode, write mode, and click **Validate config**.
+7. Click ▷ to run manually, check the history icon, then add a schedule in the **Scheduling** tab.
 
 ## The parts of a pipeline
 
 - **Pipeline shell**: name plus source connection
 - **Source configuration**: the concrete table or resource to sync
-- **Transform branch**: optional Python logic that reshapes each record
-- **Destination configuration**: connection, schema, table, write mode, preview, and schedule
+- **Transform node** (canvas): optional SQL `SELECT` using `{{ source }}` — runs before normalisation
+- **Destination panel** — 5 tabs:
+  - **Config**: connection, final delivery schema, sync mode, replication key, write mode, validate
+  - **Normalisation**: column-level Rename and Exclude rules; lands in `raw.schema__tablename`
+  - **dbt Layer**: dbt SQL model on `{{ source('raw', 'schema__tablename') }}`; uses renamed column names
+  - **Preview**: inspect the target table before running
+  - **Scheduling**: recurring schedule configuration
 - **Run history**: the operational record of every execution
-- **Sync state**: the stored cursor or CDC checkpoint for incremental and CDC flows
+- **Sync state**: the stored cursor checkpoint for incremental sync pipelines
+
+## 3-stage Normalisation + dbt pipeline
+
+For pipelines that combine Normalisation and the dbt Layer (any supported source and SQL destination), the flow is:
+
+```
+Source (public.tablename)
+    ↓
+Normalisation   ← Rename/Exclude columns
+    ↓
+Raw layer  (raw.public__tablename)
+    ↓
+dbt Layer       ← {{ source('raw', 'public__tablename') }}
+    ↓
+Destination  (analytics.your_model)
+```
+
+See [Normalisation](/pipelines/normalisation) and [dbt Layer](/pipelines/dbt-layer) for the full reference. For a Postgres-to-Postgres walkthrough, see the [example guide](/example/pipelines/postgres-to-postgres).
 
 ## What is true in the live builder today
 
-- Stream selection happens in **Source Configuration**.
-- The transform editor uses Python and supports sample-data preview.
-- The destination panel handles validation, preview, and scheduling.
-- **Upsert** is the supported production write mode documented here.
+- Stream selection happens in the **Source panel** (⚙️ on Source node).
+- The destination panel has 5 tabs: **Config**, **Normalisation**, **dbt Layer**, **Preview**, **Scheduling**.
+- SQL Transform node uses `{{ source }}`; dbt Layer uses `{{ source('raw', 'schema__tablename') }}`.
+- **Upsert** is the available write mode. Append and Replace are coming soon.
 
 ## Typical production patterns
 
 - one PostgreSQL table feeding one PostgreSQL reporting table
 - one Shopify or Stripe resource feeding one SQL destination table
 - one source stream branching to PostgreSQL for analytics and MySQL for internal operations
-- a PostgreSQL source starting with incremental sync and moving to CDC later
+- a PostgreSQL source using full sync for first validation, then incremental sync (beta) for volume efficiency

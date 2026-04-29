@@ -114,3 +114,49 @@ html.dark #navbar a[href="https://mantrixflow.com"]:hover img,
 html.dark #navbar a[href^="https://mantrixflow.com"]:hover img {
   filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35)) brightness(1.06);
 }
+
+/*
+ * Footer: docs.json `footer.socials.website` renders a generic globe icon.
+ * Replace it with the MantrixFlow mark (`/m.png`) + product name.
+ */
+#footer a[href^="https://mantrixflow.com"],
+advanced-footer a[href^="https://mantrixflow.com"] {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+#footer a[href^="https://mantrixflow.com"] > *,
+advanced-footer a[href^="https://mantrixflow.com"] > * {
+  display: none !important;
+}
+
+#footer a[href^="https://mantrixflow.com"]::before,
+advanced-footer a[href^="https://mantrixflow.com"]::before {
+  content: "";
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  background: url("/m.png") center / contain no-repeat;
+}
+
+html.dark #footer a[href^="https://mantrixflow.com"]::before,
+html.dark advanced-footer a[href^="https://mantrixflow.com"]::before,
+body.dark #footer a[href^="https://mantrixflow.com"]::before,
+body.dark advanced-footer a[href^="https://mantrixflow.com"]::before,
+.dark #footer a[href^="https://mantrixflow.com"]::before,
+.dark advanced-footer a[href^="https://mantrixflow.com"]::before,
+[data-theme="dark"] #footer a[href^="https://mantrixflow.com"]::before,
+[data-theme="dark"] advanced-footer a[href^="https://mantrixflow.com"]::before {
+  filter: invert(1);
+}
+
+#footer a[href^="https://mantrixflow.com"]::after,
+advanced-footer a[href^="https://mantrixflow.com"]::after {
+  content: "MantrixFlow";
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: inherit;
+}

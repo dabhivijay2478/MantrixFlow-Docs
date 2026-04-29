@@ -3,6 +3,15 @@ title: Core Concepts
 description: "Understand the current MantrixFlow model: organizations, connections, pipelines, branches, sync modes, and run history."
 ---
 
+## Dashboard
+
+After signing in, the **Dashboard** (`/workspace`) is the landing page. It shows:
+- **Active Pipelines** — count of running pipelines out of total
+- **This Week** — number of migrations run
+- **Rows Processed** — total rows from recent runs
+- **Team Members** — active members in the organization
+- **Usage & Limits** — plan quota for Pipelines, Rows This Month, API Calls, and Agent Interactions with upgrade prompts
+
 ## Organizations
 
 An organization is the workspace boundary for connections, pipelines, team members, activity, and schedules. Many teams keep one organization for production and one for staging so credentials and run history stay separate.
@@ -20,30 +29,46 @@ Examples in the current product:
 
 ## Pipelines
 
-A pipeline begins as a lightweight shell created from **Data Pipelines**. The builder is where the operational details are finished: source selection, sync mode, transform script, destination table, and schedule.
+A pipeline begins as a lightweight shell (name + source connection) created from **Data Pipelines → + New Pipeline**. Clicking **Create & open canvas** opens the canvas builder with a **Source** node on the left and a **Destination** node on the right.
+
+- Click ⚙️ on the **Source** node to select tables, discover schema, and preview rows.
+- Click ⚙️ on the **Destination** node to open the five-tab Destination panel:
+  - **Config** — connection, final delivery schema, sync mode, write mode, validate
+  - **Normalisation** — column normalisation settings
+  - **dbt Layer** — dbt model integration
+  - **Preview** — target table preview
+  - **Scheduling** — recurring schedule configuration
 
 ## Branches
 
-A branch is a path on the canvas from the selected source stream to a destination. A realistic branching pattern today is:
+A branch is a connection line on the canvas from the Source node to a Destination node. One source can have multiple Destination nodes. A realistic pattern:
 
-- Branch A writes cleaned `orders` data to PostgreSQL for analytics.
-- Branch B writes a narrower version of the same records to MySQL for an internal application view.
+- Destination A writes cleaned `orders` to PostgreSQL for analytics.
+- Destination B writes a narrower version to MySQL for an internal view.
 
 ## Sync modes
 
-The app currently supports three read patterns:
+The app currently supports two read patterns:
 
-- **Full sync** for smaller datasets and first-run validation
-- **Incremental sync** for tables or resources with a dependable cursor field
-- **CDC** for PostgreSQL sources that complete the in-product CDC setup flow
+- **Full sync** — available now; recommended for all first runs and production pipelines
+- **Incremental sync** — beta; for tables with a dependable cursor field such as `updated_at`; not fully production-tested
 
 ## Destination behavior
 
-The current destination panel is centered on **Upsert**. Append and Replace are not part of the supported production flow documented here.
+The Destination **Config** tab has three write mode options:
+- **Upsert** — available now; inserts new rows and updates existing rows by primary key
+- **Append** — coming soon; insert-only, no deduplication
+- **Replace** — coming soon; drops and recreates the destination table on each run
+
+Use **Upsert** for all production workflows today.
+
+## Activity Log
+
+The **Activity Log** (`/workspace/activity`) shows all events across pipelines, data sources, and the organization — with columns for Timestamp, Entity Type, Action Type, Message, and Status. Filter by type, action, status, or time window.
 
 ## Run history and sync state
 
-Every run stores operational metadata such as status, timing, processed rows, and errors. Incremental and CDC pipelines also maintain sync state so later runs know where to resume.
+Every run stores operational metadata: status, timing, row counts, and errors. Access per-pipeline run history from the history icon in the builder top bar. Incremental pipelines also maintain sync state so later runs know where to resume.
 
 ## Mental model to keep in mind
 

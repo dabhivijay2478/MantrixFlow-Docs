@@ -1,68 +1,109 @@
 ---
-title: PostgreSQL
-description: Connect PostgreSQL as a source for application tables, reporting replicas, and CDC-ready syncs.
+title: PostgreSQL source
+description: Connect any PostgreSQL-compatible database — Neon, RDS, Aurora, Supabase, Cloud SQL, Azure, Aiven — as a MantrixFlow source for Postgres-to-Postgres pipelines.
 ---
 
-PostgreSQL is the most complete database source in the current app. It supports table discovery, transform preview, incremental sync, and the in-product CDC setup flow.
+PostgreSQL is the primary database source in MantrixFlow. Use it to read from production, staging, or analytics databases and replicate data to any PostgreSQL-compatible destination.
 
-## Current connection form
+## Connection fields
 
-The current **PostgreSQL** source form asks for:
+| Field | Default | Description |
+| --- | --- | --- |
+| Connection Name | — | Friendly label shown in the builder |
+| Host | — | Database hostname or IP address |
+| Port | `5432` | PostgreSQL port |
+| Database | — | Database name |
+| Username | — | Database user |
+| Password | — | Database password |
+| Schema | `public` | Schema to discover tables from |
+| SSL Mode | `require` | `disable`, `require`, `verify-ca`, `verify-full` |
 
-- `Connection Name`
-- `Host`
-- `Port`
-- `Database`
-- `Username`
-- `Password`
-- `Schema`
-- `SSL Mode`
+## Network access
 
-- `Port` defaults to `5432`.
-- `Schema` defaults to `public`.
-- `SSL Mode` options are `disable`, `allow`, `prefer`, `require`, `verify-ca`, and `verify-full`.
+MantrixFlow connects to the source database from the ELT server. The database must accept inbound connections from MantrixFlow's static IP on port `5432`.
 
-## Good first use cases
+Supported network configurations:
+- Public endpoint with provider firewall or IP allowlist
+- Public endpoint with no provider allowlist (credentials must be strong)
 
-- replicate operational app tables into a reporting database
-- start with incremental sync on `updated_at` and move selected tables to CDC later
-- validate one high-value business table before broadening the rollout
+Not yet supported (planned for a later release):
+- Private subnet / VPC-only databases without a public IP
+- VPN-only access
+- Bastion host or jump server connections
 
-## Before you connect
+See [Private database access](/connections/private-database-access) for MantrixFlow's static outbound IP and provider firewall steps.
 
-- Create a dedicated read-only user with schema and table access.
-- Confirm the host, database, and schema you want to read first.
-- Pick one table to validate first, usually `public.orders` or `public.customers`.
+## Provider setup
+
+| Provider | What to configure |
+| --- | --- |
+| **Neon** | Use the direct connection string from the Neon Connect modal. If IP Allow is enabled, add MantrixFlow's `/32`. See [Neon IP Allow](https://neon.com/docs/reference/cli-ip-allow). |
+| **AWS RDS / Aurora PostgreSQL** | Add an inbound security group rule for port `5432` from MantrixFlow's `/32`. See [AWS RDS security groups](https://docs.aws.amazon.com/AmazonRDS/latest/gettingstartedguide/security-groups.html). |
+| **Supabase** | Use the host from the Supabase dashboard. Add MantrixFlow's `/32` under Network Restrictions if enabled. See [Supabase Network Restrictions](https://supabase.com/docs/guides/platform/network-restrictions). |
+| **GCP Cloud SQL for PostgreSQL** | Enable public IP and add MantrixFlow's `/32` under Authorized networks. See [Google authorized networks](https://cloud.google.com/sql/docs/postgres/authorize-networks). |
+| **Azure Database for PostgreSQL** | Use public access and create a firewall rule with start and end IP both equal to MantrixFlow's IP. See [Azure firewall rules](https://learn.microsoft.com/en-us/azure/postgresql/security/security-firewall-rules). |
+| **Aiven for PostgreSQL** | Add MantrixFlow's `/32` to the service IP filter. See [Aiven access restrictions](https://aiven.io/docs/platform/howto/restrict-access). |
+| **DigitalOcean Managed PostgreSQL** | Add MantrixFlow's IP as a trusted source on the database cluster. See [DigitalOcean trusted sources](https://docs.digitalocean.com/products/databases/postgresql/how-to/secure/). |
+| **Render Postgres** | Use the external connection details and restrict access to MantrixFlow's IP if you have access restrictions enabled. See [Render Postgres networking](https://render.com/docs/databases). |
+| **Self-hosted** | The server must have a public IP or be port-forwarded so MantrixFlow can reach it on port `5432`. |
+
+## Permissions
+
+Create a dedicated read-only user instead of using the database owner or an admin account.
+
+```sql
+CREATE USER mxf_source WITH PASSWORD 'strong_password';
+GRANT CONNECT ON DATABASE your_db TO mxf_source;
+GRANT USAGE ON SCHEMA public TO mxf_source;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO mxf_source;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO mxf_source;
+```
+
+For incremental sync, add an index on the cursor column:
+
+```sql
+CREATE INDEX ON orders (updated_at);
+```
 
 ## Step by step
 
-1. Open **Connections** and click **+ New Connection**.
-2. Keep the role set to **Source** and choose **PostgreSQL**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Neon Production`
-   - `Host`: `ep-lighthouse-prod-123456.us-east-2.aws.neon.tech`
-   - `Port`: `5432`
-   - `Database`: `app`
-   - `Username`: `mf_readonly`
-   - `Schema`: `public`
-   - `SSL Mode`: `require`
-4. Click **Test Connection**. Save the connection only after the test succeeds.
-5. Create a pipeline, pick the first table in **Source Configuration**, and run one manual sync before enabling a schedule.
+<Steps>
+  <Step title="Create the source user">
+    Run the `CREATE USER` and `GRANT` statements above in your PostgreSQL provider.
+  </Step>
+  <Step title="Add MantrixFlow's IP to your firewall">
+    Copy MantrixFlow's static outbound IP from the connection form and add it as a `/32` rule in your provider's firewall or allowlist.
+  </Step>
+  <Step title="Add the source connection in MantrixFlow">
+    Open **Connections → + New Connection**. Set the role to **Source** and choose **PostgreSQL**. Fill in all fields and click **Test Connection**. Save after the test passes.
+  </Step>
+  <Step title="Create a pipeline">
+    Go to **Data Pipelines → + New Pipeline**, select this source connection, and follow the [Postgres-to-Postgres guide](/example/pipelines/postgres-to-postgres).
+  </Step>
+</Steps>
 
-## Good first tables
+## SSL modes
 
-- `public.orders`
-- `public.customers`
-- `public.order_items`
+| Mode | When to use |
+| --- | --- |
+| `disable` | Local dev only. Never use in production. |
+| `require` | Use with most managed providers. Encrypts the connection. |
+| `verify-ca` | Verifies the server certificate against a trusted CA. |
+| `verify-full` | Verifies the server certificate and hostname. Strictest mode. |
 
-## Real-world example
+## Supported data types
 
-Lighthouse Commerce copies `public.orders` and `public.order_items` from Neon into an analytics PostgreSQL destination. The team starts with incremental sync on `updated_at` and later moves `orders` to CDC when refunds and deletes need faster visibility.
+All official PostgreSQL types are supported. Complex types (geometric, range, text search, composite, enum) are landed as `TEXT` for cross-provider compatibility.
+
+See [Data type compatibility](/pipelines/data-type-compatibility) for the full mapping table and cross-type widening rules.
 
 ## Troubleshooting
 
-- If table discovery is empty, re-check `USAGE` on the schema and `SELECT` on the tables.
-- If the connection test fails with a TLS message, keep `SSL Mode` on `require` unless your DBA gives you a different value.
-- If preview works but later runs fail, verify that the selected source table still exists and the saved connection still passes testing.
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Connection timeout | Provider firewall blocking MantrixFlow | Add MantrixFlow's `/32` to the provider allowlist |
+| Authentication failed | Wrong credentials or database name | Re-check host, database, username, and password |
+| No tables discovered | User missing `USAGE` on schema | Run `GRANT USAGE ON SCHEMA` |
+| Table missing from discovery | User missing `SELECT` on that table | Run `GRANT SELECT ON TABLE` |
+| TLS / SSL error | Provider requires stricter SSL mode | Change SSL mode to `require`, `verify-ca`, or `verify-full` |
 
-If you need log-based replication, save the connection first and then use [CDC setup for PostgreSQL](/sync-reference/cdc-postgresql).

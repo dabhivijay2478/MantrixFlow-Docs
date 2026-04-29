@@ -1,15 +1,85 @@
 ---
 title: Changelog
-description: Product and documentation updates for MantrixFlow.
+description: Product and documentation updates for MantrixFlow — from project start in October 2025 through the Postgres-to-Postgres live release in April 2026.
 mode: wide
 ---
 
-## 2026-03-31
+## 2026-04-27 — Postgres-to-Postgres live release
+
+- **Postgres-to-Postgres pipelines** are now live. Read from any PostgreSQL source (Neon, RDS, Aurora, Supabase, Cloud SQL, Azure, Aiven) and write to any PostgreSQL destination.
+- Full coverage of all official PostgreSQL data types: numeric, character, datetime, boolean, binary, network, JSON, UUID, XML, bit string, arrays, geometric, range, text search, composite, and enum.
+- Cross-type widening support: `CHAR`/`VARCHAR` → `TEXT`, `SMALLINT` → `BIGINT`, `REAL` → `DOUBLE PRECISION`, `DATE` → `TIMESTAMPTZ`, and more.
+- Upsert write mode available for all P2P pipelines. Rows are matched by primary key and inserted or updated atomically.
+- Dynamic schema naming for test and E2E runs — schemas use unique suffixes to avoid conflicts across runs.
+- SQL transform editor supports all PostgreSQL cast syntax, JSONB operators, aggregation, filtering, and derived columns.
+- Added documentation: [Postgres-to-Postgres guide](/example/pipelines/postgres-to-postgres) (includes SQL transform examples), and [Data type compatibility](/pipelines/data-type-compatibility).
+
+---
+
+## 2026-03-31 — Documentation refresh
 
 - Documentation migrated to **Mintlify** (Almond theme) with app-aligned colors and branding.
-- Top navigation and guide structure refreshed to match the current docs site layout.
-- User guide and connector docs updated for the current workspace UI.
+- Top navigation and guide structure refreshed to match the current workspace UI layout.
+- User guide, connector docs, and sync reference updated for the live builder.
+- PostgreSQL source and destination connector docs expanded with provider-specific setup tables (Neon, RDS, Supabase, Cloud SQL, Azure, Aiven, DigitalOcean, Render).
+- CDC setup guide for PostgreSQL replication slots published.
 
-## Earlier releases
+---
 
-For application release notes and feature announcements, see the in-app **Activity** log and [cloud.mantrixflow.com](https://cloud.mantrixflow.com).
+## 2026-02-28 — Pipeline builder improvements
+
+- SQL transform editor added to the pipeline builder canvas. Write `SELECT` transforms directly in the UI with live preview against sample data.
+- Filter node added. Apply row-level conditions without writing a full transform.
+- Preview panel now shows destination column types alongside source types so you can catch type mismatches before running.
+- Run history view expanded to show rows read, rows written, duration, and error detail per run.
+- Pipeline scheduling UI updated. Cron and interval options unified into a single schedule picker.
+
+---
+
+## 2026-01-31 — Incremental sync and upsert
+
+- Incremental sync mode released for PostgreSQL, MySQL, and MariaDB sources. Choose a cursor column (`updated_at`, `id`, etc.) and MantrixFlow tracks the high-water mark automatically.
+- Upsert write mode released as the production destination write mode. Matches rows by primary key and performs insert-or-update in one operation.
+- Sync state page added to the pipeline builder. View and reset the stored cursor or CDC checkpoint for each pipeline.
+- `TIMESTAMPTZ` cursor columns now handle timezone-aware comparisons correctly across providers.
+
+---
+
+## 2026-01-01 — Postgres-to-Postgres private beta
+
+- Postgres-to-Postgres pipeline type entered private beta. Source and destination connections both use the PostgreSQL connector.
+- Pipeline builder supports full table sync from Neon, RDS, Supabase, and self-hosted PostgreSQL into any PostgreSQL destination.
+- SQL model node introduced — add a named SQL transform between the source and destination.
+- Destination schema and table are configurable per-pipeline, independent of the connection's default schema.
+- First internal load tests ran against 10,000-row fixtures covering numeric, character, datetime, boolean, and JSON types.
+
+---
+
+## 2025-12-15 — Connections and SaaS sources
+
+- SaaS source connectors released: **Shopify**, **Stripe**, **HubSpot**, **GitHub**, **Notion**.
+- Connection test now runs in under 10 seconds for all supported providers.
+- IP allowlist guidance added to every connector page. MantrixFlow static outbound IP documented under Private database access.
+- Destination connectors for MySQL, MariaDB, SQLite, and CockroachDB released alongside PostgreSQL.
+
+---
+
+## 2025-11-15 — Full sync and first connectors
+
+- Full table sync released for PostgreSQL and MySQL sources.
+- Pipeline shell creation, builder canvas, source configuration, and destination configuration all live in the workspace.
+- Organization and team member management released. Invite members, assign roles, and manage access from the platform settings.
+- Activity log introduced. Every pipeline run, connection change, and member action is recorded and viewable per organization.
+
+---
+
+## 2025-10-01 — Project start
+
+MantrixFlow started with a single goal: make data pipelines simple enough that any developer can build and run one in minutes, without managing infrastructure.
+
+- Core pipeline model defined: source connection → optional transform → destination connection.
+- ELT server architecture chosen: DuckDB-staged extraction, dlt-based loading, async callback to the Go API.
+- Go API (Fiber) and Python ELT server (FastAPI + uvicorn) set up as the two backend services.
+- PostgreSQL chosen as the first source and destination type for the initial live release.
+- Supabase chosen as the primary database for the MantrixFlow platform itself (auth, org, pipeline metadata).
+- MantrixFlow cloud at [cloud.mantrixflow.com](https://cloud.mantrixflow.com) set as the deployment target.

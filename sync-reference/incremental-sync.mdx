@@ -3,6 +3,10 @@ title: Incremental sync
 description: Choose a reliable cursor column, understand which sources use column-based incremental sync, and avoid the most common mistakes.
 ---
 
+<Warning>
+  Incremental sync is in **beta**. It has not been fully tested in production across all source types. Use full sync for any pipeline where correctness is critical. Do not rely on incremental sync for production workloads until this notice is removed.
+</Warning>
+
 Incremental sync reads only records that are newer than the last successful run. In MantrixFlow, this is the most common production choice for application tables and SaaS resources that grow continuously and expose a dependable update field.
 
 ## Best fit use cases
@@ -25,15 +29,18 @@ Incremental sync reads only records that are newer than the last successful run.
 
 ## Step by step in MantrixFlow
 
-1. Create and test the source connection.
-2. Start a new pipeline and pick the source table or resource.
-3. Switch the sync mode to **Incremental**.
-4. Choose the **Replication key (cursor column)** that should track new or changed rows.
-5. Continue into the builder and validate the source preview for the selected table or resource.
-6. Add transform logic if needed.
-7. Configure the destination branch and save the pipeline.
-8. Run the pipeline manually once and confirm the destination table looks correct.
-9. Schedule it only after the first run proves the cursor behaves as expected.
+1. Create and test the source connection. Run at least one full-sync pipeline successfully first.
+2. Go to **Data Pipelines → + New Pipeline**, name it, pick the source connection, and click **Create & open canvas**.
+3. Click ⚙️ on the **Source** node — discover schema, tick **Include** on the table, preview raw rows.
+4. Add a Transform node if needed.
+5. Click ⚙️ on the **Destination** node — open the **Config** tab:
+   - Set **Sync mode** to `INCREMENTAL`
+   - Set **Replication key** to the cursor column (e.g. `updated_at`)
+   - Set **Write mode** to `Upsert`
+   - Click **Validate config**
+6. Open the Destination **Preview** tab to confirm the target table.
+7. Click ▷ to run manually. Verify the destination row count and the sync state checkpoint.
+8. Open the **Scheduling** tab and set the schedule only after the first run is confirmed correct.
 
 ## What makes a good cursor column
 
@@ -55,7 +62,7 @@ Good examples:
 - MySQL, MariaDB, and SQLite incremental syncs do not capture hard deletes.
 - If the chosen column is not indexed, each sync may scan the full source table.
 - For CockroachDB, prefer MVCC timestamp mode when the cluster version supports it.
-- For PostgreSQL, use logical CDC instead of a cursor when delete fidelity matters.
+- For PostgreSQL, if hard-delete tracking is required, model deletes using a soft-delete flag (`is_deleted = true`) and filter in the transform layer.
 
 ## Real-world example
 
@@ -63,4 +70,4 @@ Summit RevOps syncs `public.orders` from PostgreSQL into PostgreSQL every 15 min
 
 ## Important limitations
 
-Incremental sync is excellent for inserts and updates, but it is not the best fit for hard deletes. If delete tracking matters and the source is PostgreSQL, use log-based CDC. For MySQL, MariaDB, SQLite, and cursor-based API sources, model deletes explicitly with a soft-delete field if downstream consumers need that signal.
+Incremental sync is excellent for inserts and updates, but it is not the best fit for hard deletes. Model deletes explicitly with a soft-delete flag if downstream consumers need that signal.

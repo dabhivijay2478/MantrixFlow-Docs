@@ -7,7 +7,14 @@ MantrixFlow security has two parts in day-to-day operations: securing user acces
 
 ## What the product exposes today
 
-In **Workspace -> Settings -> Security**, users can review their verified email and change their password. Organization-level administration stays in the team and organization settings flows.
+Open **Settings** from the left sidebar. The Settings page has five tabs:
+- **Profile** — edit first name, last name, display name, and avatar URL
+- **Organization** — update org name, slug, and description (Owner only)
+- **Notifications** — email and alert preferences
+- **Security** — review verified email, change password
+- **Billing** — plan details, usage limits, and upgrade options
+
+The top of the Settings page shows your account name, email, role badge (Owner/Admin), verification status, and profile completion percentage.
 
 ## Credential handling
 
@@ -29,6 +36,7 @@ Based on the current connection experience and supporting product copy:
 - use dedicated service accounts for databases and SaaS sources
 - grant minimum required privileges
 - enable SSL for database connections where the form and provider support it
+- for managed PostgreSQL providers, allow MantrixFlow's static IP as a `/32` on port `5432` instead of opening broad database access
 - rotate credentials periodically
 - keep the owner role limited to a very small set of users
 

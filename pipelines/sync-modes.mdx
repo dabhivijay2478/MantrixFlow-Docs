@@ -1,36 +1,45 @@
 ---
 title: Sync modes
-description: Choose between full sync, incremental sync, and log-based CDC based on source behavior, freshness needs, and operational risk.
+description: Choose between full sync and incremental sync based on source behavior, table size, and freshness requirements.
 ---
 
-Sync mode decides how MantrixFlow reads data from the source. The right choice depends on table size, resource behavior, freshness requirements, and whether deletes matter.
+Sync mode controls how MantrixFlow reads from the source on each run. It is configured in the **Destination node → Config tab → Sync mode** dropdown in the canvas builder.
 
 ## Quick comparison
 
-| Mode | Best for | Example | Main tradeoff |
+| Mode | Status | Best for | Main tradeoff |
 | --- | --- | --- | --- |
-| Full sync | smaller tables and simpler SaaS resources | nightly Notion pages sync | re-reads everything each run |
-| Incremental sync | growing tables or resources with reliable update fields | `orders` using `updated_at` | depends on correct cursor behavior |
-| Log-based CDC | low-latency inserts, updates, and deletes | PostgreSQL operational orders replication | requires source-specific setup |
+| Full sync | **Available** | Any table — recommended for first runs and correctness validation | Re-reads everything each run |
+| Incremental sync | **Beta** | Growing tables with a reliable update field like `updated_at` | Depends on correct cursor behavior; not fully production-tested |
 
 ## Full sync
 
-Use full sync when the dataset is modest or the source does not expose a good cursor. This is common for smaller reference tables and some SaaS resources.
+Use full sync when the dataset is modest or the source does not expose a good cursor. Recommended for all first runs, correctness checks, and smaller reference tables. This is the safest mode and the one to start with.
+
+> **Note:** Full Table sync does not support automatic scheduling. The Scheduling tab in the Destination panel is disabled when this mode is active. See [Schedule and automation](/pipelines/schedule) for details.
 
 ## Incremental sync
 
-Use incremental sync when records have a trustworthy field such as `updated_at`, `modified_at`, or a monotonic ID. This is the most common production mode for MySQL, MariaDB, SQLite, fallback PostgreSQL flows, and many SaaS resources.
+<Warning>
+  Incremental sync is in **beta** and has not been fully tested across all source types. Use full sync for production workloads until this notice is removed.
+</Warning>
 
-## Log-based CDC
+Use incremental sync when records have a trustworthy field such as `updated_at`, `modified_at`, or a monotonic ID. See [Incremental sync](/sync-reference/incremental-sync) for configuration steps and limitations.
 
-Use log-based CDC when you need low-latency inserts, updates, and deletes without relying on an application-level cursor. In the current app, PostgreSQL is the primary log-based implementation. Other connectors use cursor-based incremental methods instead of database log streaming.
+## How to choose
 
-## How to choose safely
+- **Start with full sync** for all new pipelines. Validate that data looks correct end-to-end.
+- Consider **incremental sync** only once full sync is confirmed working and table volume makes full re-reads expensive.
 
-- Start with **Full sync** for smaller datasets and first-run validation.
-- Move to **Incremental sync** when volume grows and you have a reliable cursor.
-- Use **Log-based CDC** only when the business need justifies the extra database setup and you can verify the source prerequisites safely.
+## Where sync mode lives in the UI
+
+In the canvas builder, click ⚙️ on the **Destination** node, open the **Config** tab, and choose from the **Sync mode** dropdown:
+
+- `FULL_TABLE` — re-reads all rows on every run (recommended default)
+- `INCREMENTAL` — reads only rows newer than the cursor column value stored in sync state (beta)
+
+The **Replication key** field below the dropdown is where you set the cursor column for incremental mode (e.g. `updated_at`).
 
 ## Companion destination decision
 
-Read mode and write mode are separate concerns. In the current destination panel, the supported production write behavior is **Upsert**, so many teams pair **Incremental sync + Upsert** for the first rollout.
+Sync mode and write mode are separate concerns. The only available write mode today is **Upsert**. Append and Replace are coming soon.

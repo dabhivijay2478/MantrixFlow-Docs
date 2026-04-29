@@ -1,20 +1,23 @@
 ---
 title: Sync state
-description: What MantrixFlow tracks for incremental and CDC pipelines, how operators should think about it, and where it shows up in the current workflow.
+description: What MantrixFlow tracks for incremental pipelines, how operators should think about it, and where it shows up in the current workflow.
 ---
 
-Sync state is the checkpoint MantrixFlow uses to decide where the next run should resume. It matters most for incremental and CDC pipelines.
+<Warning>
+  Incremental sync (and therefore sync state) is in **beta**. Use full sync for production pipelines until incremental sync graduates from beta.
+</Warning>
+
+Sync state is the checkpoint MantrixFlow uses to decide where the next incremental run should resume.
 
 ## What sync state contains
 
-For incremental sync, the state typically represents the latest successful cursor value. For CDC, it represents the latest successful replication checkpoint used by the pipeline service.
+For incremental sync, the state represents the latest successful cursor value — typically the highest `updated_at` or `id` processed in the last run.
 
 ## What operators see today
 
 In the standard workspace flow, operators mostly experience sync state indirectly through:
 
-- successful incremental runs only pulling newer rows
-- CDC pipelines resuming from the last processed log position
+- successful incremental runs only pulling rows newer than the last cursor value
 - run history showing whether the pipeline is progressing normally
 
 The state itself is not exposed as a standard self-serve reset screen in the current product.

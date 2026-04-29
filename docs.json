@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "MantrixFlow",
-  "description": "Documentation for MantrixFlow — ETL pipelines, connectors, sync modes, and the workspace app.",
+  "description": "Documentation for MantrixFlow — ELT pipelines, connectors, sync modes, and the workspace app.",
   "theme": "almond",
   "colors": {
     "primary": "#00a859",
@@ -98,6 +98,7 @@
             "icon": "database",
             "pages": [
               "connections/overview",
+              "connections/private-database-access",
               {
                 "group": "Sources",
                 "pages": [
@@ -141,6 +142,9 @@
             "pages": [
               "pipelines/overview",
               "pipelines/creating",
+              "pipelines/normalisation",
+              "pipelines/dbt-layer",
+              "pipelines/data-type-compatibility",
               "pipelines/sync-modes",
               "pipelines/transformation-rules",
               "pipelines/schedule",
@@ -153,20 +157,7 @@
             "pages": [
               "sync-reference/full-sync",
               "sync-reference/incremental-sync",
-              "sync-reference/cdc-overview",
-              "sync-reference/cdc-postgresql",
               "sync-reference/sync-state"
-            ]
-          },
-          {
-            "group": "Transformations",
-            "icon": "wand-sparkles",
-            "pages": [
-              "transformations/overview",
-              "transformations/script-editor",
-              "transformations/filter-node",
-              "transformations/preview-and-validation",
-              "transformations/script-patterns"
             ]
           },
           {
@@ -196,14 +187,14 @@
               "user-guide/organizations",
               "user-guide/activity-and-edge-cases"
             ]
+          },
+          {
+            "group": "Examples",
+            "icon": "flask-conical",
+            "pages": [
+              "example/pipelines/postgres-to-postgres"
+            ]
           }
-        ]
-      },
-      {
-        "tab": "Changelog",
-        "icon": "newspaper",
-        "pages": [
-          "changelog"
         ]
       }
     ]

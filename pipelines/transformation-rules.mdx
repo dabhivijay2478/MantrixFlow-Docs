@@ -1,41 +1,59 @@
 ---
 title: Transformation rules
-description: "The current MantrixFlow transformation model: branch-scoped Python scripts, filter nodes, example packs, preview, and save behavior."
+description: "The MantrixFlow transformation model: SQL Transform node, Normalisation tab, dbt Layer tab, and Filter node — all SQL-based."
 ---
 
-The current builder centers transformation work around a branch-scoped Python `transform(record)` function. Renaming, casting, derived columns, null handling, and nested-payload cleanup are implemented inside that script rather than through separate point-and-click mapping screens.
+MantrixFlow provides three SQL-based approaches to transform data in a pipeline:
 
-## What the current implementation includes
+| Approach | Where | Source reference | Best for |
+| --- | --- | --- | --- |
+| **SQL Transform node** | Canvas (between Source and Destination) | `{{ source }}` | Quick column reshaping, casts, filters |
+| **Normalisation tab** | Destination panel → Normalisation | Automatic | Column renames and exclusions |
+| **dbt Layer tab** | Destination panel → dbt Layer | `{{ source('raw', 'schema__tablename') }}` | Complex models, JSONB extraction, derived metrics |
 
-- a **Transform** panel with a branch label, source-table selector, Python editor, example loader, preview button, and **Save Script**
-- source-specific example packs for PostgreSQL, MySQL, Stripe, Shopify, HubSpot, Notion, and GitHub
-- fallback default SQL examples for source types without their own example pack
-- sample-data preview for the current transform, using up to 10 source rows in the builder flow
-- a separate **Filter** node with Python-expression and SQL-`WHERE` modes
-- destination-side schema preview after the destination is saved
+## SQL Transform node
 
-## What is not the supported workflow
+Write a `SELECT` statement using `{{ source }}` as the table reference. MantrixFlow replaces it with the actual source stream at run time.
 
-- a standalone visual rename screen
-- a dedicated cast wizard
-- a separate null-fill product surface
-- visual mapping docs as the main production path
-- a user-facing toggle for skipping transform errors; current saved scripts default to failing the run on transform errors
-
-## What a script must do
-
-Use a Python function with this shape:
-
-```python
-def transform(record):
-    return record
+```sql
+SELECT
+  id,
+  LOWER(email)                AS email,
+  first_name || ' ' || last_name AS full_name,
+  amount_cents::NUMERIC / 100  AS amount_usd,
+  created_at::TIMESTAMPTZ     AS created_at
+FROM {{ source }}
+WHERE is_deleted = false
 ```
 
-The function should:
+SQL transforms support all PostgreSQL syntax: casts, filters, derived columns, aggregations, JSONB operators, and cross-type widening. See [SQL transform examples](/example/pipelines/postgres-to-postgres#sql-transform-examples) on the Postgres-to-Postgres guide for a full pattern library.
 
-- return a `dict` when the record should continue
-- return `None` when the record should be dropped
-- stay focused on record shaping rather than filesystem, network, or environment access
+## Normalisation + dbt Layer
+
+For production pipelines, use the Destination panel tabs:
+
+1. **Normalisation tab** — Rename or Exclude source columns before data lands in the raw layer (`raw.schema__tablename`).
+2. **dbt Layer tab** — Write a dbt SQL model on `{{ source('raw', 'schema__tablename') }}` using the **renamed** column names.
+
+See [Normalisation](/pipelines/normalisation) and [dbt Layer](/pipelines/dbt-layer) for the full reference and examples.
+
+## Filter node
+
+Add a **Filter** node on the canvas to keep or drop rows using a SQL `WHERE` clause:
+
+```sql
+is_deleted = false AND status IN ('active', 'pending')
+```
+
+Use the Filter node for simple row filtering. Use the Transform node or dbt Layer when you also need reshaping.
+
+## What the builder provides for transforms
+
+- **Source panel** (click ⚙️ on Source node) — Discover schema, Include toggle per table, Preview raw rows
+- **Transform node** on the canvas — SQL editor, Preview, Save
+- **Filter node** on the canvas — SQL `WHERE` clause
+- **Normalisation tab** in the Destination panel — Rename and Exclude rules
+- **dbt Layer tab** in the Destination panel — dbt SQL model editor
 
 ## Preview every meaningful change
 
@@ -49,12 +67,14 @@ Use preview whenever you:
 
 ## Recommended workflow
 
-1. Select the source table or resource first.
-2. Start with the pass-through script.
-3. Load an example only if it matches the current payload shape closely.
+1. Click ⚙️ on the **Source** node — discover schema, tick Include, Preview raw rows.
+2. Add a Transform node if you need to reshape data.
+3. Start with a pass-through or load a built-in example.
 4. Make one change at a time.
-5. Run **Preview with sample data** after each meaningful edit.
-6. Save the script.
-7. Validate the destination preview and then run the pipeline manually.
+5. Click **Preview** after each meaningful edit.
+6. Save the transform.
+7. Click ⚙️ on the **Destination** node — configure the Config tab and click **Validate config**.
+8. Use the Destination **Preview** tab to confirm the target schema.
+9. Run the pipeline manually before enabling a schedule.
 
-Read the detailed guides in the [Transformations](/transformations/overview) section for the current editor, filter, and preview behavior.
+See [Normalisation](/pipelines/normalisation), [dbt Layer](/pipelines/dbt-layer), and [Postgres-to-Postgres](/example/pipelines/postgres-to-postgres) for a full walkthrough.
