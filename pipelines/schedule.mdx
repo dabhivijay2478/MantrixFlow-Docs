@@ -5,9 +5,15 @@ description: Configure schedules in the current builder after the pipeline has a
 
 Scheduling is where a working pipeline becomes an operating system. The safest rollout pattern is simple: **manual first, automation second**.
 
+## Sync mode requirement
+
+**Scheduling is only available when the destination sync mode is set to Incremental.**
+
+When a destination is configured as **Full Table**, the Scheduling tab is disabled. Full Table sync re-loads the entire dataset on every run, so it is designed to be triggered manually or via the API rather than run on a continuous schedule. Switch the sync mode to **Incremental** in the destination Config tab to unlock scheduling.
+
 ## Where scheduling lives
 
-Scheduling is in the **Destination node → Scheduling tab** inside the canvas builder. Open the Destination panel (⚙️ on the Destination node), then click the **Scheduling** tab. Options available:
+Scheduling is in the **Destination node → Scheduling tab** inside the canvas builder. Open the Destination panel (⚙️ on the Destination node), click the **Config** tab and set the sync mode to **Incremental**, then switch to the **Scheduling** tab. Options available:
 
 - manual only (default)
 - every X minutes

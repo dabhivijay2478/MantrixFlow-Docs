@@ -16,6 +16,8 @@ Sync mode controls how MantrixFlow reads from the source on each run. It is conf
 
 Use full sync when the dataset is modest or the source does not expose a good cursor. Recommended for all first runs, correctness checks, and smaller reference tables. This is the safest mode and the one to start with.
 
+> **Note:** Full Table sync does not support automatic scheduling. The Scheduling tab in the Destination panel is disabled when this mode is active. See [Schedule and automation](/pipelines/schedule) for details.
+
 ## Incremental sync
 
 <Warning>
