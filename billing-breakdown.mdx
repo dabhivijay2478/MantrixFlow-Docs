@@ -1,0 +1,119 @@
+---
+title: Billing Breakdown
+description: How MantrixFlow calculates plan changes, included usage, and usage overage.
+---
+
+This page explains the pricing math behind plan changes and usage overage. It focuses only on customer-facing formulas and examples.
+
+<Note>
+  Exact charges are always shown in the hosted billing flow before confirmation. The examples below are simple estimates for understanding how the calculation works.
+</Note>
+
+## Plan allowances
+
+| Plan | Monthly price | Included rows | Included API calls |
+| --- | ---: | ---: | ---: |
+| Starter | `$0` | `10K / month` | `1K / day` |
+| Growth | `$49` | `1M / month` | `50K / day` |
+| Pro | `$199` | `10M / month` | `500K / day` |
+| Enterprise | Custom | Custom or unlimited | Custom or unlimited |
+
+Usage-based pricing applies when usage goes beyond the included allowance:
+
+| Usage type | Overage rate |
+| --- | ---: |
+| Rows | `$5 / 1M rows` |
+| API calls | `$0.002 / 1K API calls` |
+
+## Upgrade calculation
+
+When a customer upgrades during a billing period, the estimate is based on the unused value of the current plan and the remaining cost of the new plan.
+
+| Step | Formula |
+| --- | --- |
+| Remaining ratio | `remaining_days / total_days_in_cycle` |
+| Current plan unused credit | `current_plan_price * remaining_ratio` |
+| New plan remaining cost | `new_plan_price * remaining_ratio` |
+| Estimated upgrade charge | `new_plan_remaining_cost - current_plan_unused_credit` |
+
+Example: Growth monthly to Pro monthly on day 10 of a 30-day cycle.
+
+| Item | Calculation | Amount |
+| --- | --- | ---: |
+| Remaining ratio | `20 / 30` | `0.6667` |
+| Growth unused credit | `$49 * 20 / 30` | `$32.67` |
+| Pro remaining cost | `$199 * 20 / 30` | `$132.67` |
+| Estimated upgrade charge | `$132.67 - $32.67` | `$100.00` |
+
+After the upgrade, the next renewal uses the new plan price.
+
+## Downgrade calculation
+
+When a customer downgrades during a billing period, the unused value of the higher plan may become a credit or the downgrade may be scheduled for the next renewal, depending on the billing settings shown during confirmation.
+
+Estimated credit formula:
+
+```txt
+estimated_credit = current_plan_unused_credit - new_plan_remaining_cost
+```
+
+Example: Pro monthly to Growth monthly on day 10 of a 30-day cycle.
+
+| Item | Calculation | Amount |
+| --- | --- | ---: |
+| Remaining ratio | `20 / 30` | `0.6667` |
+| Pro unused credit | `$199 * 20 / 30` | `$132.67` |
+| Growth remaining cost | `$49 * 20 / 30` | `$32.67` |
+| Estimated credit | `$132.67 - $32.67` | `$100.00` |
+
+The hosted billing flow shows whether the downgrade applies immediately, creates a credit, or starts at the next billing date.
+
+## Row overage calculation
+
+Row usage is counted per billing cycle. If a workspace uses its included monthly rows in the first 10 days, the allowance is not reset or prorated early. Additional rows in the same billing cycle count as overage.
+
+```txt
+overage_rows = max(cycle_to_date_rows - included_monthly_rows, 0)
+row_overage_charge = (overage_rows / 1,000,000) * $5
+```
+
+Example: Growth includes `1M` rows per month.
+
+| Cycle-to-date rows | Included rows | Overage rows | Estimated charge |
+| ---: | ---: | ---: | ---: |
+| `1,000,000` | `1,000,000` | `0` | `$0.00` |
+| `1,600,000` | `1,000,000` | `600,000` | `$3.00` |
+| `3,000,000` | `1,000,000` | `2,000,000` | `$10.00` |
+
+So if Growth reaches `1M` rows by day 10 and finishes the billing cycle at `1.6M` rows, the estimated row overage is `$3.00`.
+
+## API overage calculation
+
+API usage is measured against the included API call allowance.
+
+```txt
+overage_api_calls = max(api_calls - included_api_calls, 0)
+api_overage_charge = (overage_api_calls / 1,000) * $0.002
+```
+
+Example: Growth includes `50K` API calls per day.
+
+| API calls | Included calls | Overage calls | Estimated charge |
+| ---: | ---: | ---: | ---: |
+| `50,000` | `50,000` | `0` | `$0.00` |
+| `75,000` | `50,000` | `25,000` | `$0.05` |
+| `150,000` | `50,000` | `100,000` | `$0.20` |
+
+## What can change the final amount
+
+The final amount shown at confirmation can differ from the simple examples because it may include:
+
+- taxes
+- discounts
+- credits
+- billing period length
+- annual versus monthly billing
+- payment method or currency rules
+- whether a downgrade is immediate or scheduled
+
+Use these formulas for planning. Use the hosted billing confirmation screen as the final price.
