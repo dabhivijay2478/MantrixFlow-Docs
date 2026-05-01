@@ -90,7 +90,8 @@
             "group": "Pricing",
             "icon": "credit-card",
             "pages": [
-              "pricing"
+              "pricing",
+              "billing-breakdown"
             ]
           },
           {
