@@ -1,76 +1,40 @@
 ---
-title: Transformations and branches
-description: Use SQL transforms, Normalisation, and dbt Layer to shape data — and create multiple destination branches from one source stream.
+title: Normalisation and SQL
+description: Shape data with destination-scoped Normalisation and SQL models in the current builder.
 ---
 
-In the builder, a branch is a concrete path from the selected source stream to a destination. Each branch can have its own transform logic, filter, destination connection, and schedule.
+The live transformation workflow is destination-scoped.
 
-## Transform approaches
+## Normalisation
 
-MantrixFlow provides three SQL-based approaches:
+Use the **Normalisation** tab for rename and cast rules.
 
-| Approach | Where | Source reference |
-| --- | --- | --- |
-| **SQL Transform node** | Canvas (between Source and Destination) | `{{ source }}` |
-| **Normalisation tab** | Destination panel → Normalisation | Automatic (rename/exclude) |
-| **dbt Layer tab** | Destination panel → dbt Layer | `{{ source('raw', 'schema__tablename') }}` |
+Example:
 
-### SQL Transform node
+| Rule | Table | Column | Target |
+| --- | --- | --- | --- |
+| Rename | `public.orders` | `status` | `order_status` |
+| Cast | `public.orders` | `total_amount` | `numeric` |
 
-Add a Transform node on the canvas and write a `SELECT` using `{{ source }}`:
+## SQL Layer
+
+Use the **SQL Layer** tab for SQL models. Models read from temporary raw tables:
 
 ```sql
 SELECT
   id,
-  LOWER(email) AS email,
-  first_name || ' ' || last_name AS full_name,
-  amount_cents::NUMERIC / 100 AS amount_usd
-FROM {{ source }}
-WHERE is_deleted = false
+  customer_id,
+  order_status,
+  total_amount,
+  created_at,
+  updated_at
+FROM {{ source('raw', 'public__orders') }}
 ```
 
-### Normalisation + dbt Layer
+Set each model's final delivery table as `schema.table`, such as `analytics.orders_live`.
 
-For production pipelines, use the Destination panel tabs:
+## Multiple outputs
 
-1. **Normalisation tab** — Rename or Exclude source columns before data lands in the raw layer.
-2. **dbt Layer tab** — Write a dbt SQL model on `{{ source('raw', 'schema__tablename') }}` using the renamed column names.
+When multiple source streams are selected, configure a SQL model and final delivery table for each stream you intend to deliver.
 
-See [Normalisation](/pipelines/normalisation) and [dbt Layer](/pipelines/dbt-layer) for the full reference.
-
-## A realistic branching example
-
-A commerce team might branch one `orders` stream two ways:
-
-- **Analytics branch** writes cleaned rows to PostgreSQL in `analytics.orders_live`.
-- **Operations branch** writes a narrower customer-service view to MySQL in `ops.order_lookup`.
-
-That pattern keeps one source read while allowing two different SQL destinations to serve different teams.
-
-## Safe transform workflow
-
-1. Pick the source table first so previews use the right record shape.
-2. Start with a pass-through (`SELECT * FROM {{ source }}`) and change one thing at a time.
-3. Use **Preview** after every meaningful edit.
-4. Save the transform before running the pipeline.
-5. Validate the destination output before turning the schedule on.
-
-## Good use cases for a transform
-
-- standardize enum values such as `paid`, `Paid`, and `PAID`
-- derive reporting-friendly columns such as `order_date` or `mrr`
-- remove fields that should not leave the source system
-- flatten JSONB payloads before they reach the destination
-- add metadata such as `loaded_from` or `sync_batch_id`
-
-## Filter node
-
-The builder includes a dedicated **Filter** node that applies a SQL `WHERE` clause:
-
-```sql
-is_deleted = false AND status IN ('active', 'pending')
-```
-
-Use the Filter node for simple keep-or-drop logic. Use the Transform node or dbt Layer when you also need reshaping.
-
-Current limitation: the filter panel is primarily a configuration surface. Treat source preview, destination preview, and a manual run as the authoritative validation path.
+Each final destination table must already exist.

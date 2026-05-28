@@ -1,70 +1,10 @@
 ---
-title: Stripe
-description: Connect Stripe as a source for payments, subscriptions, invoices, disputes, and payout reporting.
+title: Stripe source
+description: Status notice for Stripe source support.
 ---
 
-Stripe is a high-value finance source in the current app. The live connection form is intentionally simple: a connection name plus a secret key.
+Stripe source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **Stripe** source form asks for:
-
-- `Connection Name`
-- `Secret Key`
-
-- The token field expects a Stripe secret key such as `sk_live_...` or `sk_test_...`.
-- Save the connection only after a successful test because the builder depends on that validated credential.
-
-## Good first use cases
-
-- revenue reporting from invoices and subscriptions
-- payout reconciliation and cash movement tracking
-- refund and dispute monitoring in a SQL destination
-
-## Before you connect
-
-- Create or retrieve a Stripe secret key with the access level your team approves.
-- Decide which resource you will validate first, usually `invoices`, `subscriptions`, or `customers`.
-- Make sure you are using the correct Stripe account and mode before testing.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Keep the role set to **Source** and choose **Stripe**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Stripe Production`
-   - `Secret Key`: `sk_live_...`
-4. Click **Test Connection** and save only after the test succeeds.
-5. Create a pipeline and start with one high-value resource so validation stays simple.
-
-## Resources available in the current source preview
-
-- `customers`
-- `charges`
-- `invoices`
-- `subscriptions`
-- `products`
-- `prices`
-- `events`
-- `balance_transactions`
-- `coupons`
-- `payment_intents`
-- `payment_methods`
-- `refunds`
-- `disputes`
-- `payouts`
-- `plans`
-- `tax_rates`
-- `credit_notes`
-- `promotion_codes`
-- `setup_intents`
-
-## Real-world example
-
-A finance team syncs Stripe `invoices`, `subscriptions`, and `payouts` into PostgreSQL so revenue operations, cash reporting, and reconciliation all use the same destination tables.
-
-## Troubleshooting
-
-- If the test fails, confirm that the key is active and belongs to the correct Stripe account.
-- Start with one resource such as `invoices` so row-level validation is easy.
-- If business users dispute counts, confirm that you are comparing the same account mode and time window.
+Use [Connections Overview](/connections/overview) for the supported live connector list.

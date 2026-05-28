@@ -1,52 +1,26 @@
 ---
 title: Schedule and automation
-description: Configure schedules in the current builder after the pipeline has already succeeded manually.
+description: Configure schedules for Incremental PostgreSQL destinations after manual validation.
 ---
 
-Scheduling is where a working pipeline becomes an operating system. The safest rollout pattern is simple: **manual first, automation second**.
+Scheduling is configured from the **Scheduling** tab in the **Destination** panel.
 
-## Sync mode requirement
+## Requirement
 
-**Scheduling is only available when the destination sync mode is set to Incremental.**
+The destination must use `INCREMENTAL` sync. Full Table destinations are manual-only in the current app.
 
-When a destination is configured as **Full Table**, the Scheduling tab is disabled. Full Table sync re-loads the entire dataset on every run, so it is designed to be triggered manually or via the API rather than run on a continuous schedule. Switch the sync mode to **Incremental** in the destination Config tab to unlock scheduling.
+## Recommended sequence
 
-## Where scheduling lives
+1. Build the pipeline in Full Table mode.
+2. Run manually and validate the destination rows.
+3. Switch the destination to Incremental.
+4. Enter a replication key such as `updated_at`.
+5. Save the destination.
+6. Run manually again.
+7. Add a schedule.
 
-Scheduling is in the **Destination node → Scheduling tab** inside the canvas builder. Open the Destination panel (⚙️ on the Destination node), click the **Config** tab and set the sync mode to **Incremental**, then switch to the **Scheduling** tab. Options available:
+## Operational notes
 
-- manual only (default)
-- every X minutes
-- every X hours
-- daily at a fixed time
-- weekly on a chosen day and time
-- monthly on a chosen day and time
-- custom cron expression
-
-## Recommended rollout sequence
-
-1. Save the pipeline.
-2. Run it manually.
-3. Validate the destination output.
-4. Check run history for clean completion.
-5. Add the schedule that matches the business need.
-
-## Real schedule examples
-
-- Every 15 minutes for Shopify `orders` that feed support dashboards.
-- Hourly for PostgreSQL `orders` and `customers` into an analytics database.
-- Daily at 02:00 for Stripe payouts and invoice reporting.
-- Weekly for a Notion workspace snapshot that powers team planning reports.
-
-## Timezone matters
-
-Always set the schedule timezone intentionally. This matters for finance closes, sales reporting windows, and business-hour sync expectations.
-
-## When to stay manual
-
-Keep a pipeline manual when:
-
-- you are still validating a new connector
-- the source schema is unstable
-- the destination table is used for a one-time migration
-- the pipeline depends on a process that is not yet reliable enough to automate
+- Keep the replication key stable and indexed when possible.
+- Re-test connections after credential rotation.
+- Review run history after enabling a schedule.

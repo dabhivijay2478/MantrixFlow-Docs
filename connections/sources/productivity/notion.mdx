@@ -1,56 +1,10 @@
 ---
-title: Notion
-description: Connect Notion as a source for workspace databases, pages, and users that need to land in SQL destinations.
+title: Notion source
+description: Status notice for Notion source support.
 ---
 
-Notion is useful when operational planning, editorial calendars, release checklists, or internal knowledge bases need to be pulled into structured reporting tables.
+Notion source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **Notion** source form asks for:
-
-- `Connection Name`
-- `Integration Token`
-
-- The token field expects a Notion integration token, usually starting with `secret_...`.
-- The integration must be explicitly shared to the databases or pages you want to read.
-
-## Good first use cases
-
-- planning database exports for reporting
-- release checklist visibility outside Notion
-- operational page snapshots in a SQL destination
-
-## Before you connect
-
-- Create a Notion integration with the access level your workspace allows.
-- Share the target databases or pages with that integration before testing.
-- Start with `databases` or `pages` so you can confirm the visible content quickly.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Keep the role set to **Source** and choose **Notion**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Product Wiki`
-   - `Integration Token`: `secret_...`
-4. Click **Test Connection** and save only after the test succeeds.
-5. Create a pipeline and start with one high-value resource so validation stays simple.
-
-## Common resources in the current source preview
-
-- `databases`
-- `pages`
-- `users`
-
-The current Notion preview is intentionally narrow. It does not document extra unpublished resource variants beyond these three surfaces.
-
-## Real-world example
-
-An operations team syncs a Notion release checklist database into PostgreSQL so engineering managers can combine planning status with GitHub and deployment reporting.
-
-## Troubleshooting
-
-- If the test succeeds but the expected content is missing, confirm that the integration was shared to the specific pages or databases.
-- Notion resources are often better validated with a manual full-sync run first.
-- Start with one workspace area before expanding the connection scope.
+Use [Connections Overview](/connections/overview) for the supported live connector list.

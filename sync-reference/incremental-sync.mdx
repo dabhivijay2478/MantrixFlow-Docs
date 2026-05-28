@@ -1,73 +1,31 @@
 ---
 title: Incremental sync
-description: Choose a reliable cursor column, understand which sources use column-based incremental sync, and avoid the most common mistakes.
+description: Use Incremental sync with a stable replication key and stored checkpoint state.
 ---
 
-<Warning>
-  Incremental sync is in **beta**. It has not been fully tested in production across all source types. Use full sync for any pipeline where correctness is critical. Do not rely on incremental sync for production workloads until this notice is removed.
-</Warning>
+`INCREMENTAL` sync uses a replication key and checkpoint state to process newer source rows after each successful run.
 
-Incremental sync reads only records that are newer than the last successful run. In MantrixFlow, this is the most common production choice for application tables and SaaS resources that grow continuously and expose a dependable update field.
+## Requirements
 
-## Best fit use cases
+- PostgreSQL source table
+- stable replication key such as `updated_at`, `created_at`, or an increasing id
+- destination table that already exists
+- saved SQL model output that matches the destination columns
 
-- `orders` tables with a trustworthy `updated_at`
-- CRM objects such as deals or contacts that update throughout the day
-- subscription or invoice resources with predictable modification timestamps
-- larger source tables where full sync would be too expensive to run repeatedly
+## How to configure
 
-## Sources that use incremental sync in MantrixFlow
+1. Open the **Destination** panel.
+2. Switch **Sync mode** to `INCREMENTAL`.
+3. Enter the replication key.
+4. Save the destination.
+5. Run manually once.
+6. Review run history.
+7. Add a schedule if the manual run succeeds.
 
-| Source | Incremental strategy | Delete handling |
-| --- | --- | --- |
-| PostgreSQL fallback | `xmin` soft CDC or user-selected column | deletes are not captured |
-| MySQL | user-selected timestamp or monotonic ID | deletes are not captured |
-| MariaDB | user-selected timestamp or monotonic ID | deletes are not captured |
-| SQLite | user-selected column or `rowid` for append-only tables | deletes are not captured |
-| CockroachDB fallback | user-selected column on older clusters | deletes are not captured |
-| SaaS connectors | source-native API cursor | depends on each API |
+## Checkpoint state
 
-## Step by step in MantrixFlow
+After a successful run, MantrixFlow extracts checkpoint state before deleting the temporary staging file. The next Incremental run resumes from that stored state.
 
-1. Create and test the source connection. Run at least one full-sync pipeline successfully first.
-2. Go to **Data Pipelines → + New Pipeline**, name it, pick the source connection, and click **Create & open canvas**.
-3. Click ⚙️ on the **Source** node — discover schema, tick **Include** on the table, preview raw rows.
-4. Add a Transform node if needed.
-5. Click ⚙️ on the **Destination** node — open the **Config** tab:
-   - Set **Sync mode** to `INCREMENTAL`
-   - Set **Replication key** to the cursor column (e.g. `updated_at`)
-   - Set **Write mode** to `Upsert`
-   - Click **Validate config**
-6. Open the Destination **Preview** tab to confirm the target table.
-7. Click ▷ to run manually. Verify the destination row count and the sync state checkpoint.
-8. Open the **Scheduling** tab and set the schedule only after the first run is confirmed correct.
+## Good replication keys
 
-## What makes a good cursor column
-
-- it updates whenever the record changes
-- it is always populated
-- it moves forward consistently
-- it is indexed or otherwise efficient to query
-
-Good examples:
-
-- `updated_at`
-- `modified_at`
-- `created_at` for append-only tables
-- monotonic numeric IDs for insert-only workloads
-- `rowid` for append-only SQLite tables
-
-## Source-specific reminders
-
-- MySQL, MariaDB, and SQLite incremental syncs do not capture hard deletes.
-- If the chosen column is not indexed, each sync may scan the full source table.
-- For CockroachDB, prefer MVCC timestamp mode when the cluster version supports it.
-- For PostgreSQL, if hard-delete tracking is required, model deletes using a soft-delete flag (`is_deleted = true`) and filter in the transform layer.
-
-## Real-world example
-
-Summit RevOps syncs `public.orders` from PostgreSQL into PostgreSQL every 15 minutes. They use `updated_at` as the incremental key because new orders, refund changes, and fulfillment updates all touch that column. This keeps the destination current without rereading years of order history on every run.
-
-## Important limitations
-
-Incremental sync is excellent for inserts and updates, but it is not the best fit for hard deletes. Model deletes explicitly with a soft-delete flag if downstream consumers need that signal.
+Use columns that move forward predictably and are populated on every row. Timestamp columns should be indexed when tables are large.

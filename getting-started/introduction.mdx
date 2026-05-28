@@ -1,35 +1,30 @@
 ---
-title: Introduction
-description: Learn the current MantrixFlow workflow and prepare the exact source, destination, and access you need before building your first pipeline.
+title: Getting started
+description: "Start with the current MantrixFlow app flow: create PostgreSQL connections, create a pipeline shell, configure the builder, and run manually."
 ---
 
-The live MantrixFlow workflow is straightforward:
+The current app flow is connection-first and builder-driven.
 
-1. Create and test connections.
-2. Create the pipeline shell.
-3. In the canvas builder, click ⚙️ on the **Source** node to pick tables and preview rows.
-4. Click ⚙️ on the **Destination** node to set the schema, sync mode, and write mode.
-5. Run manually first, verify rows, then schedule.
+You create reusable PostgreSQL connections, create a lightweight pipeline shell, then finish the operational configuration in the canvas builder.
 
-## What you need before you start
+## Current app flow
 
-- A MantrixFlow account and an organization you can work in
-- One supported source connection you can authenticate to
-- One supported destination you control
-- A read-only user or token for the source and a write-capable user for the destination
-- The network and SSL settings required by your database or SaaS provider
+1. Create a PostgreSQL source connection.
+2. Create a PostgreSQL destination connection.
+3. Create a pipeline shell from **Data Pipelines** with a name and source connection.
+4. Open the builder.
+5. Use the **Source** node to test the source, discover tables, include source streams, and preview rows.
+6. Use the **Destination** node to choose the destination connection, enter final delivery tables as `schema.table`, add optional rename/cast rules, write SQL models, validate, preview, and save.
+7. Run the destination manually.
+8. Review run status and run history.
+9. Switch the destination to Incremental sync before enabling a schedule.
 
-## The real app flow
+## Before you build
 
-1. Create or switch into the correct organization.
-2. Open **Connections** and create the source connection.
-3. Create the destination connection in the same workspace.
-4. Go to **Data Pipelines** and create the pipeline shell.
-5. In the canvas builder, click ⚙️ on the **Source** node to select tables, then click ⚙️ on the **Destination** node to configure the **Config** tab (schema, sync mode, write mode).
-6. Optionally add a SQL Transform node, or configure **Normalisation** and **dbt Layer** in the Destination panel.
-7. Click ▷ to run manually. Check run results via the history icon in the top bar and the **Activity Log** page.
+Prepare the destination table yourself before running the pipeline. MantrixFlow validates that the table exists and that model output columns match the destination columns; it does not create destination tables during delivery.
 
-## Where to go next
+For the fastest first run, start with one source table and one destination table.
 
-- Use [Quick Start](/getting-started/quick-start) for a full first pipeline.
-- Use [Core Concepts](/getting-started/core-concepts) if you want the product model first.
+## Next
+
+Follow the [Quick Start](/getting-started/quick-start) for an end-to-end PostgreSQL example.

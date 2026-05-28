@@ -1,61 +1,31 @@
 ---
 title: Run history
-description: Use pipeline run history to validate new deployments, diagnose failures, and understand sync state for incremental pipelines.
+description: Review pipeline run status, row counts, warnings, and errors.
 ---
 
-Run history is where operational truth lives. There are two places to review it:
+Run history is the operational record for a pipeline.
 
-- **Builder history panel** — click the clock/history icon in the builder top bar to see runs for the current pipeline
-- **Activity Log** (`/workspace/activity`) — org-wide view of all events across all pipelines, connections, and data sources
-
-## What to look for after every important change
+Use it to confirm:
 
 - run status
-- start and end time
-- row counts or records processed
+- row counts
+- duration
+- delivery targets
+- no-primary-key warnings
 - error messages
-- whether the run happened manually or from a schedule
 
-## Healthy first-run checklist
+## Run states
 
-A healthy first production run usually looks like this:
+Typical states include queued, pending, running, succeeded, failed, and waiting.
 
-1. source and destination connections both test successfully
-2. pipeline saves without validation errors
-3. manual run completes
-4. destination contains the expected table updates
-5. only after that does the team enable the schedule
+Runs can wait when worker capacity or disk budget checks delay execution.
 
-## Sync state in run operations
+## What to inspect after a run
 
-Incremental pipelines keep state between runs so MantrixFlow knows where to resume. That state is why later incremental runs are faster and more targeted than the first one.
+1. Confirm the run succeeded.
+2. Confirm rows were written to the intended `schema.table`.
+3. Check for no-primary-key warnings.
+4. Compare the destination table shape against the SQL model output.
+5. Review the error message if the run failed.
 
-## Activity Log
-
-The **Activity Log** page (`/workspace/activity`) shows all workspace events with:
-
-- **Summary badges** — Total, Success, Failed, Created, Updated, Deleted counts
-- **Filter bar** — free-text search plus dropdowns for **All Types**, **All Actions**, **All Status**, and **time window** (Last 7 days, etc.)
-- **Table columns** — Timestamp, Entity Type (Pipeline, Pipeline\_run, Data\_source, Data\_source\_connection), Action Type, Message, Status, Metadata
-
-Entity types you will commonly see:
-
-| Entity type | When you see it |
-| --- | --- |
-| `Pipeline` | pipeline created or updated |
-| `Pipeline_run` | run started, completed, or promoted |
-| `Data_source` | schema discovered |
-| `Data_source_connection` | connection tested |
-
-## When to investigate immediately
-
-Investigate right away if you see:
-
-- a run that fails immediately after a credential rotation
-- row counts unexpectedly dropping to zero
-- repeated errors on the same destination node
-- a scheduled run that produces no destination changes
-
-## Good operator habit
-
-When a run fails, check the builder history icon for the specific pipeline error and the Activity Log for the full event trace. The Activity Log is especially useful when multiple pipelines are affected.
+MantrixFlow sanitizes credential-like values in errors and does not return connection secrets in run output.

@@ -1,62 +1,10 @@
 ---
-title: MariaDB
-description: Connect MariaDB as a source for operational SQL tables using the current database connection flow.
+title: MariaDB source
+description: Status notice for MariaDB source support.
 ---
 
-MariaDB is available through the current SQL source flow, but the live connection form is intentionally narrower than PostgreSQL or MySQL.
+MariaDB source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **MariaDB** source form asks for:
-
-- `Connection Name`
-- `Host`
-- `Port`
-- `Database`
-- `Username`
-- `Password`
-
-- `Port` defaults to `3306`.
-- The current form does not expose `Schema` or `SSL Mode` fields.
-- Choose the database here and then pick the exact table later in the builder.
-
-## Good first use cases
-
-- replicate department or application tables into a reporting database
-- start with one table that business users already know how to validate
-- keep the first rollout simple with full or incremental sync
-
-## Before you connect
-
-- Create a read-only user for the database you plan to sync.
-- Confirm the exact MariaDB host and database name before you start.
-- Pick one or two tables for the first manual validation run.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Keep the role set to **Source** and choose **MariaDB**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Orders MariaDB`
-   - `Host`: `mariadb-prod.internal.northstar.io`
-   - `Port`: `3306`
-   - `Database`: `commerce`
-   - `Username`: `mf_readonly`
-4. Click **Test Connection**. Save the connection only after the test succeeds.
-5. Create a pipeline, pick the first table in **Source Configuration**, and run one manual sync before enabling a schedule.
-
-## Good first tables
-
-- `orders`
-- `customers`
-- `invoices`
-
-## Real-world example
-
-Harbor Ops syncs MariaDB order and invoice tables into PostgreSQL for reporting. They validate one manual run first, then move the busiest tables to incremental sync once the destination schema is trusted.
-
-## Troubleshooting
-
-- If the connection test passes but the builder cannot discover tables, verify grants on the selected database.
-- If your environment requires extra TLS or proxy handling, confirm those settings with the database team because the current form does not expose extra MariaDB-specific fields.
-- Keep schema naming decisions in the pipeline builder because the current connection form does not capture them.
+Use [PostgreSQL source](/connections/sources/database/postgresql) for the supported live source workflow.

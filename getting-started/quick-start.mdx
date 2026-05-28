@@ -1,79 +1,75 @@
 ---
 title: Quick Start
-description: Build your first production-style pipeline by syncing a PostgreSQL source into a PostgreSQL destination through the current MantrixFlow workspace flow.
+description: Build and run a real PostgreSQL-to-PostgreSQL pipeline in the current MantrixFlow workspace.
 ---
 
-This quick start uses a realistic scenario instead of placeholder demo data.
+This quick start follows the live app flow.
 
-**Scenario:** Lighthouse Commerce runs its application on Neon PostgreSQL and wants an analytics copy of the `orders` table in a separate PostgreSQL destination. The team wants one manual validation run first and an hourly schedule after that.
+**Scenario:** a team wants to copy `public.orders` from an application PostgreSQL database into `analytics.orders_live` in a reporting PostgreSQL database.
 
 ## Before you begin
 
-Have these values ready:
+Have these ready:
 
-- Source host, database, username, password, and schema for the operational PostgreSQL database
-- Destination host, database, username, password, and schema for the reporting database
-- A source user with read access and a destination user with write access
-- SSL enabled for both connections if they are cloud-hosted
+- PostgreSQL source host, port, database, username, password, and SSL mode
+- PostgreSQL destination host, port, database, username, password, and SSL mode
+- A source user with read access to `public.orders`
+- A destination user with write access to `analytics.orders_live`
+- A pre-created destination table named `analytics.orders_live`
 
-## Step by step
+Example destination shape:
 
-1. Sign in and switch to the correct organization.
-2. Open **Connections** and create a **Source** connection with **PostgreSQL**.
-3. Fill the form with real values such as:
-   - `Connection Name`: `Neon Production Orders`
-   - `Host`: `ep-lighthouse-prod-123456.us-east-2.aws.neon.tech`
-   - `Port`: `5432`
-   - `Database`: `app`
-   - `Username`: `mf_readonly`
-   - `Schema`: `public`
-   - `SSL Mode`: `require`
-4. Click **Test Connection** and save the source after the test succeeds.
-5. Create a second **Destination** connection with values such as:
-   - `Connection Name`: `Analytics Postgres`
-   - `Host`: `analytics-db.internal.lighthouse.io`
-   - `Database`: `warehouse`
-   - `Username`: `mf_writer`
-   - `Schema`: `analytics`
-   - `SSL Mode`: `require`
-6. Go to **Data Pipelines → + New Pipeline**, name it `Orders to Analytics`, choose `Neon Production Orders` as the source, and click **Create & open canvas**.
-7. On the canvas, click ⚙️ on the **Source** node:
-   - Click **Discover schema** to load available tables.
-   - Tick **Include** next to `public.orders`.
-   - Click **Preview** to verify rows.
-8. Optionally add a SQL transform. Use `{{ source }}` as the table reference:
+```sql
+CREATE SCHEMA IF NOT EXISTS analytics;
+
+CREATE TABLE IF NOT EXISTS analytics.orders_live (
+  id bigint PRIMARY KEY,
+  customer_id bigint,
+  order_status text,
+  total_amount numeric,
+  created_at timestamptz,
+  updated_at timestamptz
+);
+```
+
+## Build the pipeline
+
+1. Open **Connections** and create a **Source** connection with **PostgreSQL**.
+2. Fill the connection form and click **Test Connection**.
+3. Save the source after the test succeeds.
+4. Create a second **PostgreSQL** connection with the role set to **Destination**.
+5. Click **Test Connection** and save the destination after the test succeeds.
+6. Open **Data Pipelines** and create a new pipeline with a name and the source connection.
+7. In the builder, click the settings icon on the **Source** node.
+8. Click **Discover schema** or **Refresh tables**.
+9. Include `public.orders` and preview the rows.
+10. Click the settings icon on the **Destination** node.
+11. Choose the destination connection.
+12. Keep **Sync mode** as `FULL_TABLE` for the first validation run.
+13. Keep **Write mode** as `Upsert`.
+14. In the **SQL Layer** tab, set the final delivery table to `analytics.orders_live`.
+15. Use a simple SQL model:
 
 ```sql
 SELECT
   id,
   customer_id,
-  LOWER(order_status)          AS order_status,
+  LOWER(order_status) AS order_status,
   total_amount,
   created_at,
   updated_at
-FROM {{ source }}
+FROM {{ source('raw', 'public__orders') }}
 WHERE order_status IS NOT NULL
 ```
 
-9. Click ⚙️ on the **Destination** node. In the **Config** tab:
-   - **Connection**: `Analytics Postgres`
-   - **Final delivery schema**: `analytics`
-   - **Sync mode**: `FULL_TABLE`
-   - **Write mode**: `Upsert`
-   - Click **Validate config**, then open the **Preview** tab to confirm the target schema.
-10. Click ▷ on the Destination node to start the first manual run.
-11. Click the history icon in the top bar and confirm `analytics.orders_live` contains the expected rows.
-12. Once the manual run succeeds, open the **Scheduling** tab in the Destination panel and set an hourly schedule.
+16. Click **Validate SQL**.
+17. Click **Preview output**.
+18. Click **Save destination**.
+19. Run the destination manually from the destination node.
+20. Open run status or run history and confirm the run succeeded.
 
-## What success looks like
+## Add a schedule later
 
-You now have a working pipeline that uses the same flow most teams follow in production:
+Scheduling is available after switching the destination to `INCREMENTAL` and providing a replication key such as `updated_at`.
 
-- reusable source and destination connections
-- a named pipeline shell
-- a selected source table
-- an optional SQL transform (for PostgreSQL-to-PostgreSQL pipelines)
-- a configured destination branch
-- saved configuration, run history, and scheduling
-
-From here, you can expand to more tables, more branches, or another supported SQL destination.
+Validate at least one manual run before enabling a recurring schedule.

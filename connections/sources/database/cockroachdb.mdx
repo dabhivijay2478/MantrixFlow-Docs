@@ -1,62 +1,10 @@
 ---
-title: CockroachDB
-description: Connect CockroachDB as a source for distributed SQL tables using the current live connection form.
+title: CockroachDB source
+description: Status notice for CockroachDB source support.
 ---
 
-CockroachDB is available as a SQL source in the current connection catalog and follows the same table-first pipeline pattern as the other live database connectors.
+CockroachDB source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **CockroachDB** source form asks for:
-
-- `Connection Name`
-- `Host`
-- `Port`
-- `Database`
-- `Username`
-- `Password`
-
-- `Port` defaults to `26257`.
-- `Database` defaults to `defaultdb`.
-- The current form does not expose separate `Schema` or `SSL Mode` fields.
-
-## Good first use cases
-
-- sync operational tables into a separate analytics database
-- land CockroachDB data in PostgreSQL or CockroachDB reporting tables
-- prove one table end to end before broadening the sync surface
-
-## Before you connect
-
-- Create a SQL user with read access to the tables you need.
-- Confirm the cluster endpoint, port, and database name.
-- Start with one business table that is easy to validate manually.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Keep the role set to **Source** and choose **CockroachDB**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Cockroach Production`
-   - `Host`: `northstar-cluster.aws-us-east-1.cockroachlabs.cloud`
-   - `Port`: `26257`
-   - `Database`: `defaultdb`
-   - `Username`: `mf_readonly`
-4. Click **Test Connection**. Save the connection only after the test succeeds.
-5. Create a pipeline, pick the first table in **Source Configuration**, and run one manual sync before enabling a schedule.
-
-## Good first tables
-
-- `orders`
-- `customers`
-- `inventory_events`
-
-## Real-world example
-
-Atlas Ops syncs operational order and inventory tables from CockroachDB into PostgreSQL analytics. They use a manual full-sync validation for smaller tables and incremental sync for the large order table after the first clean run.
-
-## Troubleshooting
-
-- If the connection test fails, double-check the cluster endpoint, port, and SQL user credentials.
-- If table discovery is thin, verify that the selected database contains the expected tables and that the user can read them.
-- Use the builder to choose the final source table and destination naming because the current connection form intentionally stays minimal.
+Use [PostgreSQL source](/connections/sources/database/postgresql) for the supported live source workflow.

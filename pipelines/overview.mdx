@@ -1,64 +1,48 @@
 ---
 title: Pipelines Overview
-description: "Understand the real MantrixFlow pipeline lifecycle: pipeline shell creation, builder configuration, branch design, scheduling, and run operations."
+description: "Understand the live MantrixFlow pipeline lifecycle: shell creation, source selection, destination-scoped Normalisation and SQL, manual runs, and Incremental schedules."
 ---
 
-A MantrixFlow pipeline is the operational definition of how data should move from one source connection into one or more destinations.
+A MantrixFlow pipeline defines how data moves from one PostgreSQL source connection to one PostgreSQL destination connection.
 
-## The current lifecycle
+## Lifecycle
 
 1. Create a pipeline shell from **Data Pipelines**.
-2. Open the builder canvas (Source and Destination nodes appear automatically).
-3. Click ⚙️ on the **Source** node — tick tables to include, use **Discover schema** and **Preview**.
-4. **Option A — simple**: Add a SQL Transform node on the canvas and write your `SELECT` using `{{ source }}`.
-5. **Option B — Normalisation + dbt Layer**: Click ⚙️ on the **Destination** node:
-   - **Normalisation tab**: Rename or exclude source columns before they land in the raw layer.
-   - **dbt Layer tab**: Write a dbt SQL model on `{{ source('raw', 'schema__tablename') }}`.
-6. In the **Config** tab: set connection, final delivery schema, sync mode, write mode, and click **Validate config**.
-7. Click ▷ to run manually, check the history icon, then add a schedule in the **Scheduling** tab.
+2. Open the builder canvas.
+3. Configure the **Source** node: test connection, discover tables, include `schema.table` streams, and preview rows.
+4. Configure the **Destination** node: choose destination connection, set sync mode, add optional rename/cast rules, write SQL models, validate, preview, and save.
+5. Run the destination manually.
+6. Review run status and run history.
+7. Switch to Incremental sync and add a schedule only after manual validation.
 
-## The parts of a pipeline
+## Builder nodes
 
-- **Pipeline shell**: name plus source connection
-- **Source configuration**: the concrete table or resource to sync
-- **Transform node** (canvas): optional SQL `SELECT` using `{{ source }}` — runs before normalisation
-- **Destination panel** — 5 tabs:
-  - **Config**: connection, final delivery schema, sync mode, replication key, write mode, validate
-  - **Normalisation**: column-level Rename and Exclude rules; lands in `raw.schema__tablename`
-  - **dbt Layer**: dbt SQL model on `{{ source('raw', 'schema__tablename') }}`; uses renamed column names
-  - **Preview**: inspect the target table before running
-  - **Scheduling**: recurring schedule configuration
-- **Run history**: the operational record of every execution
-- **Sync state**: the stored cursor checkpoint for incremental sync pipelines
+The current public builder workflow uses two node types:
 
-## 3-stage Normalisation + dbt pipeline
+- **Source**: connection test, schema discovery, stream inclusion, row preview
+- **Destination**: final table targets, Normalisation, SQL Layer, preview, schedule, manual run
 
-For pipelines that combine Normalisation and the dbt Layer (any supported source and SQL destination), the flow is:
+## Delivery model
 
-```
-Source (public.tablename)
-    ↓
-Normalisation   ← Rename/Exclude columns
-    ↓
-Raw layer  (raw.public__tablename)
-    ↓
-dbt Layer       ← {{ source('raw', 'public__tablename') }}
-    ↓
-Destination  (analytics.your_model)
-```
+Each selected source stream is identified as `schema.table`, for example `public.orders`.
 
-See [Normalisation](/pipelines/normalisation) and [dbt Layer](/pipelines/dbt-layer) for the full reference. For a Postgres-to-Postgres walkthrough, see the [example guide](/example/pipelines/postgres-to-postgres).
+During a run:
 
-## What is true in the live builder today
+1. MantrixFlow stages source rows in temporary storage.
+2. Normalisation applies destination-owned rename/cast rules.
+3. SQL models read from `raw.schema__table`.
+4. Delivery writes model output into pre-created destination tables.
+5. Checkpoint state is extracted and temporary staging files are deleted.
 
-- Stream selection happens in the **Source panel** (⚙️ on Source node).
-- The destination panel has 5 tabs: **Config**, **Normalisation**, **dbt Layer**, **Preview**, **Scheduling**.
-- SQL Transform node uses `{{ source }}`; dbt Layer uses `{{ source('raw', 'schema__tablename') }}`.
-- **Upsert** is the available write mode. Append and Replace are coming soon.
+## Destination contract
 
-## Typical production patterns
+Final delivery tables must already exist. The runner validates table existence and column compatibility before writing.
 
-- one PostgreSQL table feeding one PostgreSQL reporting table
-- one Shopify or Stripe resource feeding one SQL destination table
-- one source stream branching to PostgreSQL for analytics and MySQL for internal operations
-- a PostgreSQL source using full sync for first validation, then incremental sync (beta) for volume efficiency
+Use final destination table names as `schema.table`, for example `analytics.orders_live`.
+
+## Write behavior
+
+The live write mode is **Upsert**.
+
+Tables with primary keys use merge-style delivery. Tables without primary keys receive appended rows and a no-primary-key warning in run metadata.
+ta.

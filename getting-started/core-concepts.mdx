@@ -1,75 +1,73 @@
 ---
 title: Core Concepts
-description: "Understand the current MantrixFlow model: organizations, connections, pipelines, branches, sync modes, and run history."
+description: "The current MantrixFlow concepts: connections, source streams, destination tables, Normalisation, SQL Layer, runs, and schedules."
 ---
-
-## Dashboard
-
-After signing in, the **Dashboard** (`/workspace`) is the landing page. It shows:
-- **Active Pipelines** — count of running pipelines out of total
-- **This Week** — number of migrations run
-- **Rows Processed** — total rows from recent runs
-- **Team Members** — active members in the organization
-- **Usage & Limits** — plan quota for Pipelines, Rows This Month, API Calls, and Agent Interactions with upgrade prompts
-
-## Organizations
-
-An organization is the workspace boundary for connections, pipelines, team members, activity, and schedules. Many teams keep one organization for production and one for staging so credentials and run history stay separate.
 
 ## Connections
 
-A connection is a reusable credential set plus connector-specific configuration. Connections live under **Connections** and are created with a role of **Source** or **Destination**.
+Connections store reusable credentials. The live public workflow supports PostgreSQL as both source and destination.
 
-Examples in the current product:
+Source connections need read access. Destination connections need write access to tables that already exist.
 
-- a PostgreSQL source connection for an application database
-- a Shopify source connection for store data
-- a GitHub source connection for one repository
-- a PostgreSQL, MySQL, or SQLite destination connection for downstream tables
+## Pipeline shell
 
-## Pipelines
+A pipeline shell has a name and a source connection. It is intentionally minimal because the builder owns the operational configuration.
 
-A pipeline begins as a lightweight shell (name + source connection) created from **Data Pipelines → + New Pipeline**. Clicking **Create & open canvas** opens the canvas builder with a **Source** node on the left and a **Destination** node on the right.
+## Source node
 
-- Click ⚙️ on the **Source** node to select tables, discover schema, and preview rows.
-- Click ⚙️ on the **Destination** node to open the five-tab Destination panel:
-  - **Config** — connection, final delivery schema, sync mode, write mode, validate
-  - **Normalisation** — column normalisation settings
-  - **dbt Layer** — dbt model integration
-  - **Preview** — target table preview
-  - **Scheduling** — recurring schedule configuration
+The **Source** node is where you:
 
-## Branches
+- test the source connection
+- discover schemas and tables
+- include one or more source streams
+- preview the active source stream
 
-A branch is a connection line on the canvas from the Source node to a Destination node. One source can have multiple Destination nodes. A realistic pattern:
+Streams are represented as `schema.table`, for example `public.orders`.
 
-- Destination A writes cleaned `orders` to PostgreSQL for analytics.
-- Destination B writes a narrower version to MySQL for an internal view.
+## Destination node
+
+The **Destination** node is where you:
+
+- choose the destination connection
+- choose Full Table or Incremental sync
+- set a replication key for Incremental sync
+- keep the live write mode as Upsert
+- add optional Normalisation rules
+- write SQL models
+- validate and preview model output
+- save destination configuration
+- run manually or configure a schedule
+
+## Normalisation
+
+Normalisation is destination-scoped and runs before the SQL Layer. The live rule types are:
+
+- Rename a column
+- Cast a column to a compatible type
+
+## SQL Layer
+
+The SQL Layer is the live SQL transformation surface. Models read from temporary raw staging tables using:
+
+```sql
+{{ source('raw', 'public__orders') }}
+```
+
+The double underscore maps the source stream `public.orders` to the staging table name `public__orders`.
+
+## Destination tables
+
+Destination tables must already exist. During pre-flight and delivery, MantrixFlow validates:
+
+- the final table exists
+- the model output columns match destination columns
+- primary keys are available for merge-style Upsert when possible
+
+If a destination table has no primary key, rows are appended and the run records a warning.
 
 ## Sync modes
 
-The app currently supports two read patterns:
+- **FULL_TABLE** rereads the selected source stream for manual validation or controlled refreshes.
+- **INCREMENTAL** uses a replication key and stored checkpoint for recurring runs.
 
-- **Full sync** — available now; recommended for all first runs and production pipelines
-- **Incremental sync** — beta; for tables with a dependable cursor field such as `updated_at`; not fully production-tested
-
-## Destination behavior
-
-The Destination **Config** tab has three write mode options:
-- **Upsert** — available now; inserts new rows and updates existing rows by primary key
-- **Append** — coming soon; insert-only, no deduplication
-- **Replace** — coming soon; drops and recreates the destination table on each run
-
-Use **Upsert** for all production workflows today.
-
-## Activity Log
-
-The **Activity Log** (`/workspace/activity`) shows all events across pipelines, data sources, and the organization — with columns for Timestamp, Entity Type, Action Type, Message, and Status. Filter by type, action, status, or time window.
-
-## Run history and sync state
-
-Every run stores operational metadata: status, timing, row counts, and errors. Access per-pipeline run history from the history icon in the builder top bar. Incremental pipelines also maintain sync state so later runs know where to resume.
-
-## Mental model to keep in mind
-
-An organization owns connections, a pipeline shell points to a source connection, the builder turns that shell into one or more branches, and run history tells you whether the configured flow actually worked.
+Scheduling is available only for Incremental destinations.

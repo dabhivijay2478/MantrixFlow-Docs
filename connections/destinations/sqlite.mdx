@@ -1,52 +1,10 @@
 ---
-title: SQLite
-description: Write MantrixFlow pipeline output into SQLite for lightweight downstream handoffs, local validation, and file-based application reads.
+title: SQLite destination
+description: Status notice for SQLite destination support.
 ---
 
-SQLite is a file-based destination option in the current connection catalog. It works well when the destination is a single database file instead of a managed server.
+SQLite destination setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **SQLite** destination form asks for:
-
-- `Connection Name`
-- `Database File Path`
-
-- The path should point to the SQLite file MantrixFlow should write into.
-- You still choose the final destination table name in the builder.
-
-## Good first use cases
-
-- local validation copies for QA or support teams
-- lightweight handoff files for internal tooling
-- embedded application read models that do not need a server-backed destination
-
-## Before you connect
-
-- Pick the exact SQLite file location you want the runtime to use.
-- Make sure the directory is writable from the environment that runs the pipeline.
-- Decide on the first destination table name before you build the branch.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Set the role to **Destination** and choose **SQLite**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Operations QA SQLite`
-   - `Database File Path`: `/var/lib/mantrixflow/sqlite/qa_reporting.db`
-4. Click **Test Connection** and save the connection after the test succeeds.
-5. In the builder's **Destination** panel, configure:
-   - `Connection`: `Operations QA SQLite`
-   - `Table`: `orders_live`
-   - `Write mode`: `Upsert`
-6. Save the pipeline and run one manual sync before enabling a schedule.
-
-## Real-world example
-
-A QA team lands a cleaned order feed into a SQLite file that ships with an internal troubleshooting tool, so support engineers can inspect recent records without querying production systems.
-
-## Troubleshooting
-
-- If the test fails, verify the file path and whether the runtime can create or open the database file.
-- If writes fail during the run, check directory permissions and whether another process is holding the file unexpectedly.
-- Validate the first manual run before treating the SQLite file as a durable downstream dependency.
+Use [PostgreSQL destination](/connections/destinations/postgresql) for the supported live destination workflow.

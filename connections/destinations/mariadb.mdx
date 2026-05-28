@@ -1,61 +1,10 @@
 ---
-title: MariaDB
-description: Write MantrixFlow pipeline output into MariaDB for departmental reporting and SQL landing tables.
+title: MariaDB destination
+description: Status notice for MariaDB destination support.
 ---
 
-MariaDB is available as a live SQL destination. The current connection form stays minimal and leaves schema and table naming to the builder.
+MariaDB destination setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **MariaDB** destination form asks for:
-
-- `Connection Name`
-- `Host`
-- `Port`
-- `Database`
-- `Username`
-- `Password`
-
-- `Port` defaults to `3306`.
-- The current form does not expose `Schema` or `SSL Mode` fields.
-- Use the destination panel to set the final `Schema` and `Table`.
-
-## Good first use cases
-
-- departmental reporting tables
-- internal application tables that expect MariaDB
-- a simple SQL landing zone for operational data
-
-## Before you connect
-
-- Create a dedicated write user for the target database.
-- Decide which destination schema and table you want to create or update in the builder.
-- Validate one table manually before scheduling recurring runs.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Set the role to **Destination** and choose **MariaDB**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `MariaDB Reporting`
-   - `Host`: `mariadb-reporting.internal.northstar.io`
-   - `Port`: `3306`
-   - `Database`: `reporting`
-   - `Username`: `mf_writer`
-4. Click **Test Connection** and save the connection after the test succeeds.
-5. In the builder's **Destination** panel, configure:
-   - `Connection`: `MariaDB Reporting`
-   - `Schema`: `analytics`
-   - `Table`: `shopify_orders`
-   - `Write mode`: `Upsert`
-6. Save the pipeline and run one manual sync before enabling a schedule.
-
-## Real-world example
-
-An operations team lands Shopify order data into MariaDB so downstream internal tools can query one clean SQL table without reading the Shopify API directly.
-
-## Troubleshooting
-
-- If writes fail after a successful connection test, verify that the user can create or update objects in the target database.
-- If your environment requires extra network or TLS handling, coordinate that outside the current form and then re-test the connection.
-- Keep destination naming decisions in the builder because the saved connection intentionally captures only the core database access details.
+Use [PostgreSQL destination](/connections/destinations/postgresql) for the supported live destination workflow.

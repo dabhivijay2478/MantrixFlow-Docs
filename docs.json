@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "MantrixFlow",
-  "description": "Documentation for MantrixFlow — ELT pipelines, connectors, sync modes, and the workspace app.",
+  "description": "Documentation for the current MantrixFlow app: PostgreSQL-to-PostgreSQL ELT pipelines, source and destination configuration, dbt models, runs, and scheduling.",
   "theme": "almond",
   "colors": {
     "primary": "#00a859",
@@ -51,7 +51,7 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Get started",
+      "label": "Launch app",
       "href": "https://cloud.mantrixflow.com"
     }
   },
@@ -103,36 +103,13 @@
               {
                 "group": "Sources",
                 "pages": [
-                  {
-                    "group": "Database",
-                    "pages": [
-                      "connections/sources/database/postgresql",
-                      "connections/sources/database/mysql",
-                      "connections/sources/database/mariadb",
-                      "connections/sources/database/sqlite",
-                      "connections/sources/database/cockroachdb"
-                    ]
-                  },
-                  {
-                    "group": "SaaS",
-                    "pages": [
-                      "connections/sources/ecommerce/shopify",
-                      "connections/sources/finance/stripe",
-                      "connections/sources/crm/hubspot",
-                      "connections/sources/developer-tools/github",
-                      "connections/sources/productivity/notion"
-                    ]
-                  }
+                  "connections/sources/database/postgresql"
                 ]
               },
               {
                 "group": "Destinations",
                 "pages": [
-                  "connections/destinations/postgresql",
-                  "connections/destinations/mysql",
-                  "connections/destinations/mariadb",
-                  "connections/destinations/sqlite",
-                  "connections/destinations/cockroachdb"
+                  "connections/destinations/postgresql"
                 ]
               }
             ]
@@ -147,7 +124,6 @@
               "pipelines/dbt-layer",
               "pipelines/data-type-compatibility",
               "pipelines/sync-modes",
-              "pipelines/transformation-rules",
               "pipelines/schedule",
               "pipelines/run-history"
             ]

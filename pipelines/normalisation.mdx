@@ -1,150 +1,41 @@
 ---
 title: Normalisation
-description: Use the Normalisation tab in the Destination panel to rename or exclude source columns before they land in the raw layer — before any dbt transformation runs.
+description: Use destination-scoped rename and cast rules before SQL models run.
 ---
 
-The **Normalisation** tab is in the Destination panel (⚙️ on any Destination node). It applies column-level rules to the incoming source data **before** it lands in the raw staging layer that the dbt Layer reads from.
+Normalisation is configured in the **Destination** panel. It runs after extraction and before the SQL Layer.
 
-## Where it fits in the pipeline
+## Live rule types
 
-```
-Source (public.tablename)
-    ↓
-Normalisation  ← rename columns, exclude columns
-    ↓
-Raw layer  (raw.public__tablename)
-    ↓
-dbt Layer  ← SQL model on raw.public__tablename
-    ↓
-Destination  (analytics.your_model)
-```
-
-Normalisation runs before the dbt Layer. Any column rename you apply here is visible in the dbt SQL using the **new name**, not the original source column name.
-
----
-
-## Two rule types
-
-### Rename
-
-Map a source column to a different name in the raw layer.
-
-| Source column | Rename to |
+| Rule | Use it for |
 | --- | --- |
-| `customer_id` | `customer_uuid` |
-| `email` | `email_address` |
-| `first_name` | `fname` |
-| `created_at` | `registered_at` |
-| `total_amount` | `order_total` |
+| Rename | Change a source column name before the SQL model reads it |
+| Cast | Coerce a staged value to a destination-friendly type |
 
-In the dbt SQL you then reference the **renamed** name:
+Rules can be scoped to a source stream such as `public.orders`.
+
+## Example
+
+If the source stream is `public.orders`, you can add:
+
+| Rule | Table | Column | Target |
+| --- | --- | --- | --- |
+| Rename | `public.orders` | `status` | `order_status` |
+| Cast | `public.orders` | `total_amount` | `numeric` |
+
+The SQL model should then reference the post-normalisation names:
 
 ```sql
 SELECT
-    customer_uuid,   -- was customer_id in source
-    email_address,   -- was email in source
-    fname,           -- was first_name in source
-    order_total      -- was total_amount in source
-FROM {{ source('raw', 'public__customers') }}
+  id,
+  customer_id,
+  order_status,
+  total_amount,
+  created_at,
+  updated_at
+FROM {{ source('raw', 'public__orders') }}
 ```
 
-### Exclude
+## When to use SQL models instead
 
-Drop a column entirely. It will not appear in the raw layer or downstream.
-
-Common reasons to exclude:
-- Auto-generated columns (`serial_col`, `bigserial_col`) that are meaningless in the destination
-- PII columns you do not want to land in the warehouse at all
-- Large columns (e.g. raw `description` TEXT) you plan to truncate in dbt instead
-
-Excluded columns are silently omitted — no error is raised if a downstream query references them.
-
----
-
-## How to configure
-
-1. Click ⚙️ on the **Destination** node in the canvas.
-2. Click the **Normalisation** tab.
-3. For each source column, either:
-   - Enter a new name in the **Rename to** field, or
-   - Tick **Exclude** to drop the column.
-4. Columns with no rule pass through unchanged under their original name.
-5. Save the destination configuration.
-
----
-
-## Naming convention for the raw layer
-
-MantrixFlow stores normalised rows in a `raw` schema using this table name pattern:
-
-```
-raw.{source_schema}__{table_name}
-```
-
-Examples:
-
-| Source table | Raw layer table |
-| --- | --- |
-| `public.customers` | `raw.public__customers` |
-| `public.orders` | `raw.public__orders` |
-| `public.order_items` | `raw.public__order_items` |
-| `sales.transactions` | `raw.sales__transactions` |
-| `inventory.products` | `raw.inventory__products` |
-
-The double underscore (`__`) separates schema from table name. This is the reference you use in the dbt Layer `{{ source() }}` call.
-
----
-
-## Real-world normalisation examples
-
-### Customers table
-
-| Rule | Source column | Target |
-| --- | --- | --- |
-| Rename | `customer_id` | `customer_uuid` |
-| Rename | `email` | `email_address` |
-| Rename | `first_name` | `fname` |
-| Rename | `last_name` | `lname` |
-| Rename | `date_of_birth` | `birth_date` |
-| Exclude | `phone` | — |
-| Exclude | `metadata` | — (extracted in dbt) |
-
-### Orders table
-
-| Rule | Source column | Target |
-| --- | --- | --- |
-| Rename | `order_id` | `order_uuid` |
-| Rename | `customer_id` | `customer_ref` |
-| Rename | `order_number` | `order_code` |
-| Rename | `status` | `order_status` |
-| Rename | `total_amount` | `order_total` |
-| Exclude | `items` | — (extracted in dbt) |
-| Exclude | `shipping_address` | — (extracted in dbt) |
-| Exclude | `billing_address` | — (extracted in dbt) |
-
-### Numeric types table
-
-| Rule | Source column | Target |
-| --- | --- | --- |
-| Rename | `small_int_col` | `small_int_value` |
-| Rename | `int_col` | `int_value` |
-| Rename | `big_int_col` | `big_int_value` |
-| Rename | `decimal_col` | `decimal_value` |
-| Rename | `numeric_col` | `numeric_value` |
-| Rename | `real_col` | `real_value` |
-| Rename | `double_col` | `double_value` |
-| Rename | `money_col` | `money_value` |
-| Exclude | `serial_col` | — (auto-generated) |
-| Exclude | `bigserial_col` | — (auto-generated) |
-
----
-
-## When to use Normalisation vs SQL Transform node
-
-| Approach | Best for |
-| --- | --- |
-| **Normalisation tab** | Clean column naming before dbt runs; excluding columns you never want in the warehouse |
-| **SQL Transform node** | Full SQL reshaping, casts, aggregations, derived columns, filtering before the raw layer |
-| **Both together** | Normalise first, then write richer dbt logic on the clean column names |
-
-For simple pipelines where you only need column renames and basic filtering, use Normalisation + dbt Layer without a Transform node. For complex pre-processing, add a Transform node before Normalisation.
+Use the SQL Layer for filtering rows, deriving fields, joining, aggregating, or reshaping output columns. Normalisation is intentionally small and structural.

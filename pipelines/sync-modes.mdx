@@ -1,45 +1,26 @@
 ---
 title: Sync modes
-description: Choose between full sync and incremental sync based on source behavior, table size, and freshness requirements.
+description: Full Table and Incremental sync behavior in the current MantrixFlow app.
 ---
 
-Sync mode controls how MantrixFlow reads from the source on each run. It is configured in the **Destination node → Config tab → Sync mode** dropdown in the canvas builder.
+MantrixFlow supports two sync modes in the live pipeline builder.
 
-## Quick comparison
+## Full Table
 
-| Mode | Status | Best for | Main tradeoff |
-| --- | --- | --- | --- |
-| Full sync | **Available** | Any table — recommended for first runs and correctness validation | Re-reads everything each run |
-| Incremental sync | **Beta** | Growing tables with a reliable update field like `updated_at` | Depends on correct cursor behavior; not fully production-tested |
+Use `FULL_TABLE` for the first validation run or for manual refreshes.
 
-## Full sync
+Full Table runs are manual in the current app. The Scheduling tab is disabled while a destination is in Full Table mode.
 
-Use full sync when the dataset is modest or the source does not expose a good cursor. Recommended for all first runs, correctness checks, and smaller reference tables. This is the safest mode and the one to start with.
+## Incremental
 
-> **Note:** Full Table sync does not support automatic scheduling. The Scheduling tab in the Destination panel is disabled when this mode is active. See [Schedule and automation](/pipelines/schedule) for details.
+Use `INCREMENTAL` when the source table has a stable cursor column, such as `updated_at`, `created_at`, or a monotonic id.
 
-## Incremental sync
+Incremental runs store checkpoint state after each successful run and use that state on the next run.
 
-<Warning>
-  Incremental sync is in **beta** and has not been fully tested across all source types. Use full sync for production workloads until this notice is removed.
-</Warning>
+## Scheduling
 
-Use incremental sync when records have a trustworthy field such as `updated_at`, `modified_at`, or a monotonic ID. See [Incremental sync](/sync-reference/incremental-sync) for configuration steps and limitations.
+Scheduling is available only for Incremental destinations. Switch the destination to Incremental, enter the replication key, save, run manually once, and then add a schedule.
 
-## How to choose
+## Write behavior
 
-- **Start with full sync** for all new pipelines. Validate that data looks correct end-to-end.
-- Consider **incremental sync** only once full sync is confirmed working and table volume makes full re-reads expensive.
-
-## Where sync mode lives in the UI
-
-In the canvas builder, click ⚙️ on the **Destination** node, open the **Config** tab, and choose from the **Sync mode** dropdown:
-
-- `FULL_TABLE` — re-reads all rows on every run (recommended default)
-- `INCREMENTAL` — reads only rows newer than the cursor column value stored in sync state (beta)
-
-The **Replication key** field below the dropdown is where you set the cursor column for incremental mode (e.g. `updated_at`).
-
-## Companion destination decision
-
-Sync mode and write mode are separate concerns. The only available write mode today is **Upsert**. Append and Replace are coming soon.
+Sync mode and write behavior are separate. The live write mode is **Upsert**.

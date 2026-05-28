@@ -1,80 +1,41 @@
 ---
 title: Transformation rules
-description: "The MantrixFlow transformation model: SQL Transform node, Normalisation tab, dbt Layer tab, and Filter node — all SQL-based."
+description: "The current transformation model: destination-scoped Normalisation plus SQL models."
 ---
 
-MantrixFlow provides three SQL-based approaches to transform data in a pipeline:
+The live transformation flow happens in the **Destination** panel.
 
-| Approach | Where | Source reference | Best for |
-| --- | --- | --- | --- |
-| **SQL Transform node** | Canvas (between Source and Destination) | `{{ source }}` | Quick column reshaping, casts, filters |
-| **Normalisation tab** | Destination panel → Normalisation | Automatic | Column renames and exclusions |
-| **dbt Layer tab** | Destination panel → dbt Layer | `{{ source('raw', 'schema__tablename') }}` | Complex models, JSONB extraction, derived metrics |
+| Layer | Location | Purpose |
+| --- | --- | --- |
+| Normalisation | Destination panel | Rename and cast columns before the SQL model |
+| SQL Layer | Destination panel | SQL model that selects final output columns |
 
-## SQL Transform node
+## Normalisation
 
-Write a `SELECT` statement using `{{ source }}` as the table reference. MantrixFlow replaces it with the actual source stream at run time.
+Use Normalisation for small structural changes such as renaming `status` to `order_status` or casting a string amount to `numeric`.
+
+## SQL Layer
+
+Use SQL for business logic:
+
+- filtering rows
+- deriving columns
+- selecting the exact destination shape
+- extracting JSON fields
+- joining staged tables when available
+
+Example:
 
 ```sql
 SELECT
   id,
-  LOWER(email)                AS email,
-  first_name || ' ' || last_name AS full_name,
-  amount_cents::NUMERIC / 100  AS amount_usd,
-  created_at::TIMESTAMPTZ     AS created_at
-FROM {{ source }}
-WHERE is_deleted = false
+  customer_id,
+  LOWER(order_status) AS order_status,
+  total_amount,
+  created_at,
+  updated_at
+FROM {{ source('raw', 'public__orders') }}
+WHERE order_status IS NOT NULL
 ```
 
-SQL transforms support all PostgreSQL syntax: casts, filters, derived columns, aggregations, JSONB operators, and cross-type widening. See [SQL transform examples](/example/pipelines/postgres-to-postgres#sql-transform-examples) on the Postgres-to-Postgres guide for a full pattern library.
-
-## Normalisation + dbt Layer
-
-For production pipelines, use the Destination panel tabs:
-
-1. **Normalisation tab** — Rename or Exclude source columns before data lands in the raw layer (`raw.schema__tablename`).
-2. **dbt Layer tab** — Write a dbt SQL model on `{{ source('raw', 'schema__tablename') }}` using the **renamed** column names.
-
-See [Normalisation](/pipelines/normalisation) and [dbt Layer](/pipelines/dbt-layer) for the full reference and examples.
-
-## Filter node
-
-Add a **Filter** node on the canvas to keep or drop rows using a SQL `WHERE` clause:
-
-```sql
-is_deleted = false AND status IN ('active', 'pending')
-```
-
-Use the Filter node for simple row filtering. Use the Transform node or dbt Layer when you also need reshaping.
-
-## What the builder provides for transforms
-
-- **Source panel** (click ⚙️ on Source node) — Discover schema, Include toggle per table, Preview raw rows
-- **Transform node** on the canvas — SQL editor, Preview, Save
-- **Filter node** on the canvas — SQL `WHERE` clause
-- **Normalisation tab** in the Destination panel — Rename and Exclude rules
-- **dbt Layer tab** in the Destination panel — dbt SQL model editor
-
-## Preview every meaningful change
-
-Use preview whenever you:
-
-- change field names
-- cast types
-- filter rows
-- touch nested JSON structures
-- prepare a destination table that other teams will query immediately
-
-## Recommended workflow
-
-1. Click ⚙️ on the **Source** node — discover schema, tick Include, Preview raw rows.
-2. Add a Transform node if you need to reshape data.
-3. Start with a pass-through or load a built-in example.
-4. Make one change at a time.
-5. Click **Preview** after each meaningful edit.
-6. Save the transform.
-7. Click ⚙️ on the **Destination** node — configure the Config tab and click **Validate config**.
-8. Use the Destination **Preview** tab to confirm the target schema.
-9. Run the pipeline manually before enabling a schedule.
-
-See [Normalisation](/pipelines/normalisation), [dbt Layer](/pipelines/dbt-layer), and [Postgres-to-Postgres](/example/pipelines/postgres-to-postgres) for a full walkthrough.
+The model output must match the pre-created destination table.

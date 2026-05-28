@@ -1,67 +1,10 @@
 ---
-title: Shopify
-description: Connect Shopify as a source for store orders, products, customers, collections, and content resources.
+title: Shopify source
+description: Status notice for Shopify source support.
 ---
 
-Shopify is one of the clearest SaaS sources in the current app. The live form captures the store URL and the Admin API access token you need for testing and syncs.
+Shopify source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **Shopify** source form asks for:
-
-- `Connection Name`
-- `Shop URL`
-- `Admin API Access Token`
-
-- The shop URL should be the real store URL, for example `https://your-store.myshopify.com`.
-- The token field expects the Admin API access token, usually starting with `shpat_...`.
-
-## Good first use cases
-
-- order and customer analytics
-- product catalog replication into SQL
-- support and operations reporting built around store activity
-
-## Before you connect
-
-- Create a custom app with read access to the resources you plan to sync.
-- Confirm the exact shop URL before testing the connection.
-- Start with one high-value resource such as `orders` so the first validation run is easy to review.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Keep the role set to **Source** and choose **Shopify**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Northstar Home`
-   - `Shop URL`: `https://northstar-home.myshopify.com`
-   - `Admin API Access Token`: `shpat_...`
-4. Click **Test Connection** and save only after the test succeeds.
-5. Create a pipeline and start with one high-value resource so validation stays simple.
-
-## Resources available in the current source preview
-
-- `products`
-- `orders`
-- `customers`
-- `draft_orders`
-- `custom_collections`
-- `smart_collections`
-- `pages`
-- `blogs`
-- `articles`
-- `locations`
-- `price_rules`
-- `themes`
-- `countries`
-- `collects`
-
-## Real-world example
-
-An ecommerce team syncs Shopify `orders`, `customers`, and `products` into PostgreSQL so support, merchandising, and finance can all work from the same reporting tables.
-
-## Troubleshooting
-
-- If the test fails, confirm the shop URL format and the token scopes.
-- If resources are unexpectedly empty, start with `orders` or `customers` and validate against the Shopify admin UI.
-- One validated store connection is better than several broad first-time rollouts.
+Use [Connections Overview](/connections/overview) for the supported live connector list.
