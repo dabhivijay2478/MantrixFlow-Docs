@@ -1,22 +1,22 @@
 ---
 title: Transformation rules
-description: "The current transformation model: destination-scoped Normalisation plus dbt SQL models."
+description: "The current transformation model: destination-scoped Normalisation plus SQL models."
 ---
 
 The live transformation flow happens in the **Destination** panel.
 
 | Layer | Location | Purpose |
 | --- | --- | --- |
-| Normalisation | Destination panel | Rename and cast columns before dbt |
-| dbt Layer | Destination panel | SQL model that selects final output columns |
+| Normalisation | Destination panel | Rename and cast columns before the SQL model |
+| SQL Layer | Destination panel | SQL model that selects final output columns |
 
 ## Normalisation
 
 Use Normalisation for small structural changes such as renaming `status` to `order_status` or casting a string amount to `numeric`.
 
-## dbt Layer
+## SQL Layer
 
-Use dbt SQL for business logic:
+Use SQL for business logic:
 
 - filtering rows
 - deriving columns

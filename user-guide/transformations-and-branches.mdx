@@ -1,6 +1,6 @@
 ---
-title: Normalisation and dbt
-description: Shape data with destination-scoped Normalisation and dbt models in the current builder.
+title: Normalisation and SQL
+description: Shape data with destination-scoped Normalisation and SQL models in the current builder.
 ---
 
 The live transformation workflow is destination-scoped.
@@ -16,9 +16,9 @@ Example:
 | Rename | `public.orders` | `status` | `order_status` |
 | Cast | `public.orders` | `total_amount` | `numeric` |
 
-## dbt Layer
+## SQL Layer
 
-Use the **dbt Layer** tab for SQL models. Models read from temporary raw tables:
+Use the **SQL Layer** tab for SQL models. Models read from temporary raw tables:
 
 ```sql
 SELECT
@@ -35,6 +35,6 @@ Set each model's final delivery table as `schema.table`, such as `analytics.orde
 
 ## Multiple outputs
 
-When multiple source streams are selected, configure a dbt model and final delivery table for each stream you intend to deliver.
+When multiple source streams are selected, configure a SQL model and final delivery table for each stream you intend to deliver.
 
 Each final destination table must already exist.

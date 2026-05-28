@@ -57,9 +57,9 @@ Optional Normalisation rules:
 | Rename | `public.orders` | `status` | `order_status` |
 | Cast | `public.orders` | `total_amount` | `numeric` |
 
-## 6. Write the dbt model
+## 6. Write the SQL model
 
-In the **dbt Layer** tab, set final delivery table to `analytics.orders_live` and use:
+In the **SQL Layer** tab, set final delivery table to `analytics.orders_live` and use:
 
 ```sql
 SELECT

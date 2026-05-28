@@ -10,7 +10,7 @@ Use it for:
 - first-run validation
 - controlled manual refreshes
 - debugging source and destination shape
-- confirming dbt model output before moving to Incremental
+- confirming SQL model output before moving to Incremental
 
 ## How to configure
 
@@ -28,7 +28,7 @@ Full Table destinations are manual-only in the current app. The Scheduling tab i
 
 Full Table still follows the strict delivery contract:
 
-- source rows are staged in temporary DuckDB storage
-- dbt models run against raw staged tables
+- source rows are staged in temporary storage
+- SQL models run against raw staged tables
 - final destination tables must already exist
 - temporary staging is cleaned up after checkpoint extraction

@@ -1,6 +1,6 @@
 ---
 title: Core Concepts
-description: "The current MantrixFlow concepts: connections, source streams, destination tables, Normalisation, dbt Layer, runs, and schedules."
+description: "The current MantrixFlow concepts: connections, source streams, destination tables, Normalisation, SQL Layer, runs, and schedules."
 ---
 
 ## Connections
@@ -33,27 +33,27 @@ The **Destination** node is where you:
 - set a replication key for Incremental sync
 - keep the live write mode as Upsert
 - add optional Normalisation rules
-- write dbt SQL models
+- write SQL models
 - validate and preview model output
 - save destination configuration
 - run manually or configure a schedule
 
 ## Normalisation
 
-Normalisation is destination-scoped and runs before the dbt Layer. The live rule types are:
+Normalisation is destination-scoped and runs before the SQL Layer. The live rule types are:
 
 - Rename a column
 - Cast a column to a compatible type
 
-## dbt Layer
+## SQL Layer
 
-The dbt Layer is the live SQL transformation surface. Models read from temporary raw DuckDB tables using:
+The SQL Layer is the live SQL transformation surface. Models read from temporary raw staging tables using:
 
 ```sql
 {{ source('raw', 'public__orders') }}
 ```
 
-The double underscore maps the source stream `public.orders` to the DuckDB table name `public__orders`.
+The double underscore maps the source stream `public.orders` to the staging table name `public__orders`.
 
 ## Destination tables
 

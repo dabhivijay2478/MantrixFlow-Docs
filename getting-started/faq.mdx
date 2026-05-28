@@ -19,9 +19,9 @@ Open the builder and click the settings icon on the **Source** node. Use **Disco
 
 ## Where do I write SQL?
 
-Use the **dbt Layer** tab in the **Destination** panel.
+Use the **SQL Layer** tab in the **Destination** panel.
 
-Reference staged source data with the dbt source helper:
+Reference staged source data with the source helper:
 
 ```sql
 SELECT *
@@ -30,7 +30,7 @@ FROM {{ source('raw', 'public__orders') }}
 
 ## What Normalisation rules are available?
 
-The live Normalisation rules are Rename and Cast. They run before the dbt Layer.
+The live Normalisation rules are Rename and Cast. They run before the SQL Layer.
 
 ## Which write mode should I use?
 
@@ -48,10 +48,11 @@ Common causes:
 
 - source table does not exist or permission was removed
 - destination table does not exist
-- dbt model output contains a column missing from the destination table
+- SQL model output contains a column missing from the destination table
 - Incremental sync is missing a replication key
 - credentials changed after the connection was saved
 
 ## Is staging data permanent?
 
-No. Runs stage data in a temporary DuckDB file. The runner extracts checkpoint state and deletes the DuckDB file during cleanup.
+No. Runs stage data in temporary storage. The runner extracts checkpoint state and cleans up the staging file during cleanup.
+up.

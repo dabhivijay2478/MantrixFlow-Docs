@@ -47,8 +47,8 @@ CREATE TABLE IF NOT EXISTS analytics.orders_live (
 11. Choose the destination connection.
 12. Keep **Sync mode** as `FULL_TABLE` for the first validation run.
 13. Keep **Write mode** as `Upsert`.
-14. In the **dbt Layer** tab, set the final delivery table to `analytics.orders_live`.
-15. Use a simple dbt SQL model:
+14. In the **SQL Layer** tab, set the final delivery table to `analytics.orders_live`.
+15. Use a simple SQL model:
 
 ```sql
 SELECT

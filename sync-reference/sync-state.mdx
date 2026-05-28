@@ -5,7 +5,7 @@ description: Understand how Incremental runs store and reuse checkpoint state.
 
 Sync state is the checkpoint MantrixFlow saves after a successful Incremental run.
 
-The runner extracts state before deleting temporary DuckDB staging files. The Go API persists that checkpoint so later Incremental runs can resume.
+The runner extracts state before deleting temporary staging files. The platform persists that checkpoint so later Incremental runs can resume.
 
 ## When state matters
 

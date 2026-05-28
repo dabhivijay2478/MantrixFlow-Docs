@@ -1,6 +1,6 @@
 ---
 title: Pipelines Overview
-description: "Understand the live MantrixFlow pipeline lifecycle: shell creation, source selection, destination-scoped Normalisation and dbt, manual runs, and Incremental schedules."
+description: "Understand the live MantrixFlow pipeline lifecycle: shell creation, source selection, destination-scoped Normalisation and SQL, manual runs, and Incremental schedules."
 ---
 
 A MantrixFlow pipeline defines how data moves from one PostgreSQL source connection to one PostgreSQL destination connection.
@@ -10,7 +10,7 @@ A MantrixFlow pipeline defines how data moves from one PostgreSQL source connect
 1. Create a pipeline shell from **Data Pipelines**.
 2. Open the builder canvas.
 3. Configure the **Source** node: test connection, discover tables, include `schema.table` streams, and preview rows.
-4. Configure the **Destination** node: choose destination connection, set sync mode, add optional rename/cast rules, write dbt SQL models, validate, preview, and save.
+4. Configure the **Destination** node: choose destination connection, set sync mode, add optional rename/cast rules, write SQL models, validate, preview, and save.
 5. Run the destination manually.
 6. Review run status and run history.
 7. Switch to Incremental sync and add a schedule only after manual validation.
@@ -20,7 +20,7 @@ A MantrixFlow pipeline defines how data moves from one PostgreSQL source connect
 The current public builder workflow uses two node types:
 
 - **Source**: connection test, schema discovery, stream inclusion, row preview
-- **Destination**: final table targets, Normalisation, dbt Layer, preview, schedule, manual run
+- **Destination**: final table targets, Normalisation, SQL Layer, preview, schedule, manual run
 
 ## Delivery model
 
@@ -28,9 +28,9 @@ Each selected source stream is identified as `schema.table`, for example `public
 
 During a run:
 
-1. MantrixFlow stages source rows in a temporary DuckDB file.
+1. MantrixFlow stages source rows in temporary storage.
 2. Normalisation applies destination-owned rename/cast rules.
-3. dbt SQL models read from `raw.schema__table`.
+3. SQL models read from `raw.schema__table`.
 4. Delivery writes model output into pre-created destination tables.
 5. Checkpoint state is extracted and temporary staging files are deleted.
 
@@ -45,3 +45,4 @@ Use final destination table names as `schema.table`, for example `analytics.orde
 The live write mode is **Upsert**.
 
 Tables with primary keys use merge-style delivery. Tables without primary keys receive appended rows and a no-primary-key warning in run metadata.
+ta.

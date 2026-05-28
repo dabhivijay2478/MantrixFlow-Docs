@@ -10,7 +10,7 @@ description: Use Incremental sync with a stable replication key and stored check
 - PostgreSQL source table
 - stable replication key such as `updated_at`, `created_at`, or an increasing id
 - destination table that already exists
-- saved dbt model output that matches the destination columns
+- saved SQL model output that matches the destination columns
 
 ## How to configure
 
@@ -24,7 +24,7 @@ description: Use Incremental sync with a stable replication key and stored check
 
 ## Checkpoint state
 
-After a successful run, MantrixFlow extracts checkpoint state before deleting the temporary DuckDB file. The next Incremental run resumes from that stored state.
+After a successful run, MantrixFlow extracts checkpoint state before deleting the temporary staging file. The next Incremental run resumes from that stored state.
 
 ## Good replication keys
 

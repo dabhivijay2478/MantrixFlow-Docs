@@ -1,15 +1,15 @@
 ---
 title: Normalisation
-description: Use destination-scoped rename and cast rules before dbt models run.
+description: Use destination-scoped rename and cast rules before SQL models run.
 ---
 
-Normalisation is configured in the **Destination** panel. It runs after extraction and before the dbt Layer.
+Normalisation is configured in the **Destination** panel. It runs after extraction and before the SQL Layer.
 
 ## Live rule types
 
 | Rule | Use it for |
 | --- | --- |
-| Rename | Change a source column name before dbt reads it |
+| Rename | Change a source column name before the SQL model reads it |
 | Cast | Coerce a staged value to a destination-friendly type |
 
 Rules can be scoped to a source stream such as `public.orders`.
@@ -23,7 +23,7 @@ If the source stream is `public.orders`, you can add:
 | Rename | `public.orders` | `status` | `order_status` |
 | Cast | `public.orders` | `total_amount` | `numeric` |
 
-The dbt model should then reference the post-normalisation names:
+The SQL model should then reference the post-normalisation names:
 
 ```sql
 SELECT
@@ -36,6 +36,6 @@ SELECT
 FROM {{ source('raw', 'public__orders') }}
 ```
 
-## When to use dbt instead
+## When to use SQL models instead
 
-Use the dbt Layer for filtering rows, deriving fields, joining, aggregating, or reshaping output columns. Normalisation is intentionally small and structural.
+Use the SQL Layer for filtering rows, deriving fields, joining, aggregating, or reshaping output columns. Normalisation is intentionally small and structural.
