@@ -1,34 +1,25 @@
 ---
 title: Sync state
-description: What MantrixFlow tracks for incremental pipelines, how operators should think about it, and where it shows up in the current workflow.
+description: Understand how Incremental runs store and reuse checkpoint state.
 ---
 
-<Warning>
-  Incremental sync (and therefore sync state) is in **beta**. Use full sync for production pipelines until incremental sync graduates from beta.
-</Warning>
+Sync state is the checkpoint MantrixFlow saves after a successful Incremental run.
 
-Sync state is the checkpoint MantrixFlow uses to decide where the next incremental run should resume.
+The runner extracts state before deleting temporary DuckDB staging files. The Go API persists that checkpoint so later Incremental runs can resume.
 
-## What sync state contains
+## When state matters
 
-For incremental sync, the state represents the latest successful cursor value — typically the highest `updated_at` or `id` processed in the last run.
+State matters when:
 
-## What operators see today
+- a destination uses `INCREMENTAL`
+- a schedule is active
+- you change the replication key
+- you are investigating missing or duplicated rows
 
-In the standard workspace flow, operators mostly experience sync state indirectly through:
+## Operational guidance
 
-- successful incremental runs only pulling rows newer than the last cursor value
-- run history showing whether the pipeline is progressing normally
+- Do not change replication keys casually after a pipeline is running.
+- Validate a manual run after any sync-mode or replication-key change.
+- Treat state resets as operational recovery work.
 
-The state itself is not exposed as a standard self-serve reset screen in the current product.
-
-## Practical example
-
-Suppose Lighthouse Commerce runs an incremental sync on `orders.updated_at` every 15 minutes. After a successful run at 10:00, MantrixFlow stores the latest processed high-water mark. The 10:15 run uses that checkpoint so it reads only rows newer than the prior successful state.
-
-## Recommended operator workflow
-
-1. Check **Run History** first.
-2. Confirm whether the issue is source-side, transform-side, or destination-side.
-3. If the cursor or CDC assumptions changed, treat that as an operational recovery task instead of a casual reset.
-4. Re-run manually before restoring the schedule.
+Full Table runs do not depend on checkpoint state for scheduling because they are manual-only in the current app.

@@ -1,341 +1,44 @@
 ---
 title: dbt Layer
-description: Write dbt SQL models in the dbt Layer tab to transform normalised raw data into clean destination tables — for any pipeline that uses the Destination panel Normalisation and dbt Layer flow.
+description: Write destination-scoped SQL models that read from temporary DuckDB staging tables and deliver to pre-created PostgreSQL tables.
 ---
 
-The **dbt Layer** tab is in the Destination panel (⚙️ on any Destination node). It is where you write a dbt SQL model that runs **after** Normalisation, reading from the raw staging layer and writing to the final delivery schema.
+The dbt Layer is the live SQL transformation surface in MantrixFlow.
 
----
+Open the **Destination** panel and select the **dbt Layer** tab.
 
-## Where it fits in the pipeline
+## Source reference
 
-```
-Source (public.tablename)
-    ↓
-Normalisation  ← rename/exclude columns
-    ↓
-Raw layer  (raw.public__tablename)
-    ↓
-dbt Layer  ← SQL model runs here   ← YOU ARE HERE
-    ↓
-Destination  (analytics.your_model)
-```
-
----
-
-## Source reference syntax
-
-In the dbt Layer, you do **not** use `{{ source }}`. Instead, use the dbt `source()` function with the raw schema name and the raw table name:
+Use dbt `source()` references to read staged source data:
 
 ```sql
-{{ source('raw', 'public__tablename') }}
+{{ source('raw', 'public__orders') }}
 ```
 
-The raw table name follows the pattern `{source_schema}__{table_name}`:
+The source stream `public.orders` becomes the raw DuckDB table `public__orders`.
 
-| Source table | dbt source reference |
-| --- | --- |
-| `public.customers` | `{{ source('raw', 'public__customers') }}` |
-| `public.orders` | `{{ source('raw', 'public__orders') }}` |
-| `public.order_items` | `{{ source('raw', 'public__order_items') }}` |
-| `public.products` | `{{ source('raw', 'public__products') }}` |
-| `public.events` | `{{ source('raw', 'public__events') }}` |
-| `sales.transactions` | `{{ source('raw', 'sales__transactions') }}` |
-
-<Warning>
-  Always use the **renamed column names** from the Normalisation tab in your dbt SQL — not the original source column names. If you renamed `customer_id` → `customer_uuid` in Normalisation, the dbt SQL must reference `customer_uuid`.
-</Warning>
-
----
-
-## How to configure
-
-1. Click ⚙️ on the **Destination** node in the canvas.
-2. Click the **dbt Layer** tab.
-3. Write your SQL model using `{{ source('raw', 'schema__tablename') }}`.
-4. The SQL can use any PostgreSQL-compatible dbt model syntax.
-5. Save the destination configuration.
-6. Click **Validate config** in the **Config** tab before running.
-
----
-
-## dbt SQL examples
-
-### Pass through with rename key
+## Example model
 
 ```sql
 SELECT
-    id AS numeric_uuid,
-    small_int_value,
-    int_value,
-    big_int_value,
-    decimal_value,
-    numeric_value,
-    created_at::DATE AS created_date
-FROM {{ source('raw', 'public__numeric_all_types') }}
-WHERE id IS NOT NULL
+  id,
+  customer_id,
+  LOWER(order_status) AS order_status,
+  total_amount,
+  created_at,
+  updated_at
+FROM {{ source('raw', 'public__orders') }}
+WHERE order_status IS NOT NULL
 ```
 
-### Cast and derive columns — numeric data
+Set the final delivery table to `analytics.orders_live`.
 
-```sql
-SELECT
-    id AS numeric_uuid,
-    small_int_value,
-    int_value,
-    big_int_value,
-    decimal_value,
-    numeric_value,
-    real_value::DOUBLE PRECISION             AS real_as_double,
-    double_value,
-    money_value::NUMERIC(20,2)               AS money_as_numeric,
-    (small_int_value + int_value)::BIGINT    AS sum_integers,
-    CASE
-        WHEN numeric_value > 0 THEN 'positive'
-        WHEN numeric_value < 0 THEN 'negative'
-        ELSE 'zero'
-    END                                      AS numeric_sign,
-    created_at::DATE                         AS created_date
-FROM {{ source('raw', 'public__numeric_all_types') }}
-WHERE id IS NOT NULL
-```
+## Validation
 
-### Extract from JSONB columns — customers
+Use **Validate SQL** to check the model before saving. Use **Preview output** to stage a small sample and inspect the model result.
 
-Uses post-normalisation column names (`email_address`, `fname`, `lname`, `birth_date` after renaming in Normalisation tab):
+MantrixFlow validates the output against the final destination table. A column that appears in the model output but not in the destination table fails with a named column error.
 
-```sql
-SELECT
-    customer_uuid,
-    email_address,
-    fname,
-    lname,
-    TRIM(CONCAT(COALESCE(fname,''), ' ', COALESCE(lname,''))) AS full_name,
-    birth_date,
-    EXTRACT(YEAR FROM AGE(CURRENT_DATE, birth_date))          AS age,
-    metadata->>'city'                                          AS city,
-    metadata->>'country'                                       AS country,
-    metadata->>'tier'                                          AS customer_tier,
-    preferences->>'newsletter' = 'true'                        AS newsletter_opt_in,
-    preferences->>'sms' = 'true'                               AS sms_opt_in,
-    ARRAY_TO_STRING(tags, ', ')                                AS tags_combined,
-    is_active,
-    created_at::DATE                                           AS registered_date,
-    updated_at::DATE                                           AS last_updated_date
-FROM {{ source('raw', 'public__customers') }}
-```
+## Delivery
 
-### Flatten JSONB and derive business fields — orders
-
-```sql
-SELECT
-    o.order_uuid,
-    o.order_code,
-    o.customer_ref,
-    o.order_status,
-    o.subtotal,
-    o.tax_amount,
-    o.shipping_amount,
-    o.order_total,
-    o.currency,
-    JSONB_ARRAY_LENGTH(o.items)                              AS item_count,
-    (o.items->0)->>'sku'                                     AS first_item_sku,
-    ((o.items->0)->>'price')::NUMERIC
-        * ((o.items->0)->>'qty')::INTEGER                    AS first_item_total,
-    o.shipping_address->>'city'                              AS ship_city,
-    o.shipping_address->>'country'                           AS ship_country,
-    o.billing_address->>'city'                               AS bill_city,
-    ARRAY_TO_STRING(o.tags, ', ')                            AS order_tags,
-    o.placed_at::DATE                                        AS order_date,
-    EXTRACT(YEAR  FROM o.placed_at)                          AS order_year,
-    EXTRACT(MONTH FROM o.placed_at)                          AS order_month,
-    CASE o.order_status
-        WHEN 'completed' THEN 1
-        WHEN 'shipped'   THEN 2
-        WHEN 'pending'   THEN 3
-        WHEN 'cancelled' THEN 4
-        ELSE 5
-    END                                                      AS status_priority
-FROM {{ source('raw', 'public__orders') }} o
-```
-
-### Calculate line item totals — order items
-
-```sql
-SELECT
-    line_item_uuid,
-    order_ref,
-    product_ref,
-    sku,
-    quantity,
-    price_each,
-    discount_percent,
-    tax_percent,
-    ROUND(price_each * quantity, 2)                                        AS line_subtotal,
-    ROUND(price_each * quantity * (1 - discount_percent/100), 2)           AS line_discounted,
-    ROUND(price_each * quantity * (1 - discount_percent/100)
-          * (1 + tax_percent/100), 2)                                      AS line_total,
-    ROUND(price_each * quantity * (discount_percent/100), 2)               AS line_discount_amount,
-    created_at::DATE                                                        AS created_date
-FROM {{ source('raw', 'public__order_items') }}
-```
-
-### Flatten context JSONB — events
-
-```sql
-SELECT
-    event_uuid,
-    event_type,
-    user_ref,
-    session_code,
-    properties->>'page'                                     AS page_viewed,
-    properties->>'element'                                  AS element_clicked,
-    (properties->>'duration_sec')::INTEGER                  AS duration_seconds,
-    context->>'device'                                      AS device_type,
-    context->>'browser'                                     AS browser_type,
-    context->>'os'                                          AS os_type,
-    client_ip,
-    HOST(client_ip)                                         AS ip_host,
-    LEFT(user_agent, 50)                                    AS user_agent_preview,
-    referrer,
-    occurred_at::DATE                                       AS event_date,
-    EXTRACT(HOUR FROM occurred_at)                          AS event_hour,
-    CASE
-        WHEN EXTRACT(HOUR FROM occurred_at) BETWEEN 6  AND 12 THEN 'morning'
-        WHEN EXTRACT(HOUR FROM occurred_at) BETWEEN 12 AND 18 THEN 'afternoon'
-        WHEN EXTRACT(HOUR FROM occurred_at) BETWEEN 18 AND 22 THEN 'evening'
-        ELSE 'night'
-    END                                                     AS time_of_day
-FROM {{ source('raw', 'public__events') }}
-```
-
-### Derive profit metrics — products
-
-```sql
-SELECT
-    product_uuid,
-    sku,
-    name,
-    LEFT(description, 100)                                  AS description_preview,
-    category,
-    ARRAY_TO_STRING(subcategories, ' > ')                   AS subcategory_path,
-    retail_price,
-    wholesale_price,
-    (retail_price - wholesale_price)::NUMERIC(10,2)         AS profit_margin,
-    ROUND(((retail_price - wholesale_price)
-           / retail_price * 100), 2)                        AS profit_percentage,
-    attributes->>'color'                                    AS product_color,
-    attributes->>'material'                                 AS product_material,
-    (attributes->>'warranty_years')::INTEGER                AS warranty_years,
-    dimensions->>'length_cm'                                AS length_cm,
-    dimensions->>'width_cm'                                 AS width_cm,
-    dimensions->>'height_cm'                                AS height_cm,
-    weight_grams,
-    ROUND(weight_grams / 1000.0, 2)                         AS weight_kg,
-    is_active,
-    ARRAY_TO_STRING(tags, ', ')                             AS product_tags,
-    created_at::DATE                                        AS created_date
-FROM {{ source('raw', 'public__products') }}
-```
-
-### Stock status derivation — inventory
-
-```sql
-SELECT
-    stock_uuid,
-    product_ref,
-    warehouse_code,
-    stock_on_hand,
-    stock_reserved,
-    quantity_available,
-    reorder_point,
-    reorder_quantity,
-    CASE
-        WHEN quantity_available <= reorder_point     THEN 'reorder_needed'
-        WHEN quantity_available <= reorder_point * 2 THEN 'low_stock'
-        ELSE 'adequate'
-    END                                                     AS stock_status,
-    ARRAY_TO_STRING(location_codes, ', ')                   AS locations,
-    last_counted_at::DATE                                   AS last_counted_date,
-    JSONB_ARRAY_LENGTH(movements)                           AS movement_count,
-    created_at::DATE                                        AS created_date
-FROM {{ source('raw', 'public__inventory') }}
-```
-
-### Date/time extraction
-
-```sql
-SELECT
-    id AS datetime_uuid,
-    record_date,
-    EXTRACT(YEAR    FROM record_date)                       AS year_extracted,
-    EXTRACT(QUARTER FROM record_date)                       AS quarter_extracted,
-    record_time,
-    record_time_tz,
-    record_timestamp,
-    record_timestamp_tz,
-    record_timestamp_tz AT TIME ZONE 'UTC'                  AS timestamp_utc,
-    record_timestamp_tz AT TIME ZONE 'America/New_York'     AS timestamp_ny,
-    record_interval,
-    EXTRACT(EPOCH FROM record_interval)/3600                AS interval_hours,
-    created_at::DATE                                        AS created_date,
-    AGE(created_at, record_timestamp_tz)                    AS age_calculation
-FROM {{ source('raw', 'public__datetime_all_types') }}
-```
-
-### Text and character type transformations
-
-```sql
-SELECT
-    id AS char_uuid,
-    TRIM(fixed_char)                                        AS trimmed_char,
-    varying_char,
-    variable_char,
-    LEFT(full_text, 100)                                    AS text_preview,
-    LENGTH(full_text)                                       AS text_length,
-    identifier_name::TEXT                                   AS name_as_text,
-    ENCODE(binary_data, 'base64')                           AS bytea_base64,
-    fixed_bits::TEXT                                        AS bit_string,
-    variable_bits::TEXT                                     AS bit_varying_string,
-    MD5(full_text)                                          AS text_md5,
-    created_at::DATE                                        AS created_date
-FROM {{ source('raw', 'public__character_all_types') }}
-```
-
-### Enum scoring
-
-```sql
-SELECT
-    id AS enum_uuid,
-    current_mood,
-    status_mood,
-    current_mood::TEXT                                      AS mood_text,
-    CASE current_mood
-        WHEN 'happy' THEN 3
-        WHEN 'ok'    THEN 2
-        WHEN 'sad'   THEN 1
-        ELSE 0
-    END                                                     AS mood_score,
-    created_at::DATE                                        AS created_date
-FROM {{ source('raw', 'public__enum_types') }}
-```
-
----
-
-## dbt Layer vs SQL Transform node
-
-| | dbt Layer | SQL Transform node |
-| --- | --- | --- |
-| Runs on | Normalised raw layer (`raw.schema__table`) | Raw source data directly |
-| Source ref | `{{ source('raw', 'schema__table') }}` | `{{ source }}` |
-| Uses renamed columns | Yes — Normalisation applies first | No — original column names only |
-| dbt Jinja | Full support | Standard SQL only |
-| Best for | Complex multi-table models, JSONB extraction, derived metrics | Lightweight pre-processing before normalisation |
-
----
-
-## Common mistakes
-
-- **Using `{{ source }}` instead of `{{ source('raw', 'schema__tablename') }}`** — `{{ source }}` is for the Transform node, not the dbt Layer.
-- **Referencing original column names** — if you renamed `customer_id` to `customer_uuid` in the Normalisation tab, the dbt SQL must use `customer_uuid`.
-- **Missing double underscore** — the raw table name is `public__customers`, not `public_customers`.
+The model output is delivered to the exact `schema.table` you enter in the Destination panel. The final table must already exist in PostgreSQL.

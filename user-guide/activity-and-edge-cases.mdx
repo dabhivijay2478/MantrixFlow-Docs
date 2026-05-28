@@ -1,52 +1,27 @@
 ---
-title: Activity log and edge cases
-description: Use the Activity Log and common recovery patterns to operate MantrixFlow safely when runs fail, credentials change, or entities go missing.
+title: Activity and edge cases
+description: Diagnose common run and configuration issues in the current MantrixFlow workflow.
 ---
 
-Production documentation is not complete until it explains what to do when things go wrong. This page covers the operational behaviors most teams hit after their first successful pipeline.
+Most issues appear during validation, preview, or the first manual run.
 
-## Use the Activity Log for org-wide context
+## Destination table missing
 
-The **Activity Log** shows events across the organization, not just one pipeline. It is the fastest way to answer questions like:
+Create the destination table in PostgreSQL before running. Enter the target in MantrixFlow as `schema.table`.
 
-- Did the run actually start?
-- Was the failure limited to one pipeline or many?
-- Did a connection test fail shortly before pipeline errors began?
-- Was a pipeline deleted or edited by another operator?
+## Column mismatch
 
-![Activity log with filters and table](/images/user-guide/ug-activity-log.png)
+If the dbt model outputs a column that is not present in the destination table, update either the model or the table. The run should name the missing column.
 
-## The most common edge cases
+## Incremental key missing
 
-### Connection tests fail after a password rotation
+Incremental sync requires a replication key. Add a stable key such as `updated_at`, save, and run manually before scheduling.
 
-Re-open the connection, update the credential, run **Test Connection**, save, and only then retry the affected pipelines.
+## No primary key warning
 
-### A source table disappears from the builder
+If the destination table has no primary key, delivery appends rows and records a warning. Add a primary key when you need merge-style Upsert behavior.
 
-Refresh source metadata or use **Discover Tables** from the connection. If it still does not appear, check grants on the source schema and table.
+## Credential changes
 
-### The pipeline saves but the run fails immediately
-
-Validate the destination configuration. A missing schema, invalid table name, or stale destination credential often surfaces only at run time.
-
-### The transform preview works but the pipeline run fails
-
-Preview confirms sample-row behavior, not every production edge case. Check the exact run error and tighten the script around null handling, nested objects, or type casting.
-
-### Someone deletes a connection that a pipeline still needs
-
-Expect broken runs until the pipeline is pointed at a replacement connection. The fix is usually to recreate the connection, edit the destination or source configuration, save, and run manually.
-
-## Safe change-management checklist
-
-1. Confirm the active organization.
-2. Test the connection after any credential, network, or SSL change.
-3. Save builder changes before running.
-4. Run manually before re-enabling schedules.
-5. Check both **Run History** and **Activity Log** after the change.
-
-## About warning banners in screenshots
-
-Some screenshots show warnings on purpose. They represent normal operator scenarios such as disconnected credentials or missing dependencies. Treat them as examples of what the failure UX looks like, not as product defects in the docs.
+Re-test both connections after credential rotation. A saved pipeline can fail if a connection changes without a successful test.
 

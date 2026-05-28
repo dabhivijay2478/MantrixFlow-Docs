@@ -117,7 +117,7 @@ html.dark #navbar a[href^="https://mantrixflow.com"]:hover img {
 
 /*
  * Footer: docs.json `footer.socials.website` renders a generic globe icon.
- * Replace it with the MantrixFlow mark (`/m.png`) + product name.
+ * Swap it with the MantrixFlow mark (`/m.png`) + product name.
  */
 #footer a[href^="https://mantrixflow.com"],
 advanced-footer a[href^="https://mantrixflow.com"] {

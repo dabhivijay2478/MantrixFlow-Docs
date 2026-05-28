@@ -1,63 +1,10 @@
 ---
-title: MySQL
-description: Write MantrixFlow pipeline output into MySQL for application-facing tables and operational reporting stores.
+title: MySQL destination
+description: Status notice for MySQL destination support.
 ---
 
-MySQL is a supported SQL destination in the current app and is useful when downstream tools or applications already expect MySQL tables.
+MySQL destination setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **MySQL** destination form asks for:
-
-- `Connection Name`
-- `Host`
-- `Port`
-- `Database`
-- `Username`
-- `Password`
-- `SSL Mode`
-
-- `Port` defaults to `3306`.
-- `SSL Mode` options are available in the connection form.
-- Use the builder to set the final destination `Schema` and `Table`.
-
-## Good first use cases
-
-- operational reporting tables
-- internal tool read models
-- application-facing SQL tables fed by a pipeline
-
-## Before you connect
-
-- Create a dedicated write user for the target MySQL database.
-- Decide which schema and table name you want to use in the destination panel.
-- Validate one destination table manually before broadening the rollout.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Set the role to **Destination** and choose **MySQL**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `MySQL Reporting`
-   - `Host`: `reporting.cluster-abcdefghijkl.us-east-1.rds.amazonaws.com`
-   - `Port`: `3306`
-   - `Database`: `reporting`
-   - `Username`: `mf_writer`
-   - `SSL Mode`: `require`
-4. Click **Test Connection** and save the connection after the test succeeds.
-5. In the builder's **Destination** panel, configure:
-   - `Connection`: `MySQL Reporting`
-   - `Schema`: `analytics`
-   - `Table`: `orders_live`
-   - `Write mode`: `Upsert`
-6. Save the pipeline and run one manual sync before enabling a schedule.
-
-## Real-world example
-
-A support operations team lands GitHub and HubSpot data into MySQL so an internal application can query recent issues, pull requests, and CRM records from one operational store.
-
-## Troubleshooting
-
-- If the test fails, confirm the database host, SSL mode, and write user credentials.
-- If destination validation fails, make sure the target schema and table names are correct for the environment.
-- Keep the first rollout on `Upsert` and validate the rows with SQL before adding a schedule.
+Use [PostgreSQL destination](/connections/destinations/postgresql) for the supported live destination workflow.

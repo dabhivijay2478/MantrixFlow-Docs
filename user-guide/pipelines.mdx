@@ -1,108 +1,46 @@
 ---
 title: Pipelines and run history
-description: The current end-to-end pipeline flow in MantrixFlow, from pipeline shell creation through builder configuration, manual validation, and scheduled runs.
+description: Configure the current Source and Destination builder flow, run manually, and inspect run history.
 ---
 
-The pipeline flow in the current app is intentionally split into two stages:
-
-1. create the pipeline shell from **Data Pipelines**
-2. finish the operational setup in the builder canvas
-
-That means the builder is where most production decisions actually happen.
+The builder is where production pipeline decisions happen.
 
 ## Key routes
 
 - List: `/workspace/data-pipelines`
 - Create shell: `/workspace/data-pipelines/new`
 - Builder: `/workspace/data-pipelines/[id]/builder`
-- Detail page: `/workspace/data-pipelines/[id]`
+- Detail: `/workspace/data-pipelines/[id]`
 
-## Create the pipeline shell
+## Create the shell
 
-Start with a pipeline name and a source connection. The create page does not ask for every configuration option up front because the builder owns stream selection, transform logic, destination setup, and schedule.
+Create the pipeline with a name and source connection. Then open the builder.
 
-![Create pipeline form](/images/user-guide/ug-new-pipeline-form.png)
+## Configure Source
 
-## Configure the builder
+Use the **Source** node to:
 
-The builder is the real control room for the pipeline.
+- test connection
+- discover schema
+- refresh tables
+- include streams
+- preview rows
 
-- **Source panel** (⚙️ on Source node) — choose tables, Discover schema, Preview raw rows.
-- **Transform node** (on canvas) — SQL editor using `{{ source }}` for quick reshaping.
-- **Destination panel** (⚙️ on Destination node) — 5 tabs: **Config**, **Normalisation**, **dbt Layer**, **Preview**, **Scheduling**.
-- **Action bar** — save, run manually, and open settings.
+## Configure Destination
 
-![Pipeline builder - branches on canvas](/images/user-guide/ug-pipeline-builder-branches.png)
+Use the **Destination** node to:
 
-## The recommended first-run sequence
+- select the destination connection
+- choose Full Table or Incremental sync
+- keep the live write mode as Upsert
+- add rename/cast Normalisation rules
+- write dbt models
+- validate and preview output
+- save the destination
+- run manually
 
-<Steps>
-  <Step>
+## Run history
 
-### 1. Select one source table or resource
+After a run, use run history to check status, row counts, duration, destination targets, warnings, and errors.
 
-Start with one high-value object such as `public.orders`, `stripe.customers`, or `github.pull_requests`. This keeps validation focused.
-
-  </Step>
-  <Step>
-
-### 2. Keep the first transform simple
-
-Either pass records through unchanged or add one small enrichment field so debugging stays straightforward.
-
-  </Step>
-  <Step>
-
-### 3. Configure the destination carefully
-
-Pick the destination connection, confirm the schema and table name, and keep the first write behavior conservative. In current builder releases, **Upsert** is the primary live option.
-
-  </Step>
-  <Step>
-
-### 4. Save before you run
-
-Use **Save** in the action bar so the selected stream, transform script, destination, and schedule are persisted.
-
-  </Step>
-  <Step>
-
-### 5. Run manually
-
-Use **Run Now** to validate the pipeline with operator attention before you introduce automation.
-
-  </Step>
-</Steps>
-
-## Review run history
-
-After the run, open the detail page and inspect **Run History**. This is where you confirm status, row counts, runtime, and whether a pipeline succeeded after a credential or schema change.
-
-![Pipeline detail - run history and warning banner](/images/user-guide/ug-pipeline-detail-runs.png)
-
-## Typical reasons a run fails
-
-- the source or destination connection was edited but not re-tested
-- the selected source table no longer exists or permissions were removed
-- the SQL transform or dbt model has a syntax error
-- the destination schema or table name is wrong
-- a schedule fired after a credential rotation
-
-## Row actions on the pipeline list
-
-Use the list page for fast operations:
-
-- **Open Builder** to change the graph
-- **Run Now** for manual validation
-- **Delete** when you intentionally retire the pipeline
-
-![Pipeline row overflow menu](/images/user-guide/ug-pipeline-row-menu.png)
-
-## When to schedule a pipeline
-
-Schedule only after three things are true:
-
-1. the source connection tests cleanly
-2. the destination receives the correct shape
-3. at least one manual run has succeeded end to end
-
+Investigate immediately when row counts drop unexpectedly, a run fails after credential changes, or repeated warnings appear for the same destination.

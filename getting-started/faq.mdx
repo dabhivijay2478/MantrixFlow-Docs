@@ -1,90 +1,57 @@
 ---
 title: FAQ
-description: Common questions about supported connectors, setup flow, sync behavior, and operating MantrixFlow in real teams.
+description: Answers for the current PostgreSQL-to-PostgreSQL MantrixFlow workflow.
 ---
 
-## Connectors and availability
+## Which connectors are live in the public docs?
 
-**Which connectors are documented as supported today?**
+PostgreSQL source and PostgreSQL destination.
 
-The current docs only cover the connectors that complete the live create, test, save, and pipeline flow.
+Other connector pages may exist as direct-link notices, but they are not documented as live self-serve workflows.
 
-If a connector tile appears earlier in rollout but does not complete that full workflow yet, it is intentionally excluded from the supported docs set.
+## Does MantrixFlow create destination tables?
 
-Sources:
-- PostgreSQL
-- MySQL
-- MariaDB
-- SQLite
-- CockroachDB
-- Stripe
-- Shopify
-- HubSpot
-- GitHub
-- Notion
+No. Create the destination table before running the pipeline. The runner validates the table and columns, then fails with a clear error if the destination is missing or mismatched.
 
-Destinations:
-- PostgreSQL
-- MySQL
-- MariaDB
-- SQLite
-- CockroachDB
+## Where do I select source tables?
 
-**Why are some future connectors missing from the docs?**
+Open the builder and click the settings icon on the **Source** node. Use **Discover schema**, **Refresh tables**, **Include**, and **Preview**.
 
-Because this documentation is intentionally product-aligned. Connectors that are not fully available in the app are not documented as supported.
+## Where do I write SQL?
 
-## Pipeline behavior
+Use the **dbt Layer** tab in the **Destination** panel.
 
-**Why does pipeline creation only ask for a source connection?**
+Reference staged source data with the dbt source helper:
 
-The app creates a pipeline shell first, then opens the canvas builder where you configure everything else. Click **Create & open canvas** to enter the builder.
+```sql
+SELECT *
+FROM {{ source('raw', 'public__orders') }}
+```
 
-**Where do I choose the source tables?**
+## What Normalisation rules are available?
 
-Click ⚙️ on the **Source** node in the canvas. The Source panel opens with **Discover schema**, **Refresh tables**, and per-table **Include** and **Preview** controls.
+The live Normalisation rules are Rename and Cast. They run before the dbt Layer.
 
-**Where do I configure the destination?**
+## Which write mode should I use?
 
-Click ⚙️ on the **Destination** node. The Destination panel has five tabs: **Config**, **Normalisation**, **dbt Layer**, **Preview**, and **Scheduling**. Set the connection, **Final delivery schema**, sync mode, and write mode in the **Config** tab.
+Use **Upsert**. It is the live write mode in the current app.
 
-**Where do I set the sync mode?**
+If the destination table has a primary key, delivery uses merge behavior. If it has no primary key, delivery appends rows and records a no-primary-key warning.
 
-In the **Destination node → Config tab → Sync mode** dropdown (`FULL_TABLE` or `INCREMENTAL`).
+## Can I schedule a Full Table sync?
 
-**Where do I set the schedule?**
+No. Scheduling is enabled for Incremental sync. For Full Table sync, run manually.
 
-In the **Destination node → Scheduling tab**. Always run the pipeline manually first and validate the output before enabling a schedule.
+## Why did my run fail before writing rows?
 
-## Transforms and write behavior
+Common causes:
 
-**How do transformations work today?**
+- source table does not exist or permission was removed
+- destination table does not exist
+- dbt model output contains a column missing from the destination table
+- Incremental sync is missing a replication key
+- credentials changed after the connection was saved
 
-MantrixFlow transforms are SQL-based. There are two approaches:
+## Is staging data permanent?
 
-- **SQL Transform node** — add a Transform node on the canvas and write a `SELECT` using `{{ source }}`. Supports casts, filters, derived columns, aggregations, and JSONB operators.
-- **Normalisation + dbt Layer** — use the Destination panel tabs: **Normalisation** (rename/exclude columns) then **dbt Layer** (write a dbt SQL model on `{{ source('raw', 'schema__tablename') }}`). Best for production pipelines with complex transformations.
-
-Both approaches support preview before saving. See [Transformation rules](/pipelines/transformation-rules) for the full reference.
-
-**Which write mode should I use?**
-
-Use **Upsert**. That is the current supported production write mode in the destination panel.
-
-## Operations
-
-**Can I reset sync state from the UI?**
-
-Not as a standard self-serve workflow in the current app. Treat sync-state changes as an operational recovery task and verify the pipeline with a manual run before restoring schedules.
-
-**How do I troubleshoot a failed first run?**
-
-Check these in order:
-
-1. Re-test the source and destination connections (Source panel → **Test connection**).
-2. Confirm the selected source table exists (Source panel → **Refresh tables**).
-3. Preview source rows (Source panel → **Preview** on the table).
-4. Click **Validate config** in the Destination **Config** tab.
-5. Use the Destination **Preview** tab to inspect the target table.
-6. Check the history icon in the builder top bar for run errors.
-7. Check the org-wide **Activity Log** for the full event trace.
+No. Runs stage data in a temporary DuckDB file. The runner extracts checkpoint state and deletes the DuckDB file during cleanup.

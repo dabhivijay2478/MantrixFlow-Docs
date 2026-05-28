@@ -1,65 +1,10 @@
 ---
-title: MySQL
-description: Connect MySQL as a source for commerce, SaaS, and operational reporting pipelines.
+title: MySQL source
+description: Status notice for MySQL source support.
 ---
 
-MySQL is a common source for storefronts, line-of-business applications, and internal services. The current app supports the standard create, test, save, and pipeline flow for MySQL sources.
+MySQL source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **MySQL** source form asks for:
-
-- `Connection Name`
-- `Host`
-- `Port`
-- `Database`
-- `Username`
-- `Password`
-- `SSL Mode`
-
-- `Port` defaults to `3306`.
-- `SSL Mode` options are `disable`, `allow`, `prefer`, `require`, `verify-ca`, and `verify-full`.
-- The current source form does not ask for a separate schema field.
-
-## Good first use cases
-
-- replicate commerce tables such as orders and customers into SQL reporting tables
-- sync operational MySQL data into a separate PostgreSQL or MySQL destination
-- start with incremental sync on a dependable timestamp column
-
-## Before you connect
-
-- Create a read-only user for the target database.
-- Confirm the exact database name and first tables you want to validate.
-- Decide which column will act as the replication key if you plan to use incremental sync.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Keep the role set to **Source** and choose **MySQL**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Aurora Commerce`
-   - `Host`: `northstar-orders.cluster-abcdefghijkl.us-east-1.rds.amazonaws.com`
-   - `Port`: `3306`
-   - `Database`: `commerce`
-   - `Username`: `mf_readonly`
-   - `SSL Mode`: `require`
-4. Click **Test Connection**. Save the connection only after the test succeeds.
-5. Create a pipeline, pick the first table in **Source Configuration**, and run one manual sync before enabling a schedule.
-
-## Good first tables
-
-- `orders`
-- `customers`
-- `order_items`
-- `inventory_levels`
-
-## Real-world example
-
-Northstar Retail syncs `orders` and `customers` from Aurora MySQL into PostgreSQL for finance and support reporting. The first production rollout uses incremental sync on `updated_at` and an hourly schedule after manual validation.
-
-## Troubleshooting
-
-- If the test succeeds but tables do not appear, verify grants on the selected database and the specific tables.
-- If incremental runs miss updates, inspect the cursor column for nulls or writes that do not update the field.
-- MySQL CDC is not part of the supported self-serve docs flow in the current app, so plan around full or incremental sync.
+Use [PostgreSQL source](/connections/sources/database/postgresql) for the supported live source workflow.

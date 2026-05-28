@@ -1,82 +1,10 @@
 ---
-title: CDC setup for PostgreSQL
-description: Use the PostgreSQL CDC setup flow in MantrixFlow, verify prerequisites, and move safely into log-based sync with slot-safe defaults.
+title: PostgreSQL change capture status
+description: Status notice for PostgreSQL change capture documentation.
 ---
 
-PostgreSQL is MantrixFlow's preferred database for full log-based CDC. The builder includes a dedicated **CDC** tab so you can verify prerequisites, choose slot naming safely, and switch from snapshot to streaming without losing unconsumed changes.
+PostgreSQL change capture setup is not part of the live self-serve workflow documented for the current app.
 
-## When PostgreSQL CDC is the right choice
+Use [Incremental sync](/sync-reference/incremental-sync) for the supported recurring PostgreSQL workflow.
 
-- you need inserts, updates, and deletes reflected quickly downstream
-- `updated_at` is not reliable enough for incremental sync
-- the table is operationally important, such as `orders`, `payments`, or `subscriptions`
-- your database team can enable logical replication prerequisites
-
-## Current in-app flow
-
-1. Create and save a PostgreSQL **source** connection in **Connections**.
-2. Open or create a pipeline that uses that PostgreSQL source.
-3. In the builder, open **Source Configuration**.
-4. Open the **CDC** tab and choose **Log-based CDC**.
-5. Review the generated names:
-   - slot: `mxf_{first6_org}_{first6_pipeline}`
-   - publication: `mxfpub_{first6_org}_{first6_pipeline}`
-6. Work through the verification steps shown by the app:
-   - `wal_level = logical`
-   - `pgoutput` available
-   - source user has replication rights
-   - optional end-to-end replication test
-7. Refresh status until the panel shows a healthy verified state.
-8. Run the pipeline manually. The first run creates the full snapshot before streaming changes.
-9. Confirm downstream results before scheduling.
-
-## What the CDC panel is checking
-
-The current UI verifies the same prerequisites reflected by the app implementation:
-
-- `wal_level` is ready for logical replication
-- `pgoutput` is available
-- the source user has replication access
-- the connection can complete a replication test
-- the configured slot exists when you re-check an existing pipeline
-- the configured publication exists and includes the selected tables
-- slot lag warnings when WAL retention starts to build up
-
-## Safety rules
-
-- MantrixFlow does not mutate your source schema with triggers, shadow tables, or stored procedures.
-- Replication slots are never dropped automatically.
-- Changing the slot name after CDC is live creates a new slot and can strand unconsumed changes in the old one.
-- The first log-based run always takes a baseline snapshot before it consumes WAL changes.
-- CDC runs use merge-style writes instead of destructive replace mode.
-
-## Soft CDC fallback
-
-If the database team cannot enable logical replication, use **Soft CDC (xmin)** in the same CDC tab. This uses PostgreSQL's `xmin` system column as an incremental cursor. It captures inserts and updates but not deletes, so it should be treated as a fallback instead of a full replacement for logical CDC.
-
-## Real-world example
-
-Northstar Commerce uses PostgreSQL CDC for `public.orders` and `public.order_items` so refunds, cancellations, and fulfillment updates land in `analytics.orders_live` quickly. The team starts with incremental sync, validates the destination table shape, and then moves the busiest tables to CDC once lower latency matters.
-
-## Database-side preparation checklist
-
-Work with your PostgreSQL administrator on these items:
-
-- enable logical replication
-- confirm the connector user can perform replication
-- use SSL where required
-- keep enough WAL retention to tolerate short downstream interruptions
-- avoid reusing the same slot for multiple pipelines unless you intentionally want one consumer
-
-## Operational warnings to watch
-
-- If slot lag exceeds 1 GB, run the pipeline soon to reduce WAL pressure on the source.
-- If lag exceeds 5 GB and the slot is inactive, treat it as urgent.
-- If the slot disappears, reinitialize CDC explicitly instead of assuming the stream can resume.
-
-## Before you schedule it
-
-- Confirm the CDC status in the source panel shows healthy verification.
-- Run the pipeline manually once after the switch.
-- Compare a recent insert, update, and delete path in source versus destination.
-- Make sure the destination table design can handle the replicated primary key behavior.
+This page is kept as a safe landing page for older or direct links.

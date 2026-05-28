@@ -1,48 +1,10 @@
 ---
-title: SQLite
-description: Connect SQLite as a source for file-based datasets, local application data, and lightweight validation pipelines.
+title: SQLite source
+description: Status notice for SQLite source support.
 ---
 
-SQLite is available in the current connection catalog as a file-based SQL source. It is best suited for local datasets, mounted volumes, and smaller operational databases where a filesystem path is the right integration point.
+SQLite source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **SQLite** source form asks for:
-
-- `Connection Name`
-- `Database File Path`
-
-- The file path should be the real SQLite database path the runtime can reach.
-- Use an absolute path when possible.
-
-## Good first use cases
-
-- validate a pipeline against a local or mounted SQLite file
-- move a desktop or edge application dataset into PostgreSQL or MySQL
-- replicate a small operational snapshot before rolling the same logic onto a larger source
-
-## Before you connect
-
-- Confirm the SQLite file already exists and is readable from the environment that runs the connection test.
-- Start with one table that is easy to validate, such as `orders` or `customers`.
-- Keep the first rollout manual so you can inspect the output before scheduling.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Keep the role set to **Source** and choose **SQLite**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Support Laptop Orders Snapshot`
-   - `Database File Path`: `/var/lib/mantrixflow/sqlite/orders_snapshot.db`
-4. Click **Test Connection** and save only after the test succeeds.
-5. Create a pipeline, select the first table in **Source Configuration**, and run one manual sync before enabling a schedule.
-
-## Real-world example
-
-A support operations team receives a nightly SQLite export from a field application and syncs the `orders` and `customers` tables into PostgreSQL so finance and support can query them centrally.
-
-## Troubleshooting
-
-- If the test fails immediately, re-check the exact file path and whether the runtime can read it.
-- If discovery returns no tables, confirm the file is a valid SQLite database and not an empty placeholder.
-- If the file changes often, validate the first run manually before trusting a schedule.
+Use [PostgreSQL source](/connections/sources/database/postgresql) for the supported live source workflow.

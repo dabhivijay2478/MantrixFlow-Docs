@@ -1,109 +1,46 @@
 ---
 title: PostgreSQL source
-description: Connect any PostgreSQL-compatible database — Neon, RDS, Aurora, Supabase, Cloud SQL, Azure, Aiven — as a MantrixFlow source for Postgres-to-Postgres pipelines.
+description: Configure PostgreSQL as a live MantrixFlow source connection.
 ---
 
-PostgreSQL is the primary database source in MantrixFlow. Use it to read from production, staging, or analytics databases and replicate data to any PostgreSQL-compatible destination.
+PostgreSQL is the live source connector documented for the current MantrixFlow app.
+
+## Required access
+
+Use a database user with read access to the source schemas and tables you want to sync.
+
+For a first pipeline, start with one table such as `public.orders`.
 
 ## Connection fields
 
-| Field | Default | Description |
-| --- | --- | --- |
-| Connection Name | — | Friendly label shown in the builder |
-| Host | — | Database hostname or IP address |
-| Port | `5432` | PostgreSQL port |
-| Database | — | Database name |
-| Username | — | Database user |
-| Password | — | Database password |
-| Schema | `public` | Schema to discover tables from |
-| SSL Mode | `require` | `disable`, `require`, `verify-ca`, `verify-full` |
-
-## Network access
-
-MantrixFlow connects to the source database from the ELT server. The database must accept inbound connections from MantrixFlow's static IP on port `5432`.
-
-Supported network configurations:
-- Public endpoint with provider firewall or IP allowlist
-- Public endpoint with no provider allowlist (credentials must be strong)
-
-Not yet supported (planned for a later release):
-- Private subnet / VPC-only databases without a public IP
-- VPN-only access
-- Bastion host or jump server connections
-
-See [Private database access](/connections/private-database-access) for MantrixFlow's static outbound IP and provider firewall steps.
-
-## Provider setup
-
-| Provider | What to configure |
+| Field | Notes |
 | --- | --- |
-| **Neon** | Use the direct connection string from the Neon Connect modal. If IP Allow is enabled, add MantrixFlow's `/32`. See [Neon IP Allow](https://neon.com/docs/reference/cli-ip-allow). |
-| **AWS RDS / Aurora PostgreSQL** | Add an inbound security group rule for port `5432` from MantrixFlow's `/32`. See [AWS RDS security groups](https://docs.aws.amazon.com/AmazonRDS/latest/gettingstartedguide/security-groups.html). |
-| **Supabase** | Use the host from the Supabase dashboard. Add MantrixFlow's `/32` under Network Restrictions if enabled. See [Supabase Network Restrictions](https://supabase.com/docs/guides/platform/network-restrictions). |
-| **GCP Cloud SQL for PostgreSQL** | Enable public IP and add MantrixFlow's `/32` under Authorized networks. See [Google authorized networks](https://cloud.google.com/sql/docs/postgres/authorize-networks). |
-| **Azure Database for PostgreSQL** | Use public access and create a firewall rule with start and end IP both equal to MantrixFlow's IP. See [Azure firewall rules](https://learn.microsoft.com/en-us/azure/postgresql/security/security-firewall-rules). |
-| **Aiven for PostgreSQL** | Add MantrixFlow's `/32` to the service IP filter. See [Aiven access restrictions](https://aiven.io/docs/platform/howto/restrict-access). |
-| **DigitalOcean Managed PostgreSQL** | Add MantrixFlow's IP as a trusted source on the database cluster. See [DigitalOcean trusted sources](https://docs.digitalocean.com/products/databases/postgresql/how-to/secure/). |
-| **Render Postgres** | Use the external connection details and restrict access to MantrixFlow's IP if you have access restrictions enabled. See [Render Postgres networking](https://render.com/docs/databases). |
-| **Self-hosted** | The server must have a public IP or be port-forwarded so MantrixFlow can reach it on port `5432`. |
+| Connection Name | A human-readable name shown in the app |
+| Host | Database host or provider endpoint |
+| Port | Usually `5432` |
+| Database | Database name |
+| Username | Source user |
+| Password | Source user password |
+| Schema | Usually `public` for first tests |
+| SSL Mode | Use `require` for most hosted databases |
 
-## Permissions
+## Setup flow
 
-Create a dedicated read-only user instead of using the database owner or an admin account.
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Set role to **Source**.
+4. Choose **PostgreSQL**.
+5. Fill the form.
+6. Click **Test Connection**.
+7. Save only after the test succeeds.
 
-```sql
-CREATE USER mxf_source WITH PASSWORD 'strong_password';
-GRANT CONNECT ON DATABASE your_db TO mxf_source;
-GRANT USAGE ON SCHEMA public TO mxf_source;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO mxf_source;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO mxf_source;
-```
+## Builder behavior
 
-For incremental sync, add an index on the cursor column:
+After a pipeline shell is created, the Source node can:
 
-```sql
-CREATE INDEX ON orders (updated_at);
-```
+- test the connection again
+- discover source schemas and tables
+- include selected streams as `schema.table`
+- preview rows for the active stream
 
-## Step by step
-
-<Steps>
-  <Step title="Create the source user">
-    Run the `CREATE USER` and `GRANT` statements above in your PostgreSQL provider.
-  </Step>
-  <Step title="Add MantrixFlow's IP to your firewall">
-    Copy MantrixFlow's static outbound IP from the connection form and add it as a `/32` rule in your provider's firewall or allowlist.
-  </Step>
-  <Step title="Add the source connection in MantrixFlow">
-    Open **Connections → + New Connection**. Set the role to **Source** and choose **PostgreSQL**. Fill in all fields and click **Test Connection**. Save after the test passes.
-  </Step>
-  <Step title="Create a pipeline">
-    Go to **Data Pipelines → + New Pipeline**, select this source connection, and follow the [Postgres-to-Postgres guide](/example/pipelines/postgres-to-postgres).
-  </Step>
-</Steps>
-
-## SSL modes
-
-| Mode | When to use |
-| --- | --- |
-| `disable` | Local dev only. Never use in production. |
-| `require` | Use with most managed providers. Encrypts the connection. |
-| `verify-ca` | Verifies the server certificate against a trusted CA. |
-| `verify-full` | Verifies the server certificate and hostname. Strictest mode. |
-
-## Supported data types
-
-All official PostgreSQL types are supported. Complex types (geometric, range, text search, composite, enum) are landed as `TEXT` for cross-provider compatibility.
-
-See [Data type compatibility](/pipelines/data-type-compatibility) for the full mapping table and cross-type widening rules.
-
-## Troubleshooting
-
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| Connection timeout | Provider firewall blocking MantrixFlow | Add MantrixFlow's `/32` to the provider allowlist |
-| Authentication failed | Wrong credentials or database name | Re-check host, database, username, and password |
-| No tables discovered | User missing `USAGE` on schema | Run `GRANT USAGE ON SCHEMA` |
-| Table missing from discovery | User missing `SELECT` on that table | Run `GRANT SELECT ON TABLE` |
-| TLS / SSL error | Provider requires stricter SSL mode | Change SSL mode to `require`, `verify-ca`, or `verify-full` |
-
+Selected streams are persisted as strict source stream configs, including the DuckDB staging table name such as `public__orders`.

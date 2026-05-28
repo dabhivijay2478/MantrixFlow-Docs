@@ -1,38 +1,34 @@
 ---
-title: Full sync
-description: How full sync works in the current product, when to use it, and how teams roll it out safely.
+title: Full Table sync
+description: Use Full Table sync for manual PostgreSQL validation runs and controlled refreshes.
 ---
 
-Full sync re-reads the selected table or resource on every run. It is the safest place to start when you are onboarding a new source, validating a transform, or syncing a small dataset that changes infrequently.
+`FULL_TABLE` rereads the selected source stream for a run.
 
-## When teams use full sync
+Use it for:
 
-- small reference tables such as `countries`, `tax_rates`, or `warehouse_locations`
-- SaaS resources where a reliable cursor field is not available or not needed
-- first-run validation before moving a larger table to incremental sync
-- controlled nightly refreshes where simplicity matters more than read efficiency
+- first-run validation
+- controlled manual refreshes
+- debugging source and destination shape
+- confirming dbt model output before moving to Incremental
 
-## Step by step in MantrixFlow
+## How to configure
 
-1. Create and test the source and destination connections.
-2. Go to **Data Pipelines → + New Pipeline**, name the pipeline, pick the source connection, and click **Create & open canvas**.
-3. Click ⚙️ on the **Source** node — click **Discover schema**, tick **Include** on the table, click **Preview** to verify rows.
-4. Add a Transform node if you need cleanup, renaming, or filtering.
-5. Click ⚙️ on the **Destination** node — open the **Config** tab:
-   - Set **Connection**, **Final delivery schema**
-   - Set **Sync mode** to `FULL_TABLE`
-   - Set **Write mode** to `Upsert`
-   - Click **Validate config**
-6. Open the Destination **Preview** tab to confirm the target table.
-7. Click ▷ to run manually and check the history icon for results.
-8. Once the run succeeds, open the **Scheduling** tab to add a schedule.
+1. Open the **Destination** panel.
+2. In **Config**, choose `FULL_TABLE`.
+3. Keep write mode as **Upsert**.
+4. Save the destination.
+5. Run manually from the Destination node.
 
-## Real-world example
+## Scheduling
 
-Lighthouse Commerce keeps a small `public.tax_rates` table in PostgreSQL and syncs it into a PostgreSQL reporting database every night. Because the dataset is small and correctness matters more than optimization, full sync is the cleanest option.
+Full Table destinations are manual-only in the current app. The Scheduling tab is disabled until the destination uses `INCREMENTAL`.
 
-## Why full sync is a good first production step
+## Run behavior
 
-- it removes cursor complexity while you validate field shape
-- it makes debugging easier because every run processes the same logical dataset
-- it is usually the fastest way to prove that the connection, transform, and destination naming are correct
+Full Table still follows the strict delivery contract:
+
+- source rows are staged in temporary DuckDB storage
+- dbt models run against raw staged tables
+- final destination tables must already exist
+- temporary staging is cleaned up after checkpoint extraction

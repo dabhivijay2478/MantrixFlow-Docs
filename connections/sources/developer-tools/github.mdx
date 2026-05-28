@@ -1,67 +1,10 @@
 ---
-title: GitHub
-description: Connect GitHub as a source for issues, pull requests, commits, releases, and repository activity.
+title: GitHub source
+description: Status notice for GitHub source support.
 ---
 
-GitHub is a practical engineering source in the current app. The live form captures one repository at a time so the first rollout stays easy to validate.
+GitHub source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **GitHub** source form asks for:
-
-- `Connection Name`
-- `Repository Owner`
-- `Repository Name`
-- `Personal Access Token`
-
-- The token field accepts personal access tokens such as `ghp_...` or `github_pat_...`.
-- Each connection is scoped to one repository owner and one repository name in the current form.
-
-## Good first use cases
-
-- engineering metrics and delivery reporting
-- release and commit reporting for one product repository
-- joining PR activity with incident or deployment data downstream
-
-## Before you connect
-
-- Create a GitHub token with the repository access your team approves.
-- Confirm the exact owner and repository name before testing.
-- Choose one resource such as `pull_requests` or `issues` for the first validation run.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Keep the role set to **Source** and choose **GitHub**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `Platform App Repo`
-   - `Repository Owner`: `northstar`
-   - `Repository Name`: `platform-app`
-   - `Personal Access Token`: `github_pat_...`
-4. Click **Test Connection** and save only after the test succeeds.
-5. Create a pipeline and start with one high-value resource so validation stays simple.
-
-## Resources available in the current source preview
-
-- `issues`
-- `pull_requests`
-- `stargazers`
-- `events`
-- `commits`
-- `releases`
-- `branches`
-- `tags`
-- `contributors`
-- `milestones`
-- `labels`
-- `forks`
-
-## Real-world example
-
-An engineering operations team syncs GitHub `pull_requests`, `issues`, and `commits` from `northstar/platform-app` into PostgreSQL so delivery metrics can be combined with deployment and incident data.
-
-## Troubleshooting
-
-- If the test fails, re-check the owner, repo, and token permissions.
-- If expected records are missing, confirm whether the repository is private or restricted by organization policy.
-- Keep the first rollout to one repository per connection so debugging stays clear.
+Use [Connections Overview](/connections/overview) for the supported live connector list.

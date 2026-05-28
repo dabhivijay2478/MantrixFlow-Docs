@@ -1,65 +1,10 @@
 ---
-title: HubSpot
-description: Connect HubSpot as a source for contacts, companies, deals, tickets, and engagement reporting.
+title: HubSpot source
+description: Status notice for HubSpot source support.
 ---
 
-HubSpot is a common RevOps and GTM source in the live app. The current connection form uses a connection name plus a private app token.
+HubSpot source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
 
-## Current connection form
+The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
 
-The current **HubSpot** source form asks for:
-
-- `Connection Name`
-- `Private App Token`
-
-- The token field expects a HubSpot private app token, commonly starting with `pat-...`.
-- Use a private app with the scopes needed for the objects you plan to sync.
-
-## Good first use cases
-
-- sales pipeline reporting
-- contact and company enrichment in SQL
-- support and lifecycle analytics from one CRM source
-
-## Before you connect
-
-- Create a HubSpot private app with CRM read scopes.
-- Decide whether your first validation resource should be `deals`, `contacts`, or `companies`.
-- Confirm that the portal and token belong to the environment you intend to sync.
-
-## Step by step
-
-1. Open **Connections** and click **+ New Connection**.
-2. Keep the role set to **Source** and choose **HubSpot**.
-3. Fill the form with real values, for example:
-   - `Connection Name`: `HubSpot Production`
-   - `Private App Token`: `pat-...`
-4. Click **Test Connection** and save only after the test succeeds.
-5. Create a pipeline and start with one high-value resource so validation stays simple.
-
-## Resources available in the current source preview
-
-- `contacts`
-- `companies`
-- `deals`
-- `tickets`
-- `products`
-- `line_items`
-- `quotes`
-- `calls`
-- `emails`
-- `meetings`
-- `notes`
-- `owners`
-- `tasks`
-- `feedback_submissions`
-
-## Real-world example
-
-A RevOps team syncs HubSpot `deals`, `companies`, and `contacts` into PostgreSQL so pipeline reporting, lifecycle reporting, and sales operations all use the same operational dataset.
-
-## Troubleshooting
-
-- If the test fails, confirm the private app token is active and has the right scopes.
-- If custom fields are missing later, verify that the object-level permissions cover them.
-- Start with one object such as `deals` before broadening the rollout to many CRM entities.
+Use [Connections Overview](/connections/overview) for the supported live connector list.

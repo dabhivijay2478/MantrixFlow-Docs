@@ -1,106 +1,61 @@
 ---
 title: PostgreSQL destination
-description: Write MantrixFlow pipeline output into any PostgreSQL-compatible database — RDS, Supabase, Neon, Cloud SQL, Aurora — with upsert, append, and schema-per-run support.
+description: Configure PostgreSQL as a live MantrixFlow destination connection.
 ---
 
-PostgreSQL is the primary destination in MantrixFlow. Use it for analytics schemas, reporting tables, operational replicas, and clean downstream tables separated from production.
+PostgreSQL is the live destination connector documented for the current MantrixFlow app.
+
+## Required access
+
+Use a database user with write access to the destination schema and tables.
+
+MantrixFlow does not create final destination tables during delivery. Create the table first, then configure the pipeline to write to it.
 
 ## Connection fields
 
-| Field | Default | Description |
-| --- | --- | --- |
-| Connection Name | — | Friendly label shown in the builder |
-| Host | — | Database hostname or IP address |
-| Port | `5432` | PostgreSQL port |
-| Database | — | Database name |
-| Username | — | Database user |
-| Password | — | Database password |
-| Schema | `public` | Default schema (overridable per-pipeline in the builder) |
-| SSL Mode | `require` | `disable`, `require`, `verify-ca`, `verify-full` |
-
-## Network access
-
-The destination database must accept inbound connections from MantrixFlow's static ELT server IP on port `5432`. Copy the IP from the connection form and add it as a `/32` allowlist rule in your provider's firewall.
-
-See [Private database access](/connections/private-database-access) for provider-specific steps.
-
-Private-only destinations without a public endpoint are not supported in this release.
-
-## Provider setup
-
-| Provider | What to configure |
+| Field | Notes |
 | --- | --- |
-| **AWS RDS / Aurora PostgreSQL** | Add an inbound security group rule for port `5432` from MantrixFlow's `/32`. See [AWS RDS security groups](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.RDSSecurityGroups.html). |
-| **Supabase** | Use the host from the dashboard. Add MantrixFlow's `/32` under Network Restrictions if enabled. See [Supabase Network Restrictions](https://supabase.com/docs/guides/platform/network-restrictions). |
-| **Neon** | Use the direct connection details. Add MantrixFlow to IP Allow when enabled for the project. See [Neon IP Allow](https://neon.com/docs/reference/cli-ip-allow). |
-| **GCP Cloud SQL for PostgreSQL** | Enable public IP and add MantrixFlow's `/32` as an authorized network. See [Google authorized networks](https://cloud.google.com/sql/docs/postgres/authorize-networks). |
-| **Azure Database for PostgreSQL** | Use public access and create a firewall rule with start and end IP both equal to MantrixFlow's IP. See [Azure firewall rules](https://learn.microsoft.com/en-us/azure/postgresql/security/security-firewall-rules). |
-| **Aiven for PostgreSQL** | Add MantrixFlow's `/32` to the service IP filter. See [Aiven access restrictions](https://aiven.io/docs/platform/howto/restrict-access). |
-| **DigitalOcean Managed PostgreSQL** | Add MantrixFlow's IP as a trusted source for the cluster. See [DigitalOcean trusted sources](https://docs.digitalocean.com/products/databases/postgresql/how-to/secure/). |
-| **Render Postgres** | Use the external connection details and restrict external access to MantrixFlow's IP. See [Render Postgres networking](https://render.com/docs/databases). |
+| Connection Name | A human-readable name shown in the app |
+| Host | Database host or provider endpoint |
+| Port | Usually `5432` |
+| Database | Database name |
+| Username | Destination user |
+| Password | Destination user password |
+| Schema | Usually `analytics` for reporting tables |
+| SSL Mode | Use `require` for most hosted databases |
 
-## Permissions
+## Destination table requirements
 
-Create a dedicated write user instead of using the database owner.
-
-```sql
-CREATE USER mxf_dest WITH PASSWORD 'strong_password';
-GRANT CONNECT ON DATABASE your_db TO mxf_dest;
-GRANT USAGE ON SCHEMA analytics TO mxf_dest;
-GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA analytics TO mxf_dest;
-ALTER DEFAULT PRIVILEGES IN SCHEMA analytics
-  GRANT SELECT, INSERT, UPDATE ON TABLES TO mxf_dest;
-```
-
-If MantrixFlow needs to create the destination schema or tables, also grant:
+Create the target table before the first run:
 
 ```sql
-GRANT CREATE ON DATABASE your_db TO mxf_dest;
+CREATE SCHEMA IF NOT EXISTS analytics;
+
+CREATE TABLE IF NOT EXISTS analytics.orders_live (
+  id bigint PRIMARY KEY,
+  customer_id bigint,
+  order_status text,
+  total_amount numeric,
+  created_at timestamptz,
+  updated_at timestamptz
+);
 ```
 
-## Step by step
+In the Destination panel, enter final delivery targets as `schema.table`, for example `analytics.orders_live`.
 
-<Steps>
-  <Step title="Create the destination schema and user">
-    Create the schema you will write into (e.g. `analytics`) and a dedicated write user using the SQL above.
-  </Step>
-  <Step title="Add MantrixFlow's IP to your firewall">
-    Copy MantrixFlow's static outbound IP from the connection form and add it as a `/32` rule in your provider's firewall.
-  </Step>
-  <Step title="Add the destination connection in MantrixFlow">
-    Open **Connections → + New Connection**. Set the role to **Destination** and choose **PostgreSQL**. Fill in all fields and click **Test Connection**. Save after the test passes.
-  </Step>
-  <Step title="Configure the Destination node">
-    In the builder canvas, click ⚙️ on the **Destination** node. In the **Config** tab: select this connection, set the **Final delivery schema**, choose **Sync mode** (`FULL_TABLE`), and set **Write mode** to `Upsert`. Click **Validate config**, then use the **Preview** tab to inspect the target table.
-  </Step>
-</Steps>
+## Write behavior
 
-## Write modes
+The live write mode is **Upsert**.
 
-The current production write mode in the MantrixFlow UI is **Upsert**. Append and Replace are visible in the UI but marked **Soon**.
+- If the destination table has a primary key, MantrixFlow uses merge-style delivery.
+- If the destination table has no primary key, MantrixFlow appends rows and records a no-primary-key warning.
 
-| Mode | Status | Behavior |
-| --- | --- | --- |
-| `Upsert` | **Available** | Inserts new rows and updates existing rows matched by primary key |
-| `Append` | Coming soon | Insert only — no deduplication |
-| `Replace` | Coming soon | Drops and recreates the destination table on each run |
+## Setup flow
 
-For upsert, the destination table must have a primary key. MantrixFlow uses it to determine whether to insert or update each row.
-
-## Destination schema management
-
-By default MantrixFlow creates the destination table automatically based on the source schema or transform output. If you prefer to manage the schema yourself:
-
-1. Create the table in the destination database before the first run.
-2. Ensure all column names and compatible types match the pipeline output.
-3. Use [cross-type widening](/pipelines/data-type-compatibility) if you want broader destination types (e.g. `TEXT` instead of `VARCHAR`).
-
-## Troubleshooting
-
-| Symptom | Cause | Fix |
-| --- | --- | --- |
-| Connection timeout | Destination firewall blocking MantrixFlow | Add MantrixFlow's `/32` to the allowlist |
-| Permission denied at run time | Write user missing schema or table privileges | Run `GRANT USAGE` and `GRANT INSERT, UPDATE` |
-| Duplicate rows on re-run | Write mode is `append` on a table with a unique key | Switch to `upsert` |
-| Type mismatch error | Source type incompatible with destination column | Check [data type compatibility](/pipelines/data-type-compatibility) |
-| TLS error | Provider requires stricter SSL | Set SSL mode to `require` or `verify-full` |
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Set role to **Destination**.
+4. Choose **PostgreSQL**.
+5. Fill the form.
+6. Click **Test Connection**.
+7. Save only after the test succeeds.

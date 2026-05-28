@@ -1,39 +1,46 @@
 ---
 title: Creating a pipeline
-description: Step-by-step instructions for the current MantrixFlow builder — canvas-based, node-driven, with source and destination configuration panels.
+description: Create a PostgreSQL-to-PostgreSQL pipeline shell and finish configuration in the builder.
 ---
 
-Pipelines are built in a canvas where a **Source** node connects to one or more **Destination** nodes. Configuration happens by clicking the ⚙️ gear icon on each node.
+Pipeline creation starts with a small form and continues in the builder.
 
-## Step by step
+## Create the shell
 
-1. Create and test source and destination connections from **Connections** first.
-2. Go to **Data Pipelines → + New Pipeline**. Enter a pipeline name, choose the source connection, and click **Create & open canvas**.
-3. The builder canvas opens. You will see a **Source** node on the left and a **Destination** node on the right connected by a sync line.
-4. Click ⚙️ on the **Source** node to open the Source panel:
-   - Use **Discover schema** to list available tables.
-   - Tick **Include** next to each table you want to sync.
-   - Click **Preview** on any table to inspect raw source rows.
-5. Click ⚙️ on the **Destination** node to open the Destination panel. Configure the **Config** tab:
-   - **Connection** — select the destination connection
-   - **Final delivery schema** — e.g. `analytics`
-   - **Sync mode** — use `FULL_TABLE` for all first runs
-   - **Write mode** — select `Upsert`
-   - Click **Validate config** before saving.
-6. Use the **Preview** tab in the Destination panel to inspect the target table before the first run.
-7. Click ▷ on the Destination node (or use the top-bar **Run** button) to trigger a manual run.
-8. Click the history icon in the top bar to inspect run results.
-9. Once the manual run succeeds, open the **Scheduling** tab in the Destination panel to add a schedule.
+1. Open **Data Pipelines**.
+2. Click **New Pipeline**.
+3. Enter a pipeline name.
+4. Choose a PostgreSQL source connection.
+5. Create the pipeline and open the builder.
 
-## A realistic first pipeline
+The shell does not ask for destination tables or SQL up front. Those decisions live in the builder.
 
-A good first production rollout is:
+## Configure the Source node
 
-- source connection: `Shopify Production`
-- selected resource: `orders`
-- transform: normalize currency codes and add `loaded_from`
-- destination: `Analytics Postgres`
-- target table: `raw_shopify_orders`
-- cadence: hourly after one successful manual run
+1. Click the settings icon on the **Source** node.
+2. Click **Test connection** if you want to re-check credentials.
+3. Click **Discover schema** or **Refresh tables**.
+4. Include one or more source streams.
+5. Preview the active stream.
 
-That sequence exercises the full live app flow without introducing unnecessary risk on day one.
+Start with one table for the first run.
+
+## Configure the Destination node
+
+1. Click the settings icon on the **Destination** node.
+2. Select the PostgreSQL destination connection.
+3. Keep the first run as `FULL_TABLE`.
+4. Keep the write mode as `Upsert`.
+5. Open the **dbt Layer** tab.
+6. Enter the final delivery table as `schema.table`.
+7. Write the SQL model against the raw staged table.
+8. Validate SQL and preview output.
+9. Save the destination.
+
+## Run manually
+
+Run manually from the Destination node after saving. Use run status and run history to verify row counts, failures, warnings, and duration.
+
+## Add automation later
+
+Scheduling is available for Incremental destinations. Provide a replication key and validate a manual Incremental run before adding a recurring schedule.

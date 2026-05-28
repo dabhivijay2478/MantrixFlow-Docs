@@ -1,47 +1,24 @@
 ---
-title: End-to-end user guide
-description: Follow the live MantrixFlow app from organization setup through connections, pipeline building, schedules, and operational troubleshooting.
+title: User guide
+description: Use the current MantrixFlow workspace to build, run, and monitor PostgreSQL-to-PostgreSQL pipelines.
 ---
 
-This guide is written against the current workspace behavior, not an abstract ELT concept model. The page names, routes, and actions below match the product you see in the app.
+This guide follows the live workspace flow.
 
-## The end-to-end flow this guide follows
+## Main workflow
 
-1. Make sure you are in the right organization.
-2. Create and test source and destination connections.
-3. Create a pipeline shell from **Data Pipelines**.
-4. Finish the real configuration in the builder.
-5. Run manually, validate the destination, and only then add a schedule.
-6. Use **Run History** and **Activity Log** when something breaks.
+1. Create PostgreSQL source and destination connections.
+2. Create a pipeline shell with a name and source connection.
+3. Configure the Source node.
+4. Configure the Destination node.
+5. Save and run manually.
+6. Review run history.
+7. Add an Incremental schedule only after validation.
 
-## Product terminology to keep straight
+## Key pages
 
-| Concept | Where it lives in the app |
-| --- | --- |
-| Source and destination credentials | **Connections** (`/workspace/connections`) |
-| Pipeline shell creation | **Data Pipelines** (`/workspace/data-pipelines/new`) |
-| Table selection, transforms, destination settings | Builder canvas (`/workspace/data-pipelines/[id]/builder`) |
-| Operational history for one pipeline | Pipeline detail page |
-| Org-wide operational events | **Activity Log** (`/workspace/activity`) |
-| Access and roles | **Team** and **Settings** |
-
-## Read these pages in order
-
-<CardGroup cols={2}>
-  <Card title="Connections" href="/user-guide/connections">
-    Create, test, edit, and retire source and destination connections
-  </Card>
-  <Card title="Pipelines and runs" href="/user-guide/pipelines">
-    Create the pipeline shell, configure the builder, run, and verify
-  </Card>
-  <Card title="Transformations and branches" href="/user-guide/transformations-and-branches">
-    Shape records, preview changes, and create multi-destination branches
-  </Card>
-  <Card title="Organizations" href="/user-guide/organizations">
-    Create orgs, switch contexts, and keep environments separated
-  </Card>
-  <Card title="Activity and edge cases" href="/user-guide/activity-and-edge-cases">
-    Diagnose failed runs, broken credentials, and common operator mistakes
-  </Card>
-</CardGroup>
-
+- [Connections](/user-guide/connections)
+- [Pipelines and run history](/user-guide/pipelines)
+- [Normalisation and dbt](/user-guide/transformations-and-branches)
+- [Organizations](/user-guide/organizations)
+- [Activity and edge cases](/user-guide/activity-and-edge-cases)

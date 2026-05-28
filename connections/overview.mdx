@@ -1,54 +1,41 @@
 ---
 title: Connections Overview
-description: Understand how source and destination connections work in the current app, then choose the guide that matches a supported connector.
+description: Create and test the PostgreSQL source and destination connections used by the live MantrixFlow pipeline flow.
 ---
 
-Connections are reusable credentials and connector settings. This section only documents connectors that complete the current create, test, save, and pipeline flow in the live app.
+Connections are reusable credentials. The current public workflow documents PostgreSQL as both source and destination.
 
-If a connector tile appears in the catalog ahead of its full rollout, it is intentionally left out of this section until the end-to-end workflow is ready.
+## Current live connectors
 
-For the Postgres-to-Postgres live release, managed PostgreSQL databases can be connected through a public endpoint protected by a provider firewall allowlist. See [Private database access](/connections/private-database-access) before connecting AWS RDS/Aurora, GCP Cloud SQL, Azure PostgreSQL, Supabase, Neon, Aiven, DigitalOcean, or Render Postgres.
+| Role | Connector | Status |
+| --- | --- | --- |
+| Source | PostgreSQL | Live |
+| Destination | PostgreSQL | Live |
 
-## How the connection flow works today
+Other connector tiles may appear in internal code or future catalog work, but they are not documented here as available until their create, test, save, pipeline, and run path is complete in the app.
 
-1. Go to **Connections** in the left sidebar.
-2. Click **+ New Connection** (top-right button).
-3. On the **New Connection** page, use the **Source / Destination** toggle (top-right) to set the role.
-4. Browse connectors by category tab: **All**, **Databases**, **Warehouses & Lakes**, **SaaS & APIs**, **Files & Storage** — or use the **Search connectors** field.
-5. Click the connector tile (e.g. PostgreSQL).
-6. Fill the connection form fields shown on screen.
-7. Click **Test Connection** to verify credentials.
-8. Save the connection and reuse it across pipelines.
+## Create a source connection
 
-## Documented production source connectors
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Set the role to **Source**.
+4. Choose **PostgreSQL**.
+5. Fill the host, port, database, username, password, schema, and SSL mode.
+6. Click **Test Connection**.
+7. Save after the test succeeds.
 
-### Database
+## Create a destination connection
 
-- [PostgreSQL](/connections/sources/database/postgresql)
-- [MySQL](/connections/sources/database/mysql)
-- [MariaDB](/connections/sources/database/mariadb)
-- [SQLite](/connections/sources/database/sqlite)
-- [CockroachDB](/connections/sources/database/cockroachdb)
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Set the role to **Destination**.
+4. Choose **PostgreSQL**.
+5. Fill the destination database credentials.
+6. Click **Test Connection**.
+7. Save after the test succeeds.
 
-### SaaS
+Destination users need write access to pre-created destination tables.
 
-- [Shopify](/connections/sources/ecommerce/shopify)
-- [Stripe](/connections/sources/finance/stripe)
-- [HubSpot](/connections/sources/crm/hubspot)
-- [GitHub](/connections/sources/developer-tools/github)
-- [Notion](/connections/sources/productivity/notion)
+## Network access
 
-## Documented production destination connectors
-
-- [PostgreSQL](/connections/destinations/postgresql)
-- [MySQL](/connections/destinations/mysql)
-- [MariaDB](/connections/destinations/mariadb)
-- [SQLite](/connections/destinations/sqlite)
-- [CockroachDB](/connections/destinations/cockroachdb)
-
-## What this section does not cover
-
-- future or coming-soon connectors
-- placeholder rollout checklists for features that are not in the app yet
-- any unpublished developer reference surface
-- SSH tunnel or self-hosted agent runtime, which are planned later
+If your database is hosted behind a provider firewall, allow traffic from the MantrixFlow runtime before testing the connection. See [Private database access](/connections/private-database-access).
