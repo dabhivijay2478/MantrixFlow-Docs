@@ -1,18 +1,24 @@
 ---
 title: Connections Overview
-description: Create and test the PostgreSQL source and destination connections used by the live MantrixFlow pipeline flow.
+description: Create and test live PostgreSQL connections or evaluate the Stripe source Beta.
 ---
 
-Connections are reusable credentials. The current public workflow documents PostgreSQL as both source and destination.
+Connections are reusable credentials. PostgreSQL is live as both source and
+destination. Stripe is available as a Beta source for PostgreSQL delivery.
 
 ## Current live connectors
 
 | Role | Connector | Status |
 | --- | --- | --- |
 | Source | PostgreSQL | Live |
+| Source | Stripe | Beta |
 | Destination | PostgreSQL | Live |
 
-Other connector tiles may appear in internal code or future catalog work, but they are not documented here as available until their create, test, save, pipeline, and run path is complete in the app.
+Other connector tiles may appear in the catalog, but they are not available
+until their create, test, save, pipeline, and run path is enabled in the app.
+
+See [Stripe source (Beta)](/connections/sources/finance/stripe) for its supported
+streams, test-mode validation scope, and error-reporting guidance.
 
 ## Create a source connection
 
@@ -34,7 +40,8 @@ Other connector tiles may appear in internal code or future catalog work, but th
 6. Click **Test Connection**.
 7. Save after the test succeeds.
 
-Destination users need write access to pre-created destination tables.
+Destination users need write access to existing tables and permission to create
+or reconcile tables when using the explicit setup action.
 
 ## Network access
 

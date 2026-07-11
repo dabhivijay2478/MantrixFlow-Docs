@@ -9,7 +9,8 @@ PostgreSQL is the live destination connector documented for the current MantrixF
 
 Use a database user with write access to the destination schema and tables.
 
-MantrixFlow does not create final destination tables during delivery. Create the table first, then configure the pipeline to write to it.
+MantrixFlow does not create final destination tables during delivery. Create the
+table with the pipeline setup action or with SQL before starting a run.
 
 ## Connection fields
 
@@ -26,7 +27,8 @@ MantrixFlow does not create final destination tables during delivery. Create the
 
 ## Destination table requirements
 
-Create the target table before the first run:
+Create the target table from discovered source columns in the Destination panel,
+or create it manually before the first run:
 
 ```sql
 CREATE SCHEMA IF NOT EXISTS analytics;
