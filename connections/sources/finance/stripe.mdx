@@ -1,10 +1,78 @@
 ---
-title: Stripe source
-description: Status notice for Stripe source support.
+title: Stripe source (Beta)
+description: Connect Stripe as a Beta source, discover 34 supported streams, and deliver selected data to PostgreSQL.
 ---
 
-Stripe source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
+<Note>Stripe is available as a **Beta source connector**.</Note>
 
-The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
+## Beta scope
 
-Use [Connections Overview](/connections/overview) for the supported live connector list.
+The Beta supports connection testing, schema discovery, stream preview, full
+sync extraction, pagination, PostgreSQL table setup, and idempotent merge
+delivery. A valid empty Stripe response is a successful stream result.
+
+The following 34 streams are available:
+
+| Group | Streams |
+| --- | --- |
+| Payments | `account`, `balance_transactions`, `charges`, `customers`, `disputes`, `events`, `payment_intents`, `payment_methods`, `payouts`, `refunds`, `setup_intents` |
+| Billing | `subscriptions`, `subscription_items`, `invoices`, `invoice_items`, `credit_notes`, `credit_note_line_items`, `products`, `prices`, `plans`, `coupons`, `promotion_codes`, `tax_rates`, `quotes`, `quote_line_items` |
+| Checkout | `checkout_sessions`, `checkout_session_line_items`, `payment_links` |
+| Risk | `reviews`, `early_fraud_warnings` |
+| Operations | `files`, `file_links`, `webhook_endpoints`, `tax_ids` |
+
+Feature-gated Stripe families, including Connect, Issuing, Treasury, Financial
+Connections, Terminal, and the broader Tax API, are hidden during the Beta.
+
+## Create a Stripe connection
+
+1. Open **Connections** and click **+ New Connection**.
+2. Select the **Source** role and choose **Stripe — Beta**.
+3. Enter a connection name.
+4. Paste a Stripe Secret key or restricted key with read access.
+5. Click **Test Connection**.
+6. Save the connection after the test succeeds.
+
+Supported key prefixes are `sk_test_`, `rk_test_`, `sk_live_`, and `rk_live_`.
+Never send a Stripe key in screenshots, logs, or support messages.
+
+## Discover and select streams
+
+Open the Source panel in the pipeline builder and click **Discover schema**.
+Use search and feature-group filters to select streams. Preview is available for
+all 34 streams, including singleton and parent-child Stripe endpoints.
+
+An empty account commonly returns zero rows for transactional streams such as
+`charges`, `invoices`, `refunds`, and `subscriptions`. Account configuration,
+events, products, prices, plans, or payment links may still return records. Zero
+rows do not mean the connection or pipeline failed.
+
+## PostgreSQL destination setup
+
+Use a PostgreSQL destination connection with permission to create or alter the
+target tables during pipeline setup. MantrixFlow can explicitly create the
+required destination tables from discovered Stripe columns before the run.
+
+The ELT runner never creates final tables while a run is executing. It validates
+the prepared tables, stages Stripe data, runs the configured SQL models, and
+then merges rows into the exact `schema.table` targets.
+
+Refresh discovery before the first production-oriented run and after adopting
+new Stripe API fields. The setup flow can add newly discovered nullable columns
+to an existing destination table when requested.
+
+## Beta error handling
+
+Connection and run errors are categorized without exposing credentials:
+
+- `AUTHENTICATION_ERROR` means Stripe rejected the supplied key.
+- `PERMISSION_ERROR` means a restricted key cannot read the selected endpoint.
+- `RATE_LIMIT_ERROR` is retryable after Stripe's requested delay.
+- `SCHEMA_ERROR` means the response did not match the supported shape.
+- Destination validation errors identify a missing schema, table, column, or
+  incompatible key before delivery.
+
+When reporting a Beta issue to [support@mantrixflow.com](mailto:support@mantrixflow.com),
+include the pipeline run ID, stream name, approximate timestamp, Stripe test or
+live mode, and the displayed error code. Do not include the Stripe key or raw
+authorization headers.

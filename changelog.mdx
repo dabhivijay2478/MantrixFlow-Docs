@@ -3,11 +3,19 @@ title: Changelog
 description: Documentation changes for the current MantrixFlow public docs.
 ---
 
+## Stripe source Beta
+
+- Stripe is now documented as an available Beta source connector.
+- The Beta exposes 34 tested streams and hides 29 feature-gated streams.
+- Connection testing, empty-stream handling, destination table setup,
+  PostgreSQL delivery, and idempotent reruns are documented.
+- Beta error reports should include the run ID, stream, timestamp, mode, and
+  displayed error code, but never credentials.
+
 ## Current alignment
 
-- Public docs now describe the live PostgreSQL source to PostgreSQL destination workflow.
-- Navigation now exposes only live connector setup pages.
-- Non-live connector pages remain as safe direct-link status notices.
+- Public docs describe live PostgreSQL workflows and the Stripe source Beta.
+- Navigation exposes live connector pages and clearly labeled Beta pages.
 - Pipeline docs now center the real Source node and Destination node builder flow.
 - Transformation guidance now points to destination-scoped Normalisation and the SQL Layer.
 - Sync docs now clarify that schedules are for Incremental destinations.

@@ -103,7 +103,8 @@
               {
                 "group": "Sources",
                 "pages": [
-                  "connections/sources/database/postgresql"
+                  "connections/sources/database/postgresql",
+                  "connections/sources/finance/stripe"
                 ]
               },
               {
