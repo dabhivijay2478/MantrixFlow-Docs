@@ -1,15 +1,18 @@
 ---
 title: Introduction
-description: Product-aligned MantrixFlow documentation for the PostgreSQL-to-PostgreSQL ELT workflow that is live in the current app.
+description: Product-aligned MantrixFlow documentation for live PostgreSQL and HubSpot ELT workflows.
 ---
 
-MantrixFlow currently documents the live self-serve workflow in the app: a PostgreSQL source connection feeding a PostgreSQL destination connection through a staged ELT run.
+MantrixFlow documents live self-serve ELT workflows in the app: PostgreSQL or
+HubSpot source data flows through isolated staging and explicit SQL/dbt models
+into PostgreSQL.
 
 The documentation intentionally avoids partially implemented connector paths and future roadmap features. If a connector appears in product code or an internal test guide but is not available end to end in the live workspace, it is not presented here as available.
 
 ## What is live
 
 - PostgreSQL source connections
+- HubSpot production source connections with ten supported streams
 - PostgreSQL destination connections
 - Pipeline shell creation from **Data Pipelines**
 - Canvas builder with a **Source** node and a **Destination** node
@@ -22,8 +25,7 @@ The documentation intentionally avoids partially implemented connector paths and
 
 ## What is not documented as live
 
-- Non-PostgreSQL connectors
-- SaaS connectors
+- Other non-live database and SaaS connectors
 - Transform or Filter canvas nodes
 - Log-based change capture
 - Destination table creation by the runner

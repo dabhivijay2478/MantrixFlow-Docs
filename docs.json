@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "MantrixFlow",
-  "description": "Documentation for the current MantrixFlow app: PostgreSQL-to-PostgreSQL ELT pipelines, source and destination configuration, dbt models, runs, and scheduling.",
+  "description": "Documentation for MantrixFlow PostgreSQL and HubSpot ELT pipelines, source and destination configuration, dbt models, runs, and scheduling.",
   "theme": "almond",
   "colors": {
     "primary": "#00a859",
@@ -104,6 +104,7 @@
                 "group": "Sources",
                 "pages": [
                   "connections/sources/database/postgresql",
+                  "connections/sources/crm/hubspot",
                   "connections/sources/finance/stripe"
                 ]
               },

@@ -1,10 +1,123 @@
 ---
 title: HubSpot source
-description: Status notice for HubSpot source support.
+description: Connect HubSpot as a production source and deliver ten CRM streams to PostgreSQL with dlt.
 ---
 
-HubSpot source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
+HubSpot is available as a production, source-only connector. MantrixFlow uses
+dlt to extract selected HubSpot data into isolated staging, applies your SQL/dbt
+models, and delivers the result to existing PostgreSQL tables.
 
-The public docs currently cover PostgreSQL source to PostgreSQL destination pipelines only. This page is kept as a safe landing page for older or direct links and intentionally does not provide setup steps.
+<Note>
+  The supported path is **HubSpot → PostgreSQL**. HubSpot cannot be selected as
+  a destination, and other destination types are not supported for this source.
+</Note>
 
-Use [Connections Overview](/connections/overview) for the supported live connector list.
+## Authentication
+
+The connector supports a **HubSpot private app access token**. OAuth is not
+currently supported.
+
+1. In HubSpot, open **Settings → Integrations → Private Apps**.
+2. Create or open a read-only private app.
+3. Add only the read scopes required by the streams you plan to sync.
+4. Copy the access token.
+5. In MantrixFlow, open **Connections**, choose **Source**, and select
+   **HubSpot**.
+6. Enter a connection name and the private app access token.
+7. Test the connection, then save it.
+
+MantrixFlow encrypts the saved credential and masks it in connection responses.
+Never place the token in SQL, pipeline names, logs, or AI chat.
+
+## Supported streams
+
+HubSpot exposes ten production streams:
+
+| Stream | Required HubSpot scope | Recommended mode | Primary key |
+| --- | --- | --- | --- |
+| Contacts | `crm.objects.contacts.read` | Incremental | `id` |
+| Companies | `crm.objects.companies.read` | Incremental | `id` |
+| Deals | `crm.objects.deals.read` | Incremental | `id` |
+| Tickets | `tickets` | Incremental | `id` |
+| Owners | `crm.objects.owners.read` | Full Table | `id` |
+| Deal pipelines | `crm.schemas.deals.read` | Full Table | `pipeline_id`, `stage_id` |
+| Ticket pipelines | `tickets` | Full Table | `pipeline_id`, `stage_id` |
+| Products | `crm.objects.products.read` | Incremental | `id` |
+| Line items | `crm.objects.line_items.read` | Incremental | `id` |
+| Quotes | `crm.objects.quotes.read` | Incremental | `id` |
+
+Discovery checks each stream against the connected account. A stream can appear
+as available, missing a scope, unavailable for the account, or temporarily
+unknown. This lets one valid token expose only the streams it can read without
+returning CRM records during the connection test.
+
+## Configure a HubSpot pipeline
+
+1. Create or choose a PostgreSQL destination connection.
+2. Create a pipeline using the saved HubSpot source.
+3. Open the **Source** node and click **Discover schema**.
+4. Select one or more available streams.
+5. Configure the extraction window and custom-property option.
+6. Preview the selected stream. HubSpot previews mask email local parts, phone
+   numbers, and sensitive free-text fields.
+7. In the **Destination** node, map every selected stream to an existing
+   PostgreSQL table and save an explicit SQL/dbt model.
+8. Validate and preview the models, then run the pipeline.
+9. Confirm the delivered rows in PostgreSQL and review the run in **Run
+   History**.
+
+The connector does not silently select every stream. At least one stream must be
+selected before a run can start.
+
+## UTC extraction window
+
+Incremental object streams support:
+
+- a required or previously saved UTC start time;
+- an optional UTC end time, captured at run start when omitted; and
+- a lookback from `0` through `604800` seconds, with a default of `3600`
+  seconds.
+
+The lookback overlaps adjacent runs so late updates can be read again and
+deduplicated by the stable object key and update timestamp. Owners and the two
+pipeline-definition streams are small full snapshots.
+
+## Custom properties
+
+Custom properties are supported for contacts, companies, deals, tickets,
+products, line items, and quotes. Keep **Include custom properties** enabled to
+request permitted custom fields, or disable it to use the stable default field
+set. Sensitive HubSpot properties are excluded from discovery.
+
+When an account has too many properties for a safe request, the connector can
+fall back to the default property set for that stream and reports the fallback
+in the run metadata. The raw `properties` value preserves the returned property
+payload, while your SQL model promotes the fields you want into destination
+columns.
+
+## PostgreSQL destination requirements
+
+Create or explicitly reconcile the destination schema and tables before
+delivery. The pipeline runner does not create target tables during a run.
+
+- Use a primary key or stable merge key for each table.
+- Keep model output columns aligned with destination column names and types.
+- Use Upsert delivery for repeatable incremental runs.
+- Keep `_mantrixflow_run_id` if you need row-level run lineage, and
+  `extracted_at` if you need extraction-time auditing.
+- Do not include internal `_dlt_*` staging columns in destination models.
+
+Empty but valid HubSpot streams still produce a typed staging relation, so a
+ten-stream run can validate and deliver successfully even when some streams
+have no records.
+
+## Current limitations
+
+- OAuth, webhooks, write-back, custom objects, activities, associations, and
+  property history are not supported.
+- Quotes depend on the HubSpot products enabled for the connected account.
+- Calculated-property-only changes may not advance the HubSpot update timestamp
+  and may require a later full reconciliation.
+- Line-item associations are not included.
+
+For destination setup, see [PostgreSQL destination](/connections/destinations/postgresql).

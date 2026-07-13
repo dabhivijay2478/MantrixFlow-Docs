@@ -1,15 +1,17 @@
 ---
 title: Getting started
-description: "Start with the current MantrixFlow app flow: create PostgreSQL connections, create a pipeline shell, configure the builder, and run manually."
+description: "Start with the current MantrixFlow app flow: create PostgreSQL or HubSpot sources, configure the builder, and run into PostgreSQL."
 ---
 
 The current app flow is connection-first and builder-driven.
 
-You create reusable PostgreSQL connections, create a lightweight pipeline shell, then finish the operational configuration in the canvas builder.
+You create reusable source and PostgreSQL destination connections, create a
+lightweight pipeline shell, then finish the operational configuration in the
+canvas builder. Sources can be PostgreSQL or the production HubSpot connector.
 
 ## Current app flow
 
-1. Create a PostgreSQL source connection.
+1. Create a PostgreSQL or HubSpot source connection.
 2. Create a PostgreSQL destination connection.
 3. Create a pipeline shell from **Data Pipelines** with a name and source connection.
 4. Open the builder.
@@ -23,8 +25,10 @@ You create reusable PostgreSQL connections, create a lightweight pipeline shell,
 
 Prepare the destination table yourself before running the pipeline. MantrixFlow validates that the table exists and that model output columns match the destination columns; it does not create destination tables during delivery.
 
-For the fastest first run, start with one source table and one destination table.
+For the fastest first run, start with one PostgreSQL table or one HubSpot stream
+and one destination table.
 
 ## Next
 
 Follow the [Quick Start](/getting-started/quick-start) for an end-to-end PostgreSQL example.
+For CRM data, follow the [HubSpot source guide](/connections/sources/crm/hubspot).

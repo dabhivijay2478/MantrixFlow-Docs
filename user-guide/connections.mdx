@@ -1,22 +1,25 @@
 ---
 title: Connections
-description: Create and test PostgreSQL connections in the MantrixFlow workspace.
+description: Create and test PostgreSQL and HubSpot connections in the MantrixFlow workspace.
 ---
 
-Open **Connections** to create reusable PostgreSQL credentials.
+Open **Connections** to create reusable database and SaaS credentials.
 
 ## Create a connection
 
 1. Click **+ New Connection**.
 2. Choose the role: Source or Destination.
-3. Choose **PostgreSQL**.
+3. Choose **PostgreSQL** or **HubSpot**.
 4. Fill the connection fields.
 5. Click **Test Connection**.
 6. Save after the test succeeds.
 
 ## Source connections
 
-Source users should have read access to the schemas and tables you plan to include.
+PostgreSQL source users should have read access to the schemas and tables you
+plan to include. HubSpot sources use a read-only private app access token with
+the scopes required by the selected streams. See the [HubSpot source
+guide](/connections/sources/crm/hubspot).
 
 ## Destination connections
 
