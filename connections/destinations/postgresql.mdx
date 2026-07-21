@@ -28,20 +28,8 @@ table with the pipeline setup action or with SQL before starting a run.
 ## Destination table requirements
 
 Create the target table from discovered source columns in the Destination panel,
-or create it manually before the first run:
-
-```sql
-CREATE SCHEMA IF NOT EXISTS analytics;
-
-CREATE TABLE IF NOT EXISTS analytics.orders_live (
-  id bigint PRIMARY KEY,
-  customer_id bigint,
-  order_status text,
-  total_amount numeric,
-  created_at timestamptz,
-  updated_at timestamptz
-);
-```
+or create it manually before the first run. The [Quick Start](/getting-started/quick-start)
+contains a complete PostgreSQL destination-table example.
 
 In the Destination panel, enter final delivery targets as `schema.table`, for example `analytics.orders_live`.
 

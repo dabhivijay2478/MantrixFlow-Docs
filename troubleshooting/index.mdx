@@ -1,0 +1,43 @@
+---
+title: Troubleshooting
+description: Resolve common MantrixFlow connection, discovery, preview, validation, delivery, and billing problems.
+---
+
+Start with the failed action and its message. Never paste passwords, access tokens, or connection strings into support messages.
+
+## Connection test failed
+
+Verify the hostname, port, database, username, password, SSL mode, and network access. For a private database, follow [Private database access](/connections/private-database-access).
+
+## Schema discovery returned no streams
+
+Confirm that the source user can read the expected schema or API resources. For HubSpot and Stripe, verify the required token permissions in the connector reference.
+
+## Data Preview is empty
+
+Confirm that the selected stream contains records and that the current connection can read them. Refresh discovery before retrying when the source schema changed.
+
+## SQL validation failed
+
+Check the source reference, selected columns, and SQL syntax. The model output columns must match the pre-created destination table. See [SQL Layer](/pipelines/dbt-layer).
+
+## Pipeline Run failed before delivery
+
+Common causes include:
+
+- the source table or stream is no longer available;
+- source or destination permissions changed;
+- the destination table does not exist;
+- the SQL output contains a column missing from the destination table;
+- Incremental sync is missing a valid replication key; or
+- the workspace reached a plan limit.
+
+Open **Run History**, select the failed Pipeline Run, and use the named phase and error message to identify the next action.
+
+## Incremental sync repeated records
+
+Check that the replication key is stable and increases as records change. The destination should have a primary key for merge-style Upsert behavior. Review [Incremental sync](/sync-reference/incremental-sync) and [Sync state](/sync-reference/sync-state).
+
+## Billing or checkout did not update
+
+Confirm that the hosted checkout completed, then refresh **Settings → Billing**. For an unresolved payment or plan issue, contact [support@mantrixflow.com](mailto:support@mantrixflow.com) with the workspace name and billing email.

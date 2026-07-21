@@ -3,35 +3,15 @@ title: Normalisation and SQL
 description: Shape data with destination-scoped Normalisation and SQL models in the current builder.
 ---
 
-The live transformation workflow is destination-scoped.
+The transformation workflow is destination-scoped. This guide identifies where the controls appear; the topic pages contain the rules and examples.
 
 ## Normalisation
 
-Use the **Normalisation** tab for rename and cast rules.
-
-Example:
-
-| Rule | Table | Column | Target |
-| --- | --- | --- | --- |
-| Rename | `public.orders` | `status` | `order_status` |
-| Cast | `public.orders` | `total_amount` | `numeric` |
+Use the **Normalisation** tab for rename and cast rules. See [Normalisation](/pipelines/normalisation) for supported rules and examples.
 
 ## SQL Layer
 
-Use the **SQL Layer** tab for SQL models. Models read from temporary raw tables:
-
-```sql
-SELECT
-  id,
-  customer_id,
-  order_status,
-  total_amount,
-  created_at,
-  updated_at
-FROM {{ source('raw', 'public__orders') }}
-```
-
-Set each model's final delivery table as `schema.table`, such as `analytics.orders_live`.
+Use the **SQL Layer** tab for SQL models. See [SQL Layer](/pipelines/dbt-layer) for source references, validation, previews, and destination-table requirements.
 
 ## Multiple outputs
 

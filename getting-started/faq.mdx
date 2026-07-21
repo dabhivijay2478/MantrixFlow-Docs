@@ -1,13 +1,13 @@
 ---
 title: FAQ
-description: Answers for the current PostgreSQL-to-PostgreSQL MantrixFlow workflow.
+description: Answers about current connectors, destination tables, transformations, sync modes, and pipeline runs.
 ---
 
 ## Which connectors are live in the public docs?
 
-PostgreSQL source and PostgreSQL destination.
+PostgreSQL is live as a source and destination. HubSpot is a live source for PostgreSQL delivery. Stripe is available as a Beta source for PostgreSQL delivery.
 
-Other connector pages may exist as direct-link notices, but they are not documented as live self-serve workflows.
+See [Connections Overview](/connections/overview) for the canonical availability table. Other connector pages remain as direct-link status notices and are not live self-serve workflows.
 
 ## Does MantrixFlow create destination tables?
 
@@ -44,15 +44,8 @@ No. Scheduling is enabled for Incremental sync. For Full Table sync, run manuall
 
 ## Why did my run fail before writing rows?
 
-Common causes:
-
-- source table does not exist or permission was removed
-- destination table does not exist
-- SQL model output contains a column missing from the destination table
-- Incremental sync is missing a replication key
-- credentials changed after the connection was saved
+See [Troubleshooting](/troubleshooting) for connection, discovery, validation, delivery, Incremental sync, and billing checks.
 
 ## Is staging data permanent?
 
 No. Runs stage data in temporary storage. The runner extracts checkpoint state and cleans up the staging file during cleanup.
-up.

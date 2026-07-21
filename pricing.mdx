@@ -1,104 +1,44 @@
 ---
 title: Pricing
-description: Simple, scalable pricing for developers, startups, scaling apps, and enterprise AI-native data pipelines.
+description: Current MantrixFlow plan prices, pipeline limits, and monthly delivered-row allowances.
 ---
 
-MantrixFlow uses plan-based pricing for pipeline capacity and platform features, plus usage-based pricing as row volume and API traffic grow.
+MantrixFlow offers Free, Plus, Pro, and Enterprise plans. Pipeline capacity and monthly delivered-row allowances are enforced by the application.
 
 ## Plans at a glance
 
-<CardGroup cols={2}>
-  <Card title="Starter" href="https://cloud.mantrixflow.com">
-    **$0** for developers and testing. Includes 3 pipelines, 10K rows/month, limited API + SDK access, 1K API calls/day, and basic logs.
-  </Card>
-  <Card title="Growth" href="https://cloud.mantrixflow.com">
-    **$49** for startups. Includes 20 pipelines, 1M rows/month, full API + SDK access, 50K API calls/day, scheduling, webhooks, and standard logs.
-  </Card>
-  <Card title="Pro" href="https://cloud.mantrixflow.com">
-    **$199** for scaling apps. Includes 50+ pipelines, 10M+ rows/month, high-speed processing, 500K API calls/day, real-time pipelines, AI agents in beta, and advanced retry logging.
-  </Card>
-  <Card title="Enterprise" href="mailto:support@mantrixflow.com">
-    **$1000+** for custom solutions. Includes unlimited pipelines, dedicated infrastructure, MCP Server access, multi-tenant support, SLA coverage, and custom connectors.
-  </Card>
-</CardGroup>
+| Plan | Monthly price | Annual price | Pipelines | Delivered rows per month |
+| --- | ---: | ---: | ---: | ---: |
+| Free | `$0` | `$0` | `5` | `25,000` |
+| Plus | `$29` | `$22/month`, billed annually | `20` | `1,000,000` |
+| Pro | `$129` | `$97/month`, billed annually | `50` | `10,000,000` |
+| Enterprise | Contact sales | Contact sales | Unlimited | Unlimited |
 
-## Compare plans
+<Note>
+  The hosted checkout shows the final price, billing period, payment methods,
+  taxes, and any applicable discounts before you confirm a paid plan.
+</Note>
 
-| Plan | Price | Best for | Key limits and features |
-| --- | --- | --- | --- |
-| Starter | $0 | Developers and testing | 3 pipelines, 10K rows/month, limited API + SDK, 1K API calls/day, basic logs |
-| Growth | $49 | Startups | 20 pipelines, 1M rows/month, API + SDK access, 50K API calls/day, scheduling + webhooks, standard logs |
-| Pro | $199 | Scaling apps | 50+ pipelines, 10M+ rows/month, high-speed processing, 500K API calls/day, real-time pipelines, AI agents beta, advanced logs + retry |
-| Enterprise | $1000+ | Custom solutions | Unlimited pipelines, dedicated infra, MCP Server access, multi-tenant support, SLA + uptime guarantee, custom connectors |
+## Free
 
-## Usage-based pricing
+New workspaces start on Free without a payment step. Free includes up to five pipelines and 25,000 delivered rows per month.
 
-Usage pricing applies on top of your plan as traffic increases:
+## Plus
 
-- `$5 / 1M rows`
-- `$0.002 / 1K API calls`
+Plus includes up to 20 pipelines and 1,000,000 delivered rows per month. Start checkout from the billing page in the application.
 
-Included row usage is a monthly allowance. If a workspace uses its monthly rows in the first 10 days, additional delivered rows for the rest of that billing cycle count as overage. See [Billing Breakdown](/billing-breakdown) for the upgrade/downgrade and overage calculation model.
+## Pro
 
-## Plan details
+Pro includes up to 50 pipelines and 10,000,000 delivered rows per month. Start checkout from the billing page in the application.
 
-### Starter
+## Enterprise
 
-Use Starter when you are validating data shape, testing connectors, or building a first internal workflow.
+Enterprise pricing and requirements are handled through sales. Contact [support@mantrixflow.com](mailto:support@mantrixflow.com) for current terms.
 
-- 3 Pipelines
-- 10K rows/month
-- API + SDK (limited)
-- 1K API calls/day
-- Basic logs
+## When you reach a limit
 
-### Growth
+- You cannot create another pipeline after reaching the pipeline limit.
+- New pipeline runs pause after the workspace reaches its monthly delivered-row limit.
+- Upgrade the plan or wait for the monthly row allowance to reset.
 
-Use Growth when your team needs more scheduled automation and enough throughput for startup-scale workloads.
-
-- 20 Pipelines
-- 1M rows/month
-- API + SDK access
-- 50K API calls/day
-- Scheduling + Webhooks
-- Standard logs
-
-### Pro
-
-Use Pro when you need more throughput, real-time pipeline support, and advanced operational tooling.
-
-- 50+ Pipelines
-- 10M+ rows/month
-- High-speed processing
-- 500K API calls/day
-- Real-time pipelines
-- AI agents (beta)
-- Advanced logs + retry
-
-### Enterprise
-
-Use Enterprise when you need dedicated architecture, custom onboarding, or formal operational commitments.
-
-- Unlimited pipelines
-- Dedicated infra
-- MCP Server access
-- Multi-tenant support
-- SLA + uptime guarantee
-- Custom connectors
-
-## Which plan fits best?
-
-<CardGroup cols={2}>
-  <Card title="Start with Starter" href="https://cloud.mantrixflow.com">
-    Best when you are testing connectors, validating data shape, or building the first version of a pipeline.
-  </Card>
-  <Card title="Move to Growth" href="https://cloud.mantrixflow.com">
-    Best for startup teams that need more pipelines, larger monthly volume, and scheduled delivery with webhooks.
-  </Card>
-  <Card title="Choose Pro" href="https://cloud.mantrixflow.com">
-    Best for products that need higher throughput, real-time pipeline support, and early AI agent workflows.
-  </Card>
-  <Card title="Talk to sales" href="mailto:support@mantrixflow.com">
-    Best when you need dedicated infrastructure, custom connectors, multi-tenant support, or formal SLA commitments.
-  </Card>
-</CardGroup>
+The application shows current usage and the next available plan. See [Billing and usage](/billing-breakdown) for checkout, plan changes, and limit behavior.

@@ -3,39 +3,15 @@ title: Transformation rules
 description: "The current transformation model: destination-scoped Normalisation plus SQL models."
 ---
 
-The live transformation flow happens in the **Destination** panel.
+Transformations are owned by a destination and configured in the **Destination** panel.
 
 | Layer | Location | Purpose |
 | --- | --- | --- |
 | Normalisation | Destination panel | Rename and cast columns before the SQL model |
 | SQL Layer | Destination panel | SQL model that selects final output columns |
 
-## Normalisation
+Use [Normalisation](/pipelines/normalisation) for small structural changes such as renaming or casting a column.
 
-Use Normalisation for small structural changes such as renaming `status` to `order_status` or casting a string amount to `numeric`.
+Use the [SQL Layer](/pipelines/dbt-layer) for filtering, derived fields, JSON extraction, joins, aggregations, and final output selection.
 
-## SQL Layer
-
-Use SQL for business logic:
-
-- filtering rows
-- deriving columns
-- selecting the exact destination shape
-- extracting JSON fields
-- joining staged tables when available
-
-Example:
-
-```sql
-SELECT
-  id,
-  customer_id,
-  LOWER(order_status) AS order_status,
-  total_amount,
-  created_at,
-  updated_at
-FROM {{ source('raw', 'public__orders') }}
-WHERE order_status IS NOT NULL
-```
-
-The model output must match the pre-created destination table.
+Validate and preview the SQL model before saving it. The saved model output must match the pre-created destination table.

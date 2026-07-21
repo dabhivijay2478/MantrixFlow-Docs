@@ -3,24 +3,11 @@ title: PostgreSQL to PostgreSQL
 description: A complete live-app example using PostgreSQL as both source and destination.
 ---
 
-This example moves `public.orders` into `analytics.orders_live`.
+This example moves `public.orders` into `analytics.orders_live`. If this is your first pipeline, follow the [Quick Start](/getting-started/quick-start), which includes the destination DDL and full setup sequence.
 
 ## 1. Prepare the destination
 
-Create the destination table before configuring the pipeline:
-
-```sql
-CREATE SCHEMA IF NOT EXISTS analytics;
-
-CREATE TABLE IF NOT EXISTS analytics.orders_live (
-  id bigint PRIMARY KEY,
-  customer_id bigint,
-  order_status text,
-  total_amount numeric,
-  created_at timestamptz,
-  updated_at timestamptz
-);
-```
+Create `analytics.orders_live` before configuring the pipeline. Its columns must match the final SQL model, and a primary key is recommended for merge-style Upsert delivery.
 
 ## 2. Create connections
 
@@ -50,12 +37,7 @@ Create and test:
 3. Keep sync mode as `FULL_TABLE` for the first run.
 4. Keep write mode as `Upsert`.
 
-Optional Normalisation rules:
-
-| Rule | Table | Column | Target |
-| --- | --- | --- | --- |
-| Rename | `public.orders` | `status` | `order_status` |
-| Cast | `public.orders` | `total_amount` | `numeric` |
+Add optional rename or cast rules only when the source and destination shapes differ. See [Normalisation](/pipelines/normalisation).
 
 ## 6. Write the SQL model
 
