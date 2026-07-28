@@ -1,0 +1,86 @@
+---
+title: HubSpot to PostgreSQL
+description: Configure all ten HubSpot streams with explicit models, destination tables, and merge keys.
+---
+
+This example shows the production pattern for all ten HubSpot streams. Start
+with one stream when learning the workflow, then add the remaining streams.
+
+## 1. Prepare connections
+
+1. Create a HubSpot private app with the scopes listed in the
+   [HubSpot source guide](/connections/sources/crm/hubspot).
+2. Create, test, and save the HubSpot source connection.
+3. Create, test, and save a PostgreSQL destination connection.
+
+## 2. Select streams
+
+Discover and select:
+
+`contacts`, `companies`, `deals`, `tickets`, `owners`, `deal_pipelines`,
+`ticket_pipelines`, `products`, `line_items`, and `quotes`.
+
+Use Incremental mode for CRM object streams and Full Table for owners and
+pipeline definitions.
+
+## 3. Create destination contracts
+
+Create one destination table and one model for every selected stream:
+
+| Stream | Example table | Merge key |
+| --- | --- | --- |
+| Contacts | `analytics.hubspot_contacts` | `id` |
+| Companies | `analytics.hubspot_companies` | `id` |
+| Deals | `analytics.hubspot_deals` | `id` |
+| Tickets | `analytics.hubspot_tickets` | `id` |
+| Owners | `analytics.hubspot_owners` | `id` |
+| Deal pipelines | `analytics.hubspot_deal_pipelines` | `pipeline_id`, `stage_id` |
+| Ticket pipelines | `analytics.hubspot_ticket_pipelines` | `pipeline_id`, `stage_id` |
+| Products | `analytics.hubspot_products` | `id` |
+| Line items | `analytics.hubspot_line_items` | `id` |
+| Quotes | `analytics.hubspot_quotes` | `id` |
+
+Pipeline-definition streams do not expose a synthetic `id`; use the composite
+pipeline/stage key.
+
+## 4. Sample models
+
+Use explicit columns for stable tables:
+
+```sql
+SELECT
+  id,
+  created_at,
+  updated_at,
+  archived,
+  properties
+FROM {{ source('raw', 'hubspot__contacts') }}
+```
+
+HubSpot accounts can expose sparse custom properties and property names longer
+than PostgreSQL's 63-character identifier limit. For wide dynamic streams, this
+projection keeps every runtime column with a PostgreSQL-compatible name:
+
+```sql
+SELECT COLUMNS('^.{1,63}$')
+FROM {{ source('raw', 'hubspot__companies') }}
+```
+
+Validate the exact output against the destination table before publishing.
+
+## 5. Validate and run
+
+1. Validate and preview every selected stream model.
+2. Confirm all ten destination tables exist.
+3. Publish every model.
+4. Run manually.
+5. Review per-stream row counts and errors in Run History.
+
+Empty `line_items`, `quotes`, or other valid streams can complete with zero
+rows. Zero rows are not a connector failure.
+
+## 6. Incremental follow-up
+
+After the first run succeeds, keep stable `id` merge keys and use the discovered
+update cursor for incremental CRM objects. Use a lookback window to capture
+late updates while Upsert prevents duplicates.

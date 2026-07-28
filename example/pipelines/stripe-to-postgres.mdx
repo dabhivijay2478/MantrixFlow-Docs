@@ -1,0 +1,71 @@
+---
+title: Stripe to PostgreSQL
+description: Build a Stripe pipeline with discovery, a stable SQL model, and PostgreSQL Upsert delivery.
+---
+
+This example delivers the Stripe `account` stream into
+`analytics.stripe_account`. The same workflow applies to the other supported
+streams.
+
+## 1. Create the connections
+
+1. Create a **Stripe Source** connection with a secret or restricted read key.
+2. Test and save the connection.
+3. Create a **PostgreSQL Destination** connection.
+4. Test and save the destination.
+
+## 2. Discover the Stripe catalog
+
+1. Create a pipeline with the Stripe source.
+2. Open the **Source** node and click **Discover schema**.
+3. Select `account`.
+4. Preview the stream and review its typed fields.
+
+For broader coverage, select additional streams after preparing one model and
+destination table for each delivered output. Valid empty streams are successful
+and do not require fabricated sample records.
+
+## 3. Prepare the destination
+
+In the Destination panel, select the PostgreSQL connection and use the explicit
+table setup action after previewing the model. Name the table
+`analytics.stripe_account` and use the stable account identifier as its merge
+key.
+
+The final table must exist before the run starts.
+
+## 4. Add a stable model
+
+```sql
+SELECT
+  id,
+  object,
+  created,
+  created_at,
+  metadata,
+  source_stream,
+  stripe_account_id
+FROM {{ source('raw', 'stripe__account') }}
+```
+
+Prefer explicit columns over `SELECT *`; Stripe responses can include optional
+fields that are not part of your destination contract.
+
+## 5. Validate and run
+
+1. Set the final table to `analytics.stripe_account`.
+2. Set write mode to **Upsert**.
+3. Validate the model.
+4. Preview output.
+5. Save and publish the model.
+6. Run the pipeline manually.
+7. Confirm success, rows written, and the destination target in Run History.
+
+## 6. Expand to more streams
+
+Repeat the destination/model setup for every additional stream you intend to
+deliver. Streams with a `created` cursor can use Incremental sync after a
+successful first run. Cursorless streams remain Full Table.
+
+See [Stripe source](/connections/sources/finance/stripe) for the complete
+34-stream inventory and current limitations.

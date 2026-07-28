@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "MantrixFlow",
-  "description": "Documentation for current MantrixFlow PostgreSQL, HubSpot, and Stripe Beta pipelines, connections, transformations, runs, billing, and security.",
+  "description": "Documentation for current MantrixFlow PostgreSQL, HubSpot, and Stripe pipelines, connections, transformations, runs, billing, and security.",
   "theme": "almond",
   "colors": {
     "primary": "#00a859",
@@ -172,7 +172,9 @@
             "icon": "flask-conical",
             "pages": [
               "example/pipelines/postgres-to-postgres",
-              "changelog"
+              "example/pipelines/postgres-incremental",
+              "example/pipelines/stripe-to-postgres",
+              "example/pipelines/hubspot-to-postgres"
             ]
           }
         ]

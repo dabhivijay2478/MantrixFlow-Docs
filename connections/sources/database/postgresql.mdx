@@ -1,46 +1,129 @@
 ---
 title: PostgreSQL source
-description: Configure PostgreSQL as a live MantrixFlow source connection.
+description: Configure PostgreSQL as a source for Full Table and Incremental pipelines.
 ---
 
-PostgreSQL is the live source connector documented for the current MantrixFlow app.
+PostgreSQL is available as a source connector. MantrixFlow discovers permitted
+schemas and tables, previews rows, stages selected streams, applies saved SQL
+models, and delivers approved output to PostgreSQL destination tables.
 
 ## Required access
 
-Use a database user with read access to the source schemas and tables you want to sync.
+Use a dedicated read-only database user. Grant only the schemas and tables the
+workspace needs.
 
-For a first pipeline, start with one table such as `public.orders`.
+```sql
+CREATE USER mantrixflow_reader WITH PASSWORD 'replace-with-a-secret';
+GRANT CONNECT ON DATABASE app_db TO mantrixflow_reader;
+GRANT USAGE ON SCHEMA public TO mantrixflow_reader;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO mantrixflow_reader;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT SELECT ON TABLES TO mantrixflow_reader;
+```
+
+Use a secret manager for the real password. Do not commit it to source control.
 
 ## Connection fields
 
 | Field | Notes |
 | --- | --- |
-| Connection Name | A human-readable name shown in the app |
+| Connection Name | Descriptive workspace name, such as `Production read replica` |
 | Host | Database host or provider endpoint |
 | Port | Usually `5432` |
 | Database | Database name |
-| Username | Source user |
+| Username | Dedicated source user |
 | Password | Source user password |
-| Schema | Usually `public` for first tests |
+| Schema | Initial schema, commonly `public` |
 | SSL Mode | Use `require` for most hosted databases |
 
-## Setup flow
+If the provider supplies one connection string, map its host, port, database,
+username, password, and SSL mode into the form. Prefer a pooled endpoint only
+when the provider supports the read pattern and connection lifetime.
+
+## Create the connection
 
 1. Open **Connections**.
 2. Click **+ New Connection**.
-3. Set role to **Source**.
+3. Set the role to **Source**.
 4. Choose **PostgreSQL**.
-5. Fill the form.
+5. Fill the connection form.
 6. Click **Test Connection**.
 7. Save only after the test succeeds.
 
-## Builder behavior
+If the database uses an IP allowlist or private network, follow
+[Private database access](/connections/private-database-access) before testing.
 
-After a pipeline shell is created, the Source node can:
+## Discover and preview
 
-- test the connection again
-- discover source schemas and tables
-- include selected streams as `schema.table`
-- preview rows for the active stream
+After creating a pipeline:
 
-Selected streams are persisted as strict source stream configs, including the staging table name such as `public__orders`.
+1. Open the **Source** node.
+2. Click **Discover schema** or **Refresh tables**.
+3. Select each required `schema.table` stream.
+4. Preview representative rows and confirm field types.
+5. Save the source configuration.
+
+Selected streams receive stable staging names such as `public__orders`.
+
+## Full Table mode
+
+Use Full Table for the first run, small reference tables, or deliberate
+snapshots. A run reads every selected source row visible to the source user.
+
+## Incremental mode
+
+Use Incremental for growing tables with a stable cursor:
+
+- `updated_at` for inserts and updates;
+- `created_at` for append-only tables; or
+- a monotonically increasing identifier.
+
+The cursor should be populated, indexed, and updated whenever a row changes.
+Use a stable primary key such as `id` for Upsert delivery.
+
+```sql
+CREATE INDEX IF NOT EXISTS orders_updated_at_idx
+  ON public.orders (updated_at);
+```
+
+MantrixFlow stores checkpoint state only after a successful run. Failed runs do
+not advance the saved checkpoint.
+
+## Type compatibility
+
+The PostgreSQL path supports common relational and analytical types, including
+integers, numeric values, floating point, booleans, character and text values,
+UUIDs, dates and timestamps, intervals, JSON/JSONB, byte arrays, network
+addresses, bit values, and arrays.
+
+Always preview complex columns and use an explicit SQL cast when the destination
+type differs. See [Data type compatibility](/pipelines/data-type-compatibility).
+
+## Sample source table
+
+```sql
+CREATE TABLE public.orders (
+  id bigint PRIMARY KEY,
+  customer_id bigint NOT NULL,
+  order_status text NOT NULL,
+  total_amount numeric(12, 2) NOT NULL,
+  created_at timestamptz NOT NULL,
+  updated_at timestamptz NOT NULL
+);
+```
+
+Use the [PostgreSQL-to-PostgreSQL example](/example/pipelines/postgres-to-postgres)
+for a first Full Table run, or the
+[Incremental sample](/example/pipelines/postgres-incremental) for a reproducible
+8,000-row initial load and 2,000-row delta.
+
+## Troubleshooting
+
+- **Connection refused:** verify host, port, network allowlist, and provider
+  endpoint.
+- **Authentication failed:** verify username, password, database, and SSL mode.
+- **No tables discovered:** grant `USAGE` on the schema and `SELECT` on tables.
+- **Preview fails:** check table permissions and unsupported custom types.
+- **Incremental rows missing:** confirm the cursor changes on updates and is not
+  null.
+- **Duplicate destination rows:** use a stable primary key and Upsert delivery.

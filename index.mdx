@@ -1,10 +1,10 @@
 ---
 title: Introduction
-description: Product-aligned MantrixFlow documentation for current PostgreSQL, HubSpot, and Stripe Beta ELT workflows.
+description: Product-aligned MantrixFlow documentation for current PostgreSQL, HubSpot, and Stripe ELT workflows.
 ---
 
 MantrixFlow documents current self-serve ELT workflows in the app: PostgreSQL,
-HubSpot, or Stripe Beta source data flows through isolated staging and explicit
+HubSpot, or Stripe source data flows through isolated staging and explicit
 SQL models into PostgreSQL.
 
 The documentation intentionally avoids partially implemented connector paths and future roadmap features. If a connector appears in product code or an internal test guide but is not available end to end in the live workspace, it is not presented here as available.
@@ -13,7 +13,7 @@ The documentation intentionally avoids partially implemented connector paths and
 
 - PostgreSQL source connections
 - HubSpot production source connections with ten supported streams
-- Stripe Beta source connections
+- Stripe source connections with 34 supported streams
 - PostgreSQL destination connections
 - Pipeline shell creation from **Data Pipelines**
 - Canvas builder with a **Source** node and a **Destination** node
@@ -40,3 +40,6 @@ The documentation intentionally avoids partially implemented connector paths and
 3. [Connections Overview](/connections/overview)
 4. [Pipelines Overview](/pipelines/overview)
 5. [Postgres-to-Postgres Example](/example/pipelines/postgres-to-postgres)
+6. [PostgreSQL Incremental Sample](/example/pipelines/postgres-incremental)
+7. [Stripe-to-PostgreSQL Example](/example/pipelines/stripe-to-postgres)
+8. [HubSpot-to-PostgreSQL Example](/example/pipelines/hubspot-to-postgres)

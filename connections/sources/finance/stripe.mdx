@@ -1,15 +1,18 @@
 ---
-title: Stripe source (Beta)
-description: Connect Stripe as a Beta source, discover 34 supported streams, and deliver selected data to PostgreSQL.
+title: Stripe source
+description: Connect Stripe, discover 34 supported streams, and deliver selected data to PostgreSQL.
 ---
 
-<Note>Stripe is available as a **Beta source connector**.</Note>
+Stripe is available as a source connector for PostgreSQL delivery. It supports
+connection testing, typed discovery, preview, pagination, full and incremental
+stream extraction, empty streams, SQL models, and idempotent Upsert delivery.
 
-## Beta scope
+<Note>
+  The supported path is **Stripe → PostgreSQL**. Stripe cannot be selected as a
+  destination.
+</Note>
 
-The Beta supports connection testing, schema discovery, stream preview, full
-sync extraction, pagination, PostgreSQL table setup, and idempotent merge
-delivery. A valid empty Stripe response is a successful stream result.
+## Supported streams
 
 The following 34 streams are available:
 
@@ -21,58 +24,104 @@ The following 34 streams are available:
 | Risk | `reviews`, `early_fraud_warnings` |
 | Operations | `files`, `file_links`, `webhook_endpoints`, `tax_ids` |
 
-Feature-gated Stripe families, including Connect, Issuing, Treasury, Financial
-Connections, Terminal, and the broader Tax API, are hidden during the Beta.
+Stripe Connect, Issuing, Treasury, Financial Connections, Terminal, and the
+broader Tax API are not currently exposed as selectable streams.
+
+## Authentication
+
+Use a Stripe secret key or a restricted key with read access to every stream
+you plan to select.
+
+Supported key prefixes are `sk_test_`, `rk_test_`, `sk_live_`, and `rk_live_`.
+Use a restricted read-only key when possible. Never place a Stripe key in SQL,
+pipeline names, screenshots, logs, issue reports, or support messages.
 
 ## Create a Stripe connection
 
 1. Open **Connections** and click **+ New Connection**.
-2. Select the **Source** role and choose **Stripe — Beta**.
-3. Enter a connection name.
-4. Paste a Stripe Secret key or restricted key with read access.
+2. Select the **Source** role and choose **Stripe**.
+3. Enter a descriptive connection name.
+4. Paste the secret or restricted key.
 5. Click **Test Connection**.
 6. Save the connection after the test succeeds.
 
-Supported key prefixes are `sk_test_`, `rk_test_`, `sk_live_`, and `rk_live_`.
-Never send a Stripe key in screenshots, logs, or support messages.
+The connection test validates authentication without copying Stripe records.
 
 ## Discover and select streams
 
-Open the Source panel in the pipeline builder and click **Discover schema**.
-Use search and feature-group filters to select streams. Preview is available for
-all 34 streams, including singleton and parent-child Stripe endpoints.
+1. Create a pipeline with the saved Stripe source.
+2. Open the **Source** node.
+3. Click **Discover schema**.
+4. Search or filter the discovered stream catalog.
+5. Select only the streams the pipeline will model and deliver.
+6. Preview representative rows before configuring destination tables.
 
-An empty account commonly returns zero rows for transactional streams such as
-`charges`, `invoices`, `refunds`, and `subscriptions`. Account configuration,
-events, products, prices, plans, or payment links may still return records. Zero
-rows do not mean the connection or pipeline failed.
+A valid empty Stripe response is successful. New or lightly used accounts
+commonly return zero rows for `charges`, `refunds`, `subscriptions`, or
+`disputes`. Empty streams still complete with a typed staging relation.
 
-## PostgreSQL destination setup
+## Sync modes
 
-Use a PostgreSQL destination connection with permission to create or alter the
-target tables during pipeline setup. MantrixFlow can explicitly create the
-required destination tables from discovered Stripe columns before the run.
+Streams with a stable `created` cursor can use Incremental sync. Cursorless
+singleton, catalog, and child streams use Full Table mode.
 
-The ELT runner never creates final tables while a run is executing. It validates
-the prepared tables, stages Stripe data, runs the configured SQL models, and
-then merges rows into the exact `schema.table` targets.
+Use Full Table for the first validation run. Move eligible streams to
+Incremental only after the initial run succeeds and the destination key is
+verified.
 
-Refresh discovery before the first production-oriented run and after adopting
-new Stripe API fields. The setup flow can add newly discovered nullable columns
-to an existing destination table when requested.
+## PostgreSQL destination requirements
 
-## Beta error handling
+Create or explicitly reconcile destination tables before delivery. The runner
+does not create final tables while a pipeline run is executing.
 
-Connection and run errors are categorized without exposing credentials:
+- Use a stable Stripe `id` as the primary key where the resource exposes one.
+- Keep model output columns aligned with destination names and types.
+- Use Upsert for repeatable runs.
+- Exclude internal `_dlt_*` columns from final models.
+- Prefer explicit columns over `SELECT *` because Stripe may add optional
+  fields to API responses.
 
-- `AUTHENTICATION_ERROR` means Stripe rejected the supplied key.
-- `PERMISSION_ERROR` means a restricted key cannot read the selected endpoint.
-- `RATE_LIMIT_ERROR` is retryable after Stripe's requested delay.
-- `SCHEMA_ERROR` means the response did not match the supported shape.
+For singleton resources such as `account`, use a stable identifier returned by
+discovery or an explicitly modeled account key.
+
+## Sample stable model
+
+This account model selects a stable contract while retaining useful lineage:
+
+```sql
+SELECT
+  id,
+  object,
+  created,
+  created_at,
+  metadata,
+  source_stream,
+  stripe_account_id
+FROM {{ source('raw', 'stripe__account') }}
+```
+
+Validate and preview the model before creating or reconciling its destination
+table. See the complete
+[Stripe-to-PostgreSQL example](/example/pipelines/stripe-to-postgres).
+
+## Errors and retries
+
+- `AUTHENTICATION_ERROR`: Stripe rejected the key.
+- `PERMISSION_ERROR`: the key cannot read a selected endpoint.
+- `RATE_LIMIT_ERROR`: retry after the requested delay.
+- `SCHEMA_ERROR`: a response did not match the supported shape.
 - Destination validation errors identify a missing schema, table, column, or
   incompatible key before delivery.
 
-When reporting a Beta issue to [support@mantrixflow.com](mailto:support@mantrixflow.com),
-include the pipeline run ID, stream name, approximate timestamp, Stripe test or
-live mode, and the displayed error code. Do not include the Stripe key or raw
-authorization headers.
+When reporting an issue, include the pipeline run ID, stream, approximate
+timestamp, Stripe test or live mode, and displayed error code. Do not include
+the key or authorization headers.
+
+## Current limitations
+
+- Stripe is source-only.
+- The destination path is PostgreSQL.
+- Webhook ingestion and write-back to Stripe are not supported.
+- Feature-gated stream families listed above are not selectable.
+- API fields can vary by account and API version; refresh discovery before
+  adopting new fields.
