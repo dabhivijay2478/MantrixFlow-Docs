@@ -188,6 +188,7 @@
             "icon": "book-open",
             "pages": [
               "user-guide/index",
+              "user-guide/oria-copilot",
               "user-guide/connections",
               "user-guide/pipelines",
               "user-guide/transformations-and-branches",

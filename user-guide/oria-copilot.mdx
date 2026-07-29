@@ -1,0 +1,140 @@
+---
+title: Use Oria Copilot
+description: Ask workspace questions, attach the right context, and review previous Oria conversations safely.
+---
+
+Oria is MantrixFlow's read-only workspace Copilot. It helps you understand
+pipelines, connections, runs, SQL, schedules, usage, and product behavior
+without changing your workspace.
+
+## Open Oria
+
+1. Sign in and select the correct organization.
+2. Select **Oria** in the workspace sidebar.
+3. Enter a question in the composer.
+4. Add workspace context when the question refers to a specific resource.
+5. Send the question and review the cited evidence before acting on important
+   recommendations.
+
+Oria automatically chooses the appropriate read-only capability based on your
+question and context. You do not need to select or manage an internal agent.
+
+## Start a conversation
+
+Use the **plus** icon in the upper-right corner to start a clean conversation.
+This is useful when you change topics or want to attach a different pipeline,
+connection, or run.
+
+Write a focused question that includes:
+
+- the resource you are investigating;
+- the result you expected;
+- the result you observed;
+- the time or run involved, when relevant.
+
+For example:
+
+- “Why is this pipeline not ready to run?”
+- “Which phase failed in the latest run?”
+- “Does this SQL output match the destination columns?”
+- “Should this source use Full Table or Incremental sync?”
+- “Is the current schedule likely to overlap?”
+- “Why is this feature unavailable on my plan?”
+
+## Attach workspace context
+
+Select **Attach context** in the composer when the question depends on a
+specific workspace resource. Choose the relevant pipeline, connection, run,
+SQL model, destination, or billing context.
+
+Context helps Oria retrieve the correct organization-scoped metadata and
+reduces ambiguous answers. Oria validates access on the server; attaching a
+resource does not bypass workspace permissions.
+
+<Note>
+  Do not paste passwords, access tokens, API keys, private keys, session
+  cookies, payment data, or credentialed connection strings into a message.
+</Note>
+
+## Review Chat History
+
+Select the **clock** icon in the upper-right corner to open Chat History.
+
+From the history drawer you can:
+
+- search previous conversations;
+- reopen a conversation with its saved context;
+- start a new conversation;
+- open the conversation action menu;
+- delete a conversation after confirmation.
+
+Opening an existing conversation restores its saved workspace context. Start a
+new conversation when the next question concerns a different resource.
+
+## What Oria can do
+
+Oria can:
+
+- explain pipeline configuration and readiness;
+- summarize discovered schemas and destination compatibility;
+- investigate sanitized connection and run information;
+- explain and validate SQL without saving it;
+- compare sync approaches and suggest safer configuration;
+- review schedule timing and observed run duration;
+- explain plan and measured usage;
+- answer product and connector questions;
+- show permitted activity evidence to authorized roles.
+
+## Read-only safety boundary
+
+Oria can inspect, explain, validate, and recommend. It cannot:
+
+- create or edit a pipeline;
+- save or publish SQL;
+- run, retry, cancel, or delete a pipeline run;
+- change a connection or reveal stored credentials;
+- create or change a schedule;
+- modify billing, membership, or organization settings.
+
+Use the normal workspace screens to apply a recommendation. Verify important
+answers against the evidence shown in the response.
+
+## Permissions and privacy
+
+Oria follows the current organization membership and role. Most questions
+require workspace read access. Sensitive activity evidence may require an
+Admin or Owner role.
+
+Provider requests use sanitized workspace context. MantrixFlow does not send
+stored passwords, provider keys, bearer tokens, cookies, private keys, raw
+connection configuration, payment data, or raw customer rows to the model.
+
+## Troubleshooting
+
+### Oria is not visible
+
+Confirm that you are signed in, have selected an organization, and have active
+workspace access. Your deployment administrator must also enable Oria for the
+environment.
+
+### Oria is temporarily unavailable
+
+Refresh the page once. If the problem continues, ask an administrator to check
+the configured AI provider, model, server feature flag, and provider
+credentials. Provider credentials must remain server-side.
+
+### The answer uses the wrong resource
+
+Start a new conversation and attach the exact pipeline, connection, run, SQL
+model, destination, or billing context before sending the question again.
+
+### A question is restricted
+
+Some workspace evidence is limited by role. Ask an organization Admin or Owner
+to review the request when the response indicates insufficient permission.
+
+### Chat History does not load
+
+Confirm that the current organization has not changed. Refresh Oria, reopen the
+history drawer, and verify that the conversation belongs to the selected
+organization.
