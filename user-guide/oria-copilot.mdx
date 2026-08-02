@@ -16,8 +16,8 @@ without changing your workspace.
 5. Send the question and review the cited evidence before acting on important
    recommendations.
 
-Oria automatically chooses the appropriate read-only capability based on your
-question and context. You do not need to select or manage an internal agent.
+Oria automatically handles the question using your current workspace context.
+There is no catalog or assistant selection step.
 
 ## Start a conversation
 
@@ -114,14 +114,13 @@ connection configuration, payment data, or raw customer rows to the model.
 ### Oria is not visible
 
 Confirm that you are signed in, have selected an organization, and have active
-workspace access. Your deployment administrator must also enable Oria for the
-environment.
+workspace access.
 
 ### Oria is temporarily unavailable
 
 Refresh the page once. If the problem continues, ask an administrator to check
-the configured AI provider, model, server feature flag, and provider
-credentials. Provider credentials must remain server-side.
+the Go Oria runtime, model configuration, and provider credentials. Provider
+credentials must remain only in the Go deployment.
 
 ### The answer uses the wrong resource
 
