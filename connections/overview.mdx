@@ -1,23 +1,34 @@
 ---
 title: Connections Overview
-description: Create and test PostgreSQL, HubSpot, and Stripe connections supported by MantrixFlow.
+description: Create and test PostgreSQL, MySQL, Airtable, HubSpot, and Stripe connections supported by MantrixFlow.
 ---
 
-Connections are reusable credentials. PostgreSQL is available as both source
-and destination. HubSpot and Stripe are available sources for PostgreSQL
-delivery.
+Connections are reusable encrypted credentials. PostgreSQL, MySQL, and Airtable
+are available as both sources and destinations. HubSpot and Stripe are available
+as sources.
 
 ## Current live connectors
 
 | Role | Connector | Status |
 | --- | --- | --- |
 | Source | PostgreSQL | Available |
+| Source | MySQL | Available when reported by runtime capabilities |
+| Source | Airtable | Available when reported by runtime capabilities |
 | Source | HubSpot | Available |
 | Source | Stripe | Available |
 | Destination | PostgreSQL | Available |
+| Destination | MySQL | Available when reported by runtime capabilities |
+| Destination | Airtable | Available when reported by runtime capabilities |
 
 Other connector tiles may appear in the catalog, but they are not available
 until their create, test, save, pipeline, and run path is enabled in the app.
+
+See [Airtable source](/connections/sources/productivity/airtable) and
+[Airtable destination](/connections/destinations/airtable) for Personal Access
+Token scopes, base/table discovery, field mapping, and Upsert behavior. See
+[MySQL source](/connections/sources/database/mysql) and
+[MySQL destination](/connections/destinations/mysql) for database grants,
+table contracts, sync modes, and verification queries.
 
 See [HubSpot source](/connections/sources/crm/hubspot) for its ten supported
 streams, private app token setup, UTC extraction window, and PostgreSQL
@@ -29,8 +40,9 @@ requirements. See [Stripe source](/connections/sources/finance/stripe) for its
 1. Open **Connections**.
 2. Click **+ New Connection**.
 3. Set the role to **Source**.
-4. Choose **PostgreSQL**, **HubSpot**, or **Stripe**.
-5. Fill the connector-specific fields. HubSpot uses a private app access token.
+4. Choose **PostgreSQL**, **MySQL**, **Airtable**, **HubSpot**, or **Stripe**.
+5. Fill the connector-specific fields. Airtable uses a Personal Access Token;
+   HubSpot uses a private app access token.
 6. Click **Test Connection**.
 7. Save after the test succeeds.
 
@@ -39,13 +51,15 @@ requirements. See [Stripe source](/connections/sources/finance/stripe) for its
 1. Open **Connections**.
 2. Click **+ New Connection**.
 3. Set the role to **Destination**.
-4. Choose **PostgreSQL**.
+4. Choose **PostgreSQL**, **MySQL**, or **Airtable**.
 5. Fill the destination database credentials.
 6. Click **Test Connection**.
 7. Save after the test succeeds.
 
-Destination users need write access to existing tables and permission to create
-or reconcile tables when using the explicit setup action.
+Database destination users need write access to existing tables and permission
+to create or reconcile tables only when using the explicit setup action.
+Airtable destinations need an existing base/table, writable mapped fields, and
+record read/write access.
 
 ## Network access
 

@@ -1,0 +1,135 @@
+---
+title: Airtable source
+description: Connect an Airtable base, discover tables, preview records, and use Airtable in Full Table pipelines.
+---
+
+Airtable is available as a source connector. MantrixFlow discovers the bases
+and tables available to a Personal Access Token, previews records, stages the
+selected table, applies the saved SQL model, and delivers the resulting rows to
+a configured destination.
+
+## Before you begin
+
+Create an Airtable Personal Access Token that can read records and base schema
+for only the bases you intend to sync. In Airtable, give the token these scopes:
+
+- `data.records:read`
+- `schema.bases:read`
+
+Limit the token's resource access to the required workspace or bases. Copy the
+token when Airtable displays it and store it in a password manager. MantrixFlow
+encrypts the saved token and never displays it again.
+
+<Note>
+  Airtable API keys are deprecated. Use a Personal Access Token beginning with
+  `pat`, not a legacy API key.
+</Note>
+
+## Create the source connection
+
+1. Open **Connections** in the MantrixFlow workspace.
+2. Click **+ New Connection**.
+3. Choose the **Source** role.
+4. Select **Airtable**.
+5. Enter a descriptive connection name and the Personal Access Token.
+6. Click **Test Connection**.
+7. Confirm that the result reports at least one accessible base, then save.
+
+The token does not need to contain a base ID. Base and table selection happens
+inside the pipeline builder after the connection is saved.
+
+## Discover a base and table
+
+1. Create a pipeline with the Airtable connection as its source.
+2. Open the **Source** configuration.
+3. Click **Load bases** or **Discover catalog**.
+4. Select a base.
+5. Select one or more tables returned for that base.
+6. Preview the selected table and confirm the expected fields and records.
+7. Save the source configuration.
+
+MantrixFlow uses stable Airtable IDs internally. A selected table is represented
+as `airtable.tbl...`, while its DuckDB staging relation is normalized to a
+lowercase name such as `airtable__tblefetdfzjakhuqt`.
+
+<Warning>
+  Renaming an Airtable table does not change its table ID, so a saved pipeline
+  remains stable. Deleting and recreating the table creates a new ID; refresh
+  discovery and select the replacement table before running again.
+</Warning>
+
+## Source record shape
+
+Every staged row includes the Airtable fields plus two lineage columns:
+
+| Column | Meaning |
+| --- | --- |
+| `_airtable_record_id` | Stable Airtable record ID used as the source primary key |
+| `_airtable_created_time` | Airtable record creation timestamp |
+
+The record ID is used because Airtable permits an empty value in the configured
+primary field. User-created fields can be sparse: when a record has no value for
+a field, MantrixFlow preserves it as a nullable column instead of changing the
+schema between records.
+
+## Sync mode
+
+Airtable source currently supports **Full Table** only. Each run reads all
+records visible to the token from the selected table.
+
+Incremental, CDC, Replace, and Delete modes are not available for Airtable.
+Use a stable merge key at the destination so repeated Full Table runs update
+existing records instead of duplicating them.
+
+## Example SQL model
+
+Replace the staging relation with the lowercase value shown by the SQL editor:
+
+```sql
+SELECT
+  _airtable_record_id AS airtable_record_id,
+  Name AS name,
+  Email AS email,
+  _airtable_created_time AS created_at
+FROM {{ source('raw', 'airtable__tblefetdfzjakhuqt') }}
+WHERE Email IS NOT NULL
+```
+
+Column names containing spaces should be double quoted:
+
+```sql
+SELECT
+  _airtable_record_id,
+  "Customer Name" AS customer_name,
+  "Account Status" AS account_status
+FROM {{ source('raw', 'airtable__tblefetdfzjakhuqt') }}
+```
+
+Validate and preview the model before configuring the destination mapping.
+
+## Verify a run
+
+Open **Runs** after starting the pipeline and confirm:
+
+- **Extract + Stage** reports the expected source row count;
+- **Transform** reports the published SQL model;
+- **Deliver** reports the configured destination table;
+- failed rows are `0`.
+
+For an Airtable destination, also open the target base and confirm the merge-key
+values. For a database destination, query the target table directly.
+
+## Troubleshooting
+
+| Symptom | Resolution |
+| --- | --- |
+| Authentication failed | Create a new Personal Access Token and update the connection. |
+| No bases appear | Add the required base to the token's resource access. |
+| No tables appear | Add `schema.bases:read`, then test and refresh the connection. |
+| Preview is forbidden | Add `data.records:read` and confirm the token can access that base. |
+| A saved table disappears | The table was deleted, recreated, or access was removed. Refresh discovery and select it again. |
+| SQL cannot find the staging table | Use the lowercase staging name shown in the builder, not the visible Airtable table name. |
+| Repeated runs duplicate rows | Configure a stable Upsert key at the destination. |
+
+Next, follow the [Airtable and MySQL pipeline guide](/example/pipelines/airtable-and-mysql)
+or configure [Airtable as a destination](/connections/destinations/airtable).

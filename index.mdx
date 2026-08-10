@@ -1,17 +1,20 @@
 ---
 title: Introduction
-description: Product-aligned MantrixFlow documentation for current PostgreSQL, HubSpot, and Stripe ELT workflows.
+description: Product-aligned MantrixFlow documentation for PostgreSQL, MySQL, Airtable, HubSpot, and Stripe ELT workflows.
 ---
 
-MantrixFlow documents current self-serve ELT workflows in the app: PostgreSQL,
-HubSpot, or Stripe source data flows through isolated staging and explicit
-SQL models into PostgreSQL.
+MantrixFlow documents current self-serve ELT workflows in the app. PostgreSQL,
+MySQL, Airtable, HubSpot, or Stripe source data flows through isolated staging
+and explicit SQL models into supported PostgreSQL, MySQL, or Airtable
+destinations.
 
 The documentation intentionally avoids partially implemented connector paths and future roadmap features. If a connector appears in product code or an internal test guide but is not available end to end in the live workspace, it is not presented here as available.
 
 ## What is live
 
 - PostgreSQL source connections
+- MySQL source and destination connections when enabled by runtime capabilities
+- Airtable source and destination connections when enabled by runtime capabilities
 - HubSpot production source connections with ten supported streams
 - Stripe source connections with 34 supported streams
 - PostgreSQL destination connections
@@ -29,7 +32,7 @@ The documentation intentionally avoids partially implemented connector paths and
 - Other non-live database and SaaS connectors
 - Transform or Filter canvas nodes
 - Log-based change capture
-- Destination table creation by the runner
+- Automatic destination table creation by the delivery runner
 - Non-Upsert write modes
 - Public AI Copilot, MCP, or embedded-agent workflows
 
@@ -43,3 +46,4 @@ The documentation intentionally avoids partially implemented connector paths and
 6. [PostgreSQL Incremental Sample](/example/pipelines/postgres-incremental)
 7. [Stripe-to-PostgreSQL Example](/example/pipelines/stripe-to-postgres)
 8. [HubSpot-to-PostgreSQL Example](/example/pipelines/hubspot-to-postgres)
+9. [Airtable and MySQL Pipelines](/example/pipelines/airtable-and-mysql)

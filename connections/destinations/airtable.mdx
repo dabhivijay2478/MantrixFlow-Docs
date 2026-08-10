@@ -1,0 +1,137 @@
+---
+title: Airtable destination
+description: Deliver transformed rows into an existing Airtable table with explicit field mapping and Upsert keys.
+---
+
+Airtable is available as a destination connector for reverse ELT. MantrixFlow
+writes transformed rows into an existing Airtable table in batches and uses the
+selected merge fields to create or update records.
+
+## Supported behavior
+
+| Capability | Status |
+| --- | --- |
+| Existing base and table | Required |
+| Field mapping | Required |
+| Upsert merge fields | Required |
+| Write mode | Upsert only |
+| Automatic Airtable table creation during delivery | Not supported |
+| Replace and Delete | Not supported |
+
+The delivery runner never creates a final destination table. Create the table
+and its fields in Airtable first, then refresh its schema in MantrixFlow.
+
+## Create the Airtable table
+
+In the destination base, create a dedicated table for the pipeline. Add every
+field produced by the SQL model, using Airtable field types that accept those
+values.
+
+Example table:
+
+| Field | Airtable type | Purpose |
+| --- | --- | --- |
+| `External ID` | Single line text | Required merge field |
+| `Name` | Single line text | Display value |
+| `Email` | Email | Optional destination field |
+| `Amount` | Currency or Number | Numeric value |
+| `Source Updated At` | Date with time | Source timestamp |
+| `Notes` | Long text | Optional descriptive value |
+
+Choose a merge field that is populated and unique for every output row. An
+external database primary key or Airtable source record ID is usually the safest
+choice.
+
+<Warning>
+  Formula, rollup, lookup, count, created-time, last-modified-time, and other
+  calculated fields are read-only. They are excluded from the mapping picker.
+</Warning>
+
+## Create the destination connection
+
+Create a Personal Access Token with access to the destination base and these
+scopes:
+
+- `schema.bases:read`
+- `data.records:read`
+- `data.records:write`
+
+Then:
+
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Choose the **Destination** role.
+4. Select **Airtable**.
+5. Enter the connection name and Personal Access Token.
+6. Click **Test Connection** and save after it succeeds.
+
+Read access is required because the connector resolves existing records during
+Upsert. Write access is required to create and update records.
+
+## Configure the destination
+
+1. Open a pipeline and select the **Destination** node.
+2. Choose the Airtable destination connection.
+3. Click **Load bases**.
+4. Select the destination base.
+5. Select the existing destination table.
+6. Publish or select the SQL model that produces the final output columns.
+7. Map every required SQL output column to a writable Airtable field.
+8. Mark at least one mapped Airtable field as a **Merge key**.
+9. Save the destination configuration.
+
+The saved route uses stable base, table, and field IDs. Refreshing table schema
+preserves the selected table assignment when it still exists.
+
+## Mapping rules
+
+- A source output column maps to at most one Airtable destination field.
+- A merge field must also be present in the field mapping.
+- Every row must contain a non-empty value for every selected merge field.
+- Calculated and read-only fields cannot be mapped.
+- Decimal values are sent as numbers; dates and timestamps are sent in ISO 8601
+  format; tuples are sent as arrays.
+- Airtable automatic type conversion is disabled. Match the SQL output to the
+  Airtable field type before running.
+
+## Upsert behavior
+
+MantrixFlow submits records in Airtable-sized batches and performs Upsert with
+the configured merge fields:
+
+- a matching record is updated;
+- no match creates a record;
+- multiple merge fields form a composite match;
+- an empty merge-field value fails the run rather than creating an ambiguous
+  duplicate.
+
+Run the same input twice and verify that the destination row count remains
+stable. Updated values should change on the existing Airtable records.
+
+## Verify delivery
+
+After the run succeeds:
+
+1. Open **Runs** and confirm `rows written > 0` and `failed rows = 0`.
+2. Open the Airtable destination table.
+3. Filter or search by the merge-key prefix used for the test.
+4. Confirm that mapped fields contain the transformed values.
+5. Run the pipeline again and confirm records are updated rather than duplicated.
+
+## Troubleshooting
+
+| Error | Resolution |
+| --- | --- |
+| No bases or tables are available | Add base resource access and `schema.bases:read` to the token. |
+| Permission denied during delivery | Add `data.records:read` and `data.records:write` for the selected base. |
+| Selected table is no longer accessible | Restore access or refresh and choose an existing table. |
+| Destination field no longer exists | Refresh table schema and rebuild the affected mapping. |
+| Field is read-only | Map the output to a writable field; do not target formulas or rollups. |
+| Upsert field must be included in mapping | Map the merge field and select it again as a merge key. |
+| Upsert field must have a value | Filter null/empty keys in SQL or choose a consistently populated key. |
+| Airtable rejected field values | Align SQL output types with the Airtable field definitions. |
+| Rate limit reached | The connector retries after Airtable's required cooldown; avoid launching unnecessary overlapping runs. |
+
+See the [Airtable and MySQL pipeline guide](/example/pipelines/airtable-and-mysql)
+for complete Airtable-to-MySQL, MySQL-to-Airtable, and Airtable-to-Airtable
+walkthroughs.

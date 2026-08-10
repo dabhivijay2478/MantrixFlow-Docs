@@ -1,10 +1,149 @@
 ---
 title: MySQL destination
-description: Status notice for MySQL destination support.
+description: Configure a MySQL destination, prepare the target table, and verify Upsert delivery.
 ---
 
-MySQL destination setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
+MySQL is available as a destination connector. MantrixFlow validates the target
+contract, then delivers only the published SQL model's columns into the
+configured table.
 
-The public docs cover available PostgreSQL, HubSpot, and Stripe workflows. This page is kept as a safe landing page for older or direct links and intentionally does not provide MySQL destination setup steps.
+## Destination contract
 
-Use [PostgreSQL destination](/connections/destinations/postgresql) for the supported live destination workflow.
+The final MySQL table must exist before delivery begins. Create it with the
+explicit setup action in the pipeline builder when available, or run reviewed
+DDL in MySQL yourself. The delivery runner does not create final tables.
+
+The table should:
+
+- use InnoDB;
+- use `utf8mb4` for general text;
+- contain every column selected by the published SQL model;
+- use compatible types; and
+- define a primary or unique key for deterministic Upsert behavior.
+
+## Required destination access
+
+Create a dedicated writer. If table creation is managed separately, the runtime
+user needs only data access to existing tables.
+
+```sql
+CREATE DATABASE IF NOT EXISTS analytics
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+CREATE USER 'mantrixflow_writer'@'%'
+  IDENTIFIED BY 'replace-with-a-secret';
+
+GRANT SELECT, INSERT, UPDATE
+  ON analytics.*
+  TO 'mantrixflow_writer'@'%';
+
+FLUSH PRIVILEGES;
+```
+
+Grant `CREATE` and `ALTER` only to a separate setup user or when your operating
+policy explicitly allows the app's setup action to reconcile tables.
+
+## Connection fields
+
+| Field | Notes |
+| --- | --- |
+| Connection Name | Descriptive workspace name, such as `Analytics MySQL` |
+| Host | MySQL hostname or provider endpoint |
+| Port | Usually `3306` |
+| Database | Database containing destination tables |
+| Username | Dedicated destination user |
+| Password | Destination user password |
+| SSL Mode | Use the encrypted mode required by the provider |
+
+## Create the connection
+
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Set the role to **Destination**.
+4. Choose **MySQL**.
+5. Complete the connection fields.
+6. Click **Test Connection**.
+7. Save after the test succeeds.
+
+## Prepare a destination table
+
+This example accepts customer rows from Airtable or another source:
+
+```sql
+CREATE TABLE analytics.airtable_customers (
+  external_id varchar(64) NOT NULL,
+  name varchar(255),
+  email varchar(320),
+  source_created_at datetime(6),
+  synced_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (external_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+The SQL model must output `external_id`, `name`, `email`, and
+`source_created_at`. Columns with database defaults, such as `synced_at`, can be
+omitted when the table permits it.
+
+## Configure delivery
+
+1. Open the pipeline's **Destination** node.
+2. Choose the MySQL destination connection.
+3. Select or enter the existing target as `database.table`, for example
+   `analytics.airtable_customers`.
+4. Publish the SQL model that defines the final output columns.
+5. Choose the stable primary or unique key as the Upsert key.
+6. Run destination validation and save.
+
+## Upsert behavior
+
+With a primary or unique key, a first run inserts rows and later runs update the
+matching rows. This is the recommended production configuration.
+
+Without a key, delivery cannot identify an existing row deterministically.
+Add a stable primary or unique key before enabling repeated runs.
+
+## Verify delivery
+
+```sql
+SELECT COUNT(*) AS delivered_rows
+FROM analytics.airtable_customers;
+
+SELECT external_id, COUNT(*) AS occurrences
+FROM analytics.airtable_customers
+GROUP BY external_id
+HAVING COUNT(*) > 1;
+
+SELECT external_id, name, email, source_created_at
+FROM analytics.airtable_customers
+ORDER BY external_id
+LIMIT 25;
+```
+
+The duplicate query should return no rows. Compare the count with the run's
+**rows written** value, accounting for any SQL filters.
+
+Confirm that no internal loader tables were written into the destination:
+
+```sql
+SELECT TABLE_NAME
+FROM information_schema.TABLES
+WHERE TABLE_SCHEMA = 'analytics'
+  AND TABLE_NAME LIKE '\\_dlt\\_%';
+```
+
+## Troubleshooting
+
+| Error | Resolution |
+| --- | --- |
+| Destination table does not exist | Create the exact `database.table` before running, then validate again. |
+| Column is missing | Add the column to the table or remove it from the published SQL output. |
+| Access denied | Grant `SELECT`, `INSERT`, and `UPDATE` on the destination database. |
+| Data too long | Increase `VARCHAR` length, use `TEXT`, or trim intentionally in SQL. |
+| Incorrect decimal value | Align precision and scale between SQL output and MySQL. |
+| Incorrect datetime value | Emit a valid timestamp and handle null or zero dates before delivery. |
+| Duplicate-key failure | Confirm the selected Upsert key matches the table's primary or unique key. |
+| TLS connection failure | Use the provider-required SSL mode and network endpoint. |
+
+Follow the [Airtable and MySQL pipeline guide](/example/pipelines/airtable-and-mysql)
+for complete Airtable-to-MySQL and MySQL-to-Airtable examples.

@@ -1,10 +1,161 @@
 ---
 title: MySQL source
-description: Status notice for MySQL source support.
+description: Configure MySQL as a source, discover tables, preview rows, and run Full Table or Incremental pipelines.
 ---
 
-MySQL source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
+MySQL is available as a source connector. MantrixFlow discovers tables visible
+to the configured database user, previews source rows, stages selected tables
+in DuckDB, runs the saved SQL models, and delivers the result to a configured
+destination.
 
-The public docs cover available PostgreSQL, HubSpot, and Stripe workflows. This page is kept as a safe landing page for older or direct links and intentionally does not provide MySQL setup steps.
+## Required source access
 
-Use [PostgreSQL source](/connections/sources/database/postgresql) for the supported live source workflow.
+Use a dedicated read-only MySQL user. Grant access only to the database and
+tables the workspace needs.
+
+```sql
+CREATE USER 'mantrixflow_reader'@'%'
+  IDENTIFIED BY 'replace-with-a-secret';
+
+GRANT SELECT, SHOW VIEW
+  ON application_db.*
+  TO 'mantrixflow_reader'@'%';
+
+FLUSH PRIVILEGES;
+```
+
+Restrict the account's host pattern or network allowlist in production. Store
+the real password in a secret manager and never commit it.
+
+## Connection fields
+
+| Field | Notes |
+| --- | --- |
+| Connection Name | Descriptive workspace name, such as `Production MySQL replica` |
+| Host | MySQL hostname or provider endpoint |
+| Port | Usually `3306` |
+| Database | Database to discover and read |
+| Username | Dedicated source user |
+| Password | Source user password |
+| SSL Mode | Use the provider-required encrypted mode for hosted databases |
+
+Do not enter `localhost` when MantrixFlow is running in a different container or
+host. Use a reachable DNS name, private address, or host gateway instead.
+
+## Create the connection
+
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Set the role to **Source**.
+4. Choose **MySQL**.
+5. Enter the host, port, database, username, password, and SSL mode.
+6. Click **Test Connection**.
+7. Save only after the test succeeds.
+
+If the database uses an IP allowlist or private network, complete
+[Private database access](/connections/private-database-access) first.
+
+## Discover and preview tables
+
+1. Create a pipeline using the MySQL source connection.
+2. Open the **Source** node.
+3. Click **Discover schema** or **Refresh tables**.
+4. Select each required `database.table` stream.
+5. Preview representative rows and inspect detected types.
+6. Save the source configuration.
+
+For example, `application_db.customers` is staged as
+`application_db__customers`. The SQL editor shows the exact normalized staging
+name to use.
+
+## Full Table mode
+
+Use **Full Table** for the first validation run, small reference tables, or
+intentional snapshots. Every run reads all rows visible to the source user.
+
+Use a stable destination Upsert key so repeated Full Table runs do not create
+duplicates.
+
+## Incremental mode
+
+Use **Incremental** for growing tables with a reliable cursor such as
+`updated_at`, `created_at`, or a monotonically increasing identifier.
+
+```sql
+CREATE INDEX customers_updated_at_idx
+  ON application_db.customers (updated_at);
+```
+
+The replication key should be non-null, indexed, and updated whenever a source
+record changes. MantrixFlow advances the saved checkpoint only after a
+successful run.
+
+## Example source table and model
+
+```sql
+CREATE TABLE application_db.customers (
+  id varchar(64) PRIMARY KEY,
+  name varchar(255) NOT NULL,
+  email varchar(320),
+  account_status varchar(32) NOT NULL,
+  updated_at datetime(6) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+```sql
+SELECT
+  id,
+  name,
+  LOWER(email) AS email,
+  account_status,
+  updated_at
+FROM {{ source('raw', 'application_db__customers') }}
+WHERE account_status <> 'deleted'
+```
+
+Validate and preview the model before choosing the final destination mapping.
+
+## Type guidance
+
+| MySQL source type | Recommended SQL handling |
+| --- | --- |
+| `TINYINT(1)` | Compare with `= 1` when a real boolean is required |
+| `DECIMAL(p,s)` | Preserve as decimal; avoid converting financial values to float |
+| `DATETIME` | Establish whether the stored value is UTC before delivery |
+| `TIMESTAMP` | Preview the timezone-normalized output |
+| `JSON` | Select individual keys or cast to text for destinations without JSON support |
+| `BINARY` / `VARBINARY` | Encode or transform explicitly before SaaS delivery |
+| `ENUM` / `SET` | Deliver as text unless the destination has an equivalent contract |
+
+See [Data type compatibility](/pipelines/data-type-compatibility) for the
+cross-destination matrix.
+
+## Verification queries
+
+```sql
+SELECT COUNT(*) FROM application_db.customers;
+
+SELECT id, name, email, updated_at
+FROM application_db.customers
+ORDER BY updated_at DESC
+LIMIT 10;
+```
+
+Compare the source count with **Extract + Stage** in run history. A filtered SQL
+model can intentionally produce fewer destination rows.
+
+## Troubleshooting
+
+| Symptom | Resolution |
+| --- | --- |
+| Connection refused | Verify host, port, container networking, firewall, and provider allowlist. |
+| Access denied | Verify username, password, allowed host, and database grants. |
+| Unknown database | Enter the exact database name and confirm the user can access it. |
+| No tables discovered | Grant `SELECT` and `SHOW VIEW`, then refresh discovery. |
+| TLS handshake fails | Match the provider's SSL requirement and certificate settings. |
+| Incremental rows are missing | Confirm the cursor is non-null and changes on every update. |
+| Boolean values appear as `0`/`1` | Convert `TINYINT(1)` explicitly in the SQL model. |
+| SQL cannot find the staging table | Use `database__table` exactly as shown in the builder. |
+
+Continue with [MySQL destination](/connections/destinations/mysql) or the
+[Airtable and MySQL pipeline guide](/example/pipelines/airtable-and-mysql).

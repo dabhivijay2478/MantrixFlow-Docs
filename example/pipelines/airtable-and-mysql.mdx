@@ -1,0 +1,278 @@
+---
+title: Airtable and MySQL pipelines
+description: Build, run, and verify Airtable-to-MySQL, MySQL-to-Airtable, and Airtable-to-Airtable pipelines.
+---
+
+This guide covers both directions between Airtable and MySQL. It uses an
+explicit destination contract, a published SQL model, and a stable Upsert key
+for repeatable runs.
+
+## Validated connector routes
+
+The following routes were exercised through the MantrixFlow browser workflow
+with real source previews and destination verification:
+
+| Source | Destination | Result |
+| --- | --- | --- |
+| Airtable | PostgreSQL | Passed |
+| Airtable | MySQL | Passed |
+| Airtable | Airtable | Passed |
+| PostgreSQL | Airtable | Passed |
+| MySQL | Airtable | Passed |
+| Stripe | Airtable | Passed |
+| HubSpot | Airtable | Passed |
+
+This is a functional verification matrix, not a throughput benchmark. Validate
+your own field types, permissions, row volume, and rate-limit behavior before a
+production rollout.
+
+## Shared preparation
+
+Create and test these reusable connections:
+
+1. An **Airtable source** connection with schema and record read access.
+2. An **Airtable destination** connection with schema read plus record read and
+   write access. One token can be reused for both roles when your security policy
+   permits all required scopes and bases.
+3. A **MySQL source** connection with read access to the source database.
+4. A **MySQL destination** connection with write access to the destination
+   database and its existing tables.
+
+See [Airtable source](/connections/sources/productivity/airtable),
+[Airtable destination](/connections/destinations/airtable),
+[MySQL source](/connections/sources/database/mysql), and
+[MySQL destination](/connections/destinations/mysql) for least-privilege setup.
+
+## Prepare reusable test data
+
+### Airtable source table
+
+Create an Airtable table named `Customers` with these fields:
+
+| Field | Type | Example |
+| --- | --- | --- |
+| `External ID` | Single line text | `airtable-001` |
+| `Name` | Single line text | `Airtable Alpha` |
+| `Email` | Email | `alpha@example.test` |
+| `Status` | Single select or Single line text | `active` |
+
+Enter at least three records. Keep `External ID` unique and populated.
+
+### Airtable destination table
+
+Create a separate table named `Pipeline Sink` with these writable fields:
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `External ID` | Single line text | Upsert merge field |
+| `Name` | Single line text | Mapped display value |
+| `Email` | Email | Mapped email value |
+| `Source` | Single line text | Source lineage |
+| `Notes` | Long text | Verification detail |
+
+Do not use a formula or lookup as `External ID`; merge fields must be writable.
+
+### MySQL source table
+
+```sql
+CREATE DATABASE IF NOT EXISTS source_app
+  CHARACTER SET utf8mb4;
+
+CREATE TABLE source_app.customers (
+  id varchar(64) PRIMARY KEY,
+  name varchar(255) NOT NULL,
+  email varchar(320),
+  updated_at datetime(6) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO source_app.customers (id, name, email, updated_at)
+VALUES
+  ('mysql-001', 'MySQL Alpha', 'mysql-alpha@example.test', UTC_TIMESTAMP(6)),
+  ('mysql-002', 'MySQL Beta', 'mysql-beta@example.test', UTC_TIMESTAMP(6)),
+  ('mysql-003', 'MySQL Gamma', 'mysql-gamma@example.test', UTC_TIMESTAMP(6))
+ON DUPLICATE KEY UPDATE
+  name = VALUES(name),
+  email = VALUES(email),
+  updated_at = VALUES(updated_at);
+```
+
+### MySQL destination table
+
+```sql
+CREATE DATABASE IF NOT EXISTS analytics
+  CHARACTER SET utf8mb4;
+
+CREATE TABLE analytics.airtable_customers (
+  external_id varchar(64) PRIMARY KEY,
+  name varchar(255),
+  email varchar(320),
+  airtable_created_at datetime(6)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+```
+
+## Airtable to MySQL
+
+### 1. Create the pipeline
+
+1. Open **Data Pipelines** and click **New Pipeline**.
+2. Name it `Airtable Customers to MySQL`.
+3. Choose the Airtable source connection and create the pipeline.
+
+### 2. Configure Airtable source
+
+1. Open the **Source** node.
+2. Click **Load bases** and select the base containing `Customers`.
+3. Select the `Customers` table.
+4. Preview rows and confirm `_airtable_record_id`, `External ID`, `Name`, and
+   `Email` appear.
+5. Keep **Full Table** mode and save.
+
+### 3. Configure MySQL destination
+
+1. Open the **Destination** node.
+2. Choose the MySQL destination connection.
+3. Set the final table to `analytics.airtable_customers`.
+4. Publish this model, replacing the staging relation with the exact lowercase
+   value shown in the editor:
+
+```sql
+SELECT
+  "External ID" AS external_id,
+  Name AS name,
+  Email AS email,
+  _airtable_created_time AS airtable_created_at
+FROM {{ source('raw', 'airtable__tblefetdfzjakhuqt') }}
+WHERE "External ID" IS NOT NULL
+  AND TRIM("External ID") <> ''
+```
+
+5. Validate SQL and preview output.
+6. Select `external_id` as the Upsert key.
+7. Save the destination.
+
+### 4. Run and verify
+
+Start the pipeline and wait for **Succeeded**. Then run:
+
+```sql
+SELECT external_id, name, email, airtable_created_at
+FROM analytics.airtable_customers
+ORDER BY external_id;
+```
+
+Edit one Airtable name and rerun. The row should update without increasing the
+count.
+
+## MySQL to Airtable
+
+### 1. Create the pipeline
+
+1. Create a pipeline named `MySQL Customers to Airtable`.
+2. Choose the MySQL source connection.
+
+### 2. Configure MySQL source
+
+1. Discover the source database.
+2. Select `source_app.customers`.
+3. Preview the three test rows.
+4. Use **Full Table** for the first run.
+
+### 3. Publish the model
+
+```sql
+SELECT
+  id AS external_id,
+  name,
+  email,
+  'mysql' AS source,
+  CONCAT('Synced from MySQL at ', CAST(updated_at AS VARCHAR)) AS notes
+FROM {{ source('raw', 'source_app__customers') }}
+WHERE id IS NOT NULL
+```
+
+Validate and preview the output before configuring the Airtable fields.
+
+### 4. Map Airtable destination fields
+
+1. Choose the Airtable destination connection.
+2. Click **Load bases** and select the destination base.
+3. Select `Pipeline Sink`.
+4. Map fields:
+
+| SQL output | Airtable field | Merge key |
+| --- | --- | --- |
+| `external_id` | `External ID` | Yes |
+| `name` | `Name` | No |
+| `email` | `Email` | No |
+| `source` | `Source` | No |
+| `notes` | `Notes` | No |
+
+5. Save and run.
+
+### 5. Verify Upsert
+
+Open `Pipeline Sink` in Airtable and filter `External ID` by `mysql-`. Confirm
+all three records and their mapped values. Update `mysql-002` in MySQL, rerun,
+and confirm Airtable updates the same record rather than creating a duplicate.
+
+## Airtable to Airtable
+
+Use separate source and destination tables, even when they are in the same
+base. Configure `Customers` as the source and `Pipeline Sink` as the destination.
+
+```sql
+SELECT
+  CONCAT('airtable-', _airtable_record_id) AS external_id,
+  Name AS name,
+  Email AS email,
+  'airtable' AS source,
+  CONCAT('Original record: ', _airtable_record_id) AS notes
+FROM {{ source('raw', 'airtable__tblefetdfzjakhuqt') }}
+```
+
+Map `external_id` to `External ID` and select it as the merge key. The prefix
+prevents collisions with IDs from MySQL, Stripe, HubSpot, or other pipelines
+sharing the same sink table.
+
+<Warning>
+  Do not target the same Airtable table used as the source. A self-feeding Full
+  Table pipeline can continually expand its own input or overwrite records in
+  ways that are difficult to audit.
+</Warning>
+
+## Run checklist
+
+Before each run, confirm:
+
+- both connections still pass their connection tests;
+- source discovery shows the expected table;
+- preview returns representative rows;
+- the published SQL model uses the staging name shown by the builder;
+- the database table or Airtable table already exists;
+- every destination column has a compatible type or field mapping;
+- the Upsert key is unique and populated for every output row; and
+- run history reports `failed rows = 0`.
+
+## Common errors
+
+| Error | Cause and fix |
+| --- | --- |
+| `Pipeline not found` while opening discovery | Save the source-only pipeline shell, then reload. Current builds allow `/full` before a destination exists. |
+| `Unable to discover catalog` | Retest the source connection and confirm schema/base access. |
+| MySQL destination table not found | Create the exact `database.table` and validate again. |
+| Airtable destination table not accessible | Restore token resource access or refresh and select the table again. |
+| Airtable field is read-only | Map to a writable field instead of a formula, lookup, or rollup. |
+| Airtable upsert field has no value | Filter empty keys in SQL or choose another merge field. |
+| SQL relation does not exist | Copy the lowercase staging relation from the builder. |
+| Database is locked during concurrent runs | Retry after active work completes and confirm the ELT service includes serialized dbt execution. |
+
+## Production rollout
+
+After a successful Full Table validation:
+
+1. Record the source count and destination count.
+2. Rerun unchanged input and confirm no duplicates.
+3. Update a source record and confirm an in-place destination update.
+4. Review the token and database grants for least privilege.
+5. Set an operational schedule only after the manual run is stable.
+6. Monitor run history for row-count changes, retries, and mapping failures.
