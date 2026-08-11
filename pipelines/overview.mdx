@@ -1,48 +1,65 @@
 ---
 title: Pipelines Overview
-description: "Understand the live MantrixFlow pipeline lifecycle: shell creation, source selection, destination-scoped Normalisation and SQL, manual runs, and Incremental schedules."
+description: "Understand the current MantrixFlow pipeline workspace, destination-owned transformations, readiness validation, runs, and schedules."
 ---
 
-A MantrixFlow pipeline defines how data moves from one PostgreSQL source connection to one PostgreSQL destination connection.
+A MantrixFlow pipeline combines one shared source configuration with one or more
+independent destinations. Each destination owns its SQL transformations,
+published revisions, output assignments, and checkpoints.
+
+## Workspace tabs
+
+The current pipeline detail page replaces the former canvas builder.
+
+| Tab | Main actions |
+| --- | --- |
+| **Overview** | Review relationships, activity, readiness, and validate the complete pipeline |
+| **Source** | Test connection, discover catalog, select streams, set sync modes/cursors, inspect fields, preview, and save |
+| **Transformations** | Select a destination; create, validate, preview, publish, and review SQL revisions |
+| **Destinations** | Add/edit delivery connections and configure published output targets |
+| **Runs** | Inspect executions, destinations, revisions, rows, durations, warnings, and errors |
+| **GitHub** | Connect the pipeline to its repository workflow when enabled |
+| **Settings** | Edit details, pause/resume, validate, schedule, or delete |
+
+The legacy `/workspace/data-pipelines/[id]/builder` route only redirects old
+links into the appropriate workspace tab.
 
 ## Lifecycle
 
-1. Create a pipeline shell from **Data Pipelines**.
-2. Open the builder canvas.
-3. Configure the **Source** node: test connection, discover tables, include `schema.table` streams, and preview rows.
-4. Configure the **Destination** node: choose destination connection, set sync mode, add optional rename/cast rules, write SQL models, validate, preview, and save.
-5. Run the destination manually.
-6. Review run status and run history.
-7. Switch to Incremental sync and add a schedule only after manual validation.
+1. Create a pipeline from **Data Pipelines**.
+2. Configure and save streams in **Source**.
+3. Add a delivery target in **Destinations**.
+4. Select that destination in **Transformations** and create its SQL draft.
+5. Save, validate, preview, and publish the transformation revision.
+6. Return to the destination editor and assign the published output table and
+   Upsert keys.
+7. Validate readiness in **Overview**.
+8. Click **Run all** in the header.
+9. Inspect the execution in **Runs**.
+10. Configure automation from **Settings** after manual validation.
 
-## Builder nodes
-
-The current public builder workflow uses two node types:
-
-- **Source**: connection test, schema discovery, stream inclusion, row preview
-- **Destination**: final table targets, Normalisation, SQL Layer, preview, schedule, manual run
-
-## Delivery model
-
-Each selected source stream is identified as `schema.table`, for example `public.orders`.
+## Execution model
 
 During a run:
 
-1. MantrixFlow stages source rows in temporary storage.
-2. Normalisation applies destination-owned rename/cast rules.
-3. SQL models read from `raw.schema__table`.
-4. Delivery writes model output into pre-created destination tables.
-5. Checkpoint state is extracted and temporary staging files are deleted.
+1. MantrixFlow extracts selected source streams into isolated temporary staging.
+2. Published destination-owned SQL revisions read relations such as
+   `raw.public__orders`.
+3. Each destination receives only its assigned model output.
+4. Upsert delivery writes to the configured existing table.
+5. Successful checkpoints are recorded and temporary staging is cleaned up.
 
 ## Destination contract
 
-Final delivery tables must already exist. The runner validates table existence and column compatibility before writing.
+Final database tables use `schema.table` or `database.table`. Airtable uses a
+selected existing base/table plus explicit field mappings.
 
-Use final destination table names as `schema.table`, for example `analytics.orders_live`.
+The delivery runner does not create final tables. Use the destination editor's
+explicit **Create or verify destination table** action when appropriate, or
+create the reviewed table yourself.
 
 ## Write behavior
 
-The live write mode is **Upsert**.
-
-Tables with primary keys use merge-style delivery. Tables without primary keys receive appended rows and a no-primary-key warning in run metadata.
-ta.
+The current write mode is **Upsert**. Configure stable keys for every published
+output assignment. Database keys should match a primary or unique key; Airtable
+merge fields must be writable, mapped, and non-empty for every output row.

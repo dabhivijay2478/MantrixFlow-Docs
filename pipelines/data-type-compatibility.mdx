@@ -19,9 +19,12 @@ For the live PostgreSQL-to-PostgreSQL workflow, keep destination columns explici
 
 ## Casts
 
-Use Normalisation casts for simple structural coercion before SQL models run.
+Use explicit casts in the destination-owned SQL transformation. The current
+workspace does not have a separate Normalisation step.
 
-Use SQL for more specific conversions, null handling, JSON extraction, or column derivation.
+Use SQL for structural conversions, null handling, JSON extraction, column
+renaming, or derived values. Save, validate, preview, and publish the revised
+transformation before the next run.
 
 ## Destination validation
 

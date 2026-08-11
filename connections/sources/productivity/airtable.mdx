@@ -36,7 +36,7 @@ encrypts the saved token and never displays it again.
 7. Confirm that the result reports at least one accessible base, then save.
 
 The token does not need to contain a base ID. Base and table selection happens
-inside the pipeline builder after the connection is saved.
+in the pipeline **Source** tab after the connection is saved.
 
 ## Discover a base and table
 
@@ -128,7 +128,7 @@ values. For a database destination, query the target table directly.
 | No tables appear | Add `schema.bases:read`, then test and refresh the connection. |
 | Preview is forbidden | Add `data.records:read` and confirm the token can access that base. |
 | A saved table disappears | The table was deleted, recreated, or access was removed. Refresh discovery and select it again. |
-| SQL cannot find the staging table | Use the lowercase staging name shown in the builder, not the visible Airtable table name. |
+| SQL cannot find the staging table | Use the lowercase staging name shown in the transformation editor, not the visible Airtable table name. |
 | Repeated runs duplicate rows | Configure a stable Upsert key at the destination. |
 
 Next, follow the [Airtable and MySQL pipeline guide](/example/pipelines/airtable-and-mysql)

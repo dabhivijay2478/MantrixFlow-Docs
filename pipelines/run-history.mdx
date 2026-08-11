@@ -1,9 +1,10 @@
 ---
-title: Run history
-description: Review pipeline run status, row counts, warnings, and errors.
+title: Runs
+description: Use the Runs tab to review pipeline status, row counts, published revisions, warnings, and errors.
 ---
 
-Run history is the operational record for a pipeline.
+The **Runs** tab is the operational record for a pipeline. Select a row to open
+its detailed execution view.
 
 Use it to confirm:
 
@@ -11,6 +12,7 @@ Use it to confirm:
 - row counts
 - duration
 - delivery targets
+- published transformation revisions
 - no-primary-key warnings
 - error messages
 
@@ -22,7 +24,7 @@ Runs can wait when worker capacity or disk budget checks delay execution.
 
 ## What to inspect after a run
 
-1. Confirm the run succeeded.
+1. Open **Runs** and confirm the run succeeded.
 2. Confirm rows were written to the intended `schema.table`.
 3. Check for no-primary-key warnings.
 4. Compare the destination table shape against the SQL model output.

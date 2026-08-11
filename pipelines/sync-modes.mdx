@@ -1,26 +1,38 @@
 ---
 title: Sync modes
-description: Full Table and Incremental sync behavior in the current MantrixFlow app.
+description: Configure Full table or Incremental extraction per source stream in the Source tab.
 ---
 
-MantrixFlow supports two sync modes in the live pipeline builder.
+Sync mode is configured per selected stream in **Source**. It is not a
+destination-wide setting.
 
-## Full Table
+## Full table
 
-Use `FULL_TABLE` for the first validation run or for manual refreshes.
-
-Full Table runs are manual in the current app. The Scheduling tab is disabled while a destination is in Full Table mode.
+Use **Full table** for a first validation run, small reference data, or a
+deliberate complete refresh. Each execution reads all rows visible to the source
+connection.
 
 ## Incremental
 
-Use `INCREMENTAL` when the source table has a stable cursor column, such as `updated_at`, `created_at`, or a monotonic id.
+Use **Incremental** when the connector supports it and the stream has a stable
+cursor such as `updated_at`, `created_at`, or a monotonic identifier.
 
-Incremental runs store checkpoint state after each successful run and use that state on the next run.
+Enter the cursor in the stream row before clicking **Save stream settings**.
+Checkpoint state advances only after a successful run.
+
+## Connector differences
+
+- Airtable source currently exposes Full table only.
+- Database and supported SaaS streams can expose Incremental when a reliable
+  cursor is available.
+- The source catalog remains authoritative for each stream's supported modes.
 
 ## Scheduling
 
-Scheduling is available only for Incremental destinations. Switch the destination to Incremental, enter the replication key, save, run manually once, and then add a schedule.
+Scheduling is a separate pipeline-level control in **Settings**. Validate a
+manual **Run all** execution before enabling an interval or UTC cron schedule.
 
 ## Write behavior
 
-Sync mode and write behavior are separate. The live write mode is **Upsert**.
+Source sync mode and destination write behavior are separate. The current
+delivery mode is **Upsert**.

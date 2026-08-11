@@ -1,25 +1,28 @@
 ---
 title: User guide
-description: Use the current MantrixFlow workspace to build, run, and monitor PostgreSQL-to-PostgreSQL pipelines.
+description: Use the current MantrixFlow workspace to configure sources, destination-owned SQL, delivery targets, runs, and schedules.
 ---
 
-This guide follows the live workspace flow.
+This guide follows the live tabbed pipeline workspace. It does not describe the
+removed canvas editor.
 
 ## Main workflow
 
-1. Create PostgreSQL source and destination connections.
-2. Create a pipeline shell with a name and source connection.
-3. Configure the Source node.
-4. Configure the Destination node.
-5. Save and run manually.
-6. Review run history.
-7. Add an Incremental schedule only after validation.
+1. Create source and destination connections.
+2. Create and open a pipeline.
+3. Configure streams in **Source**.
+4. Add a target in **Destinations**.
+5. Create and publish destination-owned SQL in **Transformations**.
+6. Assign output tables and Upsert keys in the destination editor.
+7. Validate in **Overview** and click **Run all**.
+8. Review **Runs**.
+9. Add automation in **Settings** after validation.
 
 ## Key pages
 
 - [Use Oria Copilot](/user-guide/oria-copilot)
 - [Connections](/user-guide/connections)
-- [Pipelines and run history](/user-guide/pipelines)
-- [Normalisation and SQL](/user-guide/transformations-and-branches)
+- [Pipelines and runs](/user-guide/pipelines)
+- [SQL transformations and revisions](/user-guide/transformations-and-branches)
 - [Organizations](/user-guide/organizations)
 - [Activity and edge cases](/user-guide/activity-and-edge-cases)

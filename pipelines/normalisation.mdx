@@ -1,41 +1,40 @@
 ---
-title: Normalisation
-description: Use destination-scoped rename and cast rules before SQL models run.
+title: Rename and cast in SQL
+description: Replace the former Normalisation panel with explicit rename and cast expressions in destination-owned SQL.
 ---
 
-Normalisation is configured in the **Destination** panel. It runs after extraction and before the SQL Layer.
+The current pipeline workspace does not expose a separate **Normalisation** tab
+or panel. Older documentation that instructs you to add rename/cast rules there
+is obsolete.
 
-## Live rule types
+Perform structural changes in the destination-owned SQL transformation instead.
 
-| Rule | Use it for |
-| --- | --- |
-| Rename | Change a source column name before the SQL model reads it |
-| Cast | Coerce a staged value to a destination-friendly type |
-
-Rules can be scoped to a source stream such as `public.orders`.
-
-## Example
-
-If the source stream is `public.orders`, you can add:
-
-| Rule | Table | Column | Target |
-| --- | --- | --- | --- |
-| Rename | `public.orders` | `status` | `order_status` |
-| Cast | `public.orders` | `total_amount` | `numeric` |
-
-The SQL model should then reference the post-normalisation names:
+## Rename a column
 
 ```sql
 SELECT
   id,
-  customer_id,
-  order_status,
-  total_amount,
-  created_at,
-  updated_at
+  status AS order_status
 FROM {{ source('raw', 'public__orders') }}
 ```
 
-## When to use SQL models instead
+## Cast a column
 
-Use the SQL Layer for filtering rows, deriving fields, joining, aggregating, or reshaping output columns. Normalisation is intentionally small and structural.
+```sql
+SELECT
+  id,
+  CAST(total_amount AS DECIMAL(12, 2)) AS total_amount,
+  CAST(created_at AS TIMESTAMP) AS created_at
+FROM {{ source('raw', 'public__orders') }}
+```
+
+## Release the change
+
+1. Open **Transformations** and select the destination.
+2. Open the transformation editor.
+3. Update SQL and click **Save draft**.
+4. **Validate draft**, **Preview output**, and **Publish revision**.
+5. Confirm the published output still matches the destination table contract.
+
+Explicit SQL keeps rename/cast behavior versioned with the same revision used by
+the run.

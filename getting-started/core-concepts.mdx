@@ -1,73 +1,87 @@
 ---
 title: Core Concepts
-description: "The current MantrixFlow concepts: connections, source streams, destination tables, Normalisation, SQL Layer, runs, and schedules."
+description: "Current MantrixFlow concepts: connections, the pipeline workspace, source streams, destination-owned transformations, output assignments, runs, and schedules."
 ---
 
 ## Connections
 
-Connections store reusable credentials. The live public workflow supports PostgreSQL as both source and destination.
+Connections store reusable encrypted credentials. PostgreSQL, MySQL, and
+Airtable can be sources or destinations when their runtime capability is
+enabled. HubSpot and Stripe are sources.
 
-Source connections need read access. Destination connections need write access to tables that already exist.
+Source connections need read access. Destination connections need write access
+to final tables that already exist.
 
-## Pipeline shell
+## Pipeline workspace
 
-A pipeline shell has a name and a source connection. It is intentionally minimal because the builder owns the operational configuration.
+A pipeline starts with a name and source connection. Opening it shows the
+current tabbed workspace: **Overview**, **Source**, **Transformations**,
+**Destinations**, **Runs**, **GitHub**, and **Settings**.
 
-## Source node
+The old canvas and Source/Destination nodes no longer exist.
 
-The **Source** node is where you:
+## Source streams
 
-- test the source connection
-- discover schemas and tables
-- include one or more source streams
-- preview the active source stream
+Use the **Source** tab to:
 
-Streams are represented as `schema.table`, for example `public.orders`.
+- test the source connection;
+- discover or refresh the catalog;
+- select one or more streams;
+- choose Full table or Incremental per supported stream;
+- provide an Incremental cursor;
+- inspect fields and primary keys; and
+- preview representative rows.
 
-## Destination node
+Streams use stable keys such as `public.orders`, `stripe.customers`, or
+`airtable.tbl...`. Database staging relations use names such as
+`public__orders`.
 
-The **Destination** node is where you:
+## Destinations
 
-- choose the destination connection
-- choose Full Table or Incremental sync
-- set a replication key for Incremental sync
-- keep the live write mode as Upsert
-- add optional Normalisation rules
-- write SQL models
-- validate and preview model output
-- save destination configuration
-- run manually or configure a schedule
+Use **Destinations** to add an independent delivery target. Each destination has
+its own connection, display name, schema/database or Airtable base/table, SQL
+transformations, output assignments, Upsert keys, and checkpoint behavior.
 
-## Normalisation
+Adding a destination opens a focused destination editor; it is not a node on a
+canvas.
 
-Normalisation is destination-scoped and runs before the SQL Layer. The live rule types are:
+## Transformations and revisions
 
-- Rename a column
-- Cast a column to a compatible type
+Transformations are owned by one destination. Use **Transformations** to select
+a destination and create its SQL model. The release sequence is:
 
-## SQL Layer
+1. **Save draft**
+2. **Validate draft**
+3. **Preview output**
+4. **Publish revision**
 
-The SQL Layer is the live SQL transformation surface. Models read from temporary raw staging tables using:
+Draft changes do not affect runs until published. Each destination can evolve
+without changing another destination's published revision.
 
-```sql
-{{ source('raw', 'public__orders') }}
-```
+Rename, cast, filter, join, derive, and aggregate values directly in SQL. The
+current workspace does not expose the former Normalisation panel.
 
-The double underscore maps the source stream `public.orders` to the staging table name `public__orders`.
+## Destination tables and Upsert
 
-## Destination tables
+Published model output is assigned to an exact destination table. Database
+targets use `schema.table` or `database.table`; Airtable targets use the
+selected existing table and explicit writable-field mappings.
 
-Destination tables must already exist. During pre-flight and delivery, MantrixFlow validates:
+The current delivery mode is **Upsert**. Configure stable, non-empty Upsert keys
+that match a primary/unique database key or writable Airtable merge fields.
 
-- the final table exists
-- the model output columns match destination columns
-- primary keys are available for merge-style Upsert when possible
+## Overview and readiness
 
-If a destination table has no primary key, rows are appended and the run records a warning.
+The **Overview** tab summarizes the shared source, pipeline settings,
+destination-owned transformations, and delivery targets. **Validate pipeline**
+checks that source streams, published revisions, and destination assignments
+are ready before **Run all** is enabled.
 
-## Sync modes
+## Runs and schedules
 
-- **FULL_TABLE** rereads the selected source stream for manual validation or controlled refreshes.
-- **INCREMENTAL** uses a replication key and stored checkpoint for recurring runs.
+Use **Runs** for statuses, destination targets, published revision IDs, row
+counts, durations, warnings, and sanitized errors.
 
-Scheduling is available only for Incremental destinations.
+Use **Settings** for activation, validation, and scheduling. The current
+schedule editor supports a fixed 1–24 hour interval or a five-field UTC cron
+expression. Validate a manual run before enabling automation.

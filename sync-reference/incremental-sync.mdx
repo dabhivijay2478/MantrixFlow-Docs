@@ -1,31 +1,35 @@
 ---
 title: Incremental sync
-description: Use Incremental sync with a stable replication key and stored checkpoint state.
+description: Configure Incremental extraction per source stream with a stable cursor and stored checkpoint state.
 ---
 
-`INCREMENTAL` sync uses a replication key and checkpoint state to process newer source rows after each successful run.
+`INCREMENTAL` uses a stream cursor and saved checkpoint to read newer or changed
+source rows after each successful execution.
 
 ## Requirements
 
-- PostgreSQL source table
-- stable replication key such as `updated_at`, `created_at`, or an increasing id
-- destination table that already exists
-- saved SQL model output that matches the destination columns
+- a connector/stream that advertises Incremental support;
+- a stable, populated cursor such as `updated_at`, `created_at`, or an increasing ID;
+- published destination-owned SQL;
+- an existing destination table; and
+- a stable destination Upsert key.
 
-## How to configure
+## Configure Incremental
 
-1. Open the **Destination** panel.
-2. Switch **Sync mode** to `INCREMENTAL`.
-3. Enter the replication key.
-4. Save the destination.
-5. Run manually once.
-6. Review run history.
-7. Add a schedule if the manual run succeeds.
+1. Open **Source**.
+2. Discover the catalog and enable the stream.
+3. Choose **Incremental** in the stream's **Sync mode** column.
+4. Enter the cursor in the **Cursor** column.
+5. Preview and click **Save stream settings**.
+6. Configure and publish the destination's transformation.
+7. Assign its output table and Upsert keys in the destination editor.
+8. Validate in **Overview**, click **Run all**, and inspect **Runs**.
+9. Add an interval or UTC cron schedule in **Settings** after the manual run succeeds.
 
 ## Checkpoint state
 
-After a successful run, MantrixFlow extracts checkpoint state before deleting the temporary staging file. The next Incremental run resumes from that stored state.
+After a successful run, MantrixFlow saves checkpoint state before deleting the
+temporary staging file. Failed runs do not advance the checkpoint.
 
-## Good replication keys
-
-Use columns that move forward predictably and are populated on every row. Timestamp columns should be indexed when tables are large.
+Use cursor columns that move forward predictably and are populated on every
+row. Index timestamp cursors for large database tables.

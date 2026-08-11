@@ -1,17 +1,36 @@
 ---
-title: Transformation rules
-description: "The current transformation model: destination-scoped Normalisation plus SQL models."
+title: Transformation workflow
+description: "Create destination-owned SQL drafts and release validated, previewed revisions."
 ---
 
-Transformations are owned by a destination and configured in the **Destination** panel.
+Transformations are owned by a destination and managed from the
+**Transformations** tab. The current workspace does not use canvas nodes or a
+Destination panel.
 
-| Layer | Location | Purpose |
-| --- | --- | --- |
-| Normalisation | Destination panel | Rename and cast columns before the SQL model |
-| SQL Layer | Destination panel | SQL model that selects final output columns |
+## Ownership model
 
-Use [Normalisation](/pipelines/normalisation) for small structural changes such as renaming or casting a column.
+Each destination has an isolated set of SQL models and revisions. Editing or
+publishing a transformation for one delivery target does not change another
+destination.
 
-Use the [SQL Layer](/pipelines/dbt-layer) for filtering, derived fields, JSON extraction, joins, aggregations, and final output selection.
+## Release workflow
 
-Validate and preview the SQL model before saving it. The saved model output must match the pre-created destination table.
+1. Select a destination in **Transformations**.
+2. Create or open a transformation.
+3. Choose input streams and write SQL.
+4. Click **Save draft**.
+5. Click **Validate draft**.
+6. Click **Preview output**.
+7. Click **Publish revision**.
+
+Runs continue using the last published revision until a newer draft completes
+all release steps.
+
+## SQL responsibilities
+
+Use SQL to rename and cast columns, filter rows, derive fields, extract JSON,
+join streams, aggregate values, and select the final output contract. See
+[SQL transformations](/pipelines/dbt-layer).
+
+After publishing, open the destination editor to assign the model to its final
+table and configure Upsert keys or Airtable field mappings.

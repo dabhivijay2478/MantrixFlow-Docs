@@ -1,15 +1,15 @@
 ---
 title: HubSpot source
-description: Connect HubSpot as a production source and deliver ten CRM streams to PostgreSQL with dlt.
+description: Connect HubSpot as a production source and deliver ten CRM streams to PostgreSQL or Airtable with dlt.
 ---
 
 HubSpot is available as a production, source-only connector. MantrixFlow uses
 dlt to extract selected HubSpot data into isolated staging, applies your SQL/dbt
-models, and delivers the result to existing PostgreSQL tables.
+models, and delivers the result to existing PostgreSQL or Airtable tables.
 
 <Note>
-  The supported path is **HubSpot → PostgreSQL**. HubSpot cannot be selected as
-  a destination, and other destination types are not supported for this source.
+  Validated paths include **HubSpot → PostgreSQL** and **HubSpot → Airtable**.
+  HubSpot cannot be selected as a destination.
 </Note>
 
 ## Authentication
@@ -53,18 +53,20 @@ returning CRM records during the connection test.
 
 ## Configure a HubSpot pipeline
 
-1. Create or choose a PostgreSQL destination connection.
+1. Create or choose a PostgreSQL or Airtable destination connection.
 2. Create a pipeline using the saved HubSpot source.
-3. Open the **Source** node and click **Discover schema**.
+3. Open **Source** and click **Discover catalog**.
 4. Select one or more available streams.
 5. Configure the extraction window and custom-property option.
 6. Preview the selected stream. HubSpot previews mask email local parts, phone
    numbers, and sensitive free-text fields.
-7. In the **Destination** node, map every selected stream to an existing
-   PostgreSQL table and save an explicit SQL/dbt model.
-8. Validate and preview the models, then run the pipeline.
-9. Confirm the delivered rows in PostgreSQL and review the run in **Run
-   History**.
+7. Open **Destinations**, add the delivery target, and save it.
+8. Open **Transformations**, select that destination, and create destination-owned
+   SQL models for the selected streams. Save, validate, preview, and publish each
+   revision.
+9. Return to the destination editor and assign final tables and Upsert keys.
+   Airtable also requires writable field mappings and merge fields.
+10. Validate from **Overview**, click **Run all**, and inspect **Runs**.
 
 The connector does not silently select every stream. At least one stream must be
 selected before a run can start.
@@ -95,10 +97,12 @@ in the run metadata. The raw `properties` value preserves the returned property
 payload, while your SQL model promotes the fields you want into destination
 columns.
 
-## PostgreSQL destination requirements
+## Destination requirements
 
-Create or explicitly reconcile the destination schema and tables before
-delivery. The pipeline runner does not create target tables during a run.
+Create or explicitly reconcile PostgreSQL destination schemas and tables before
+delivery. For Airtable, create the table and fields first, then refresh and map
+them in the destination editor. The pipeline runner does not create target tables
+during a run.
 
 - Use a primary key or stable merge key for each table.
 - Keep model output columns aligned with destination column names and types.
@@ -120,7 +124,8 @@ have no records.
   and may require a later full reconciliation.
 - Line-item associations are not included.
 
-For destination setup, see [PostgreSQL destination](/connections/destinations/postgresql).
+For destination setup, see [PostgreSQL destination](/connections/destinations/postgresql)
+or [Airtable destination](/connections/destinations/airtable).
 For a complete ten-stream configuration with sample SQL and composite pipeline
 keys, see the
 [HubSpot-to-PostgreSQL example](/example/pipelines/hubspot-to-postgres).

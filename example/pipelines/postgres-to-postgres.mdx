@@ -1,47 +1,38 @@
 ---
 title: PostgreSQL to PostgreSQL
-description: A complete live-app example using PostgreSQL as both source and destination.
+description: A complete example using the current tabbed pipeline workspace.
 ---
 
-This example moves `public.orders` into `analytics.orders_live`. If this is your first pipeline, follow the [Quick Start](/getting-started/quick-start), which includes the destination DDL and full setup sequence.
+This example moves `public.orders` into `analytics.orders_live`.
 
 ## 1. Prepare the destination
 
-Create `analytics.orders_live` before configuring the pipeline. Its columns must match the final SQL model, and a primary key is recommended for merge-style Upsert delivery.
+Create `analytics.orders_live` before delivery. Its columns must match the
+published SQL output, and `id` should be its primary key for Upsert.
 
-## 2. Create connections
+## 2. Create connections and pipeline
 
-Create and test:
+Create/test a PostgreSQL source with read access to `public.orders` and a
+PostgreSQL destination with write access to `analytics.orders_live`. Then create
+`Orders to Analytics` from **Data Pipelines** and open it.
 
-- PostgreSQL source connection with read access to `public.orders`
-- PostgreSQL destination connection with write access to `analytics.orders_live`
+## 3. Configure Source
 
-## 3. Create the pipeline
+1. Open **Source**.
+2. Click **Discover catalog**.
+3. Enable `public.orders` and keep **Full table** for the first run.
+4. Preview rows and click **Save stream settings**.
 
-1. Open **Data Pipelines**.
-2. Create a new pipeline named `Orders to Analytics`.
-3. Select the source connection.
-4. Open the builder.
+## 4. Add the destination
 
-## 4. Configure Source
+1. Open **Destinations** and click **Add destination**.
+2. Select the PostgreSQL connection and set the target schema to `analytics`.
+3. Save the destination.
 
-1. Open the **Source** node.
-2. Discover schema or refresh tables.
-3. Include `public.orders`.
-4. Preview source rows.
+## 5. Create and publish SQL
 
-## 5. Configure Destination
-
-1. Open the **Destination** node.
-2. Select the destination connection.
-3. Keep sync mode as `FULL_TABLE` for the first run.
-4. Keep write mode as `Upsert`.
-
-Add optional rename or cast rules only when the source and destination shapes differ. See [Normalisation](/pipelines/normalisation).
-
-## 6. Write the SQL model
-
-In the **SQL Layer** tab, set final delivery table to `analytics.orders_live` and use:
+Open **Transformations**, select the destination, and create a transformation
+using `public.orders` as input:
 
 ```sql
 SELECT
@@ -55,25 +46,26 @@ FROM {{ source('raw', 'public__orders') }}
 WHERE order_status IS NOT NULL
 ```
 
-Validate SQL, preview output, and save the destination.
+Click **Save draft**, **Validate draft**, **Preview output**, and **Publish revision**.
+
+## 6. Assign destination output
+
+Open the destination editor. Under **Published output targets**, enter
+`analytics.orders_live`, use `id` as the Upsert key, create/verify the table if
+needed, and save.
 
 ## 7. Run and verify
 
-Run manually from the Destination node. Then check run history for:
-
-- success status
-- rows written
-- delivery target `analytics.orders_live`
-- warnings
-
-Query the destination table directly if you want an external verification.
+Open **Overview**, click **Validate pipeline**, then click **Run all**. In
+**Runs**, confirm success, rows written, the published revision, target
+`analytics.orders_live`, and any warnings.
 
 ## 8. Move to Incremental
 
-After the manual Full Table run succeeds:
+After the Full table run succeeds:
 
-1. Switch sync mode to `INCREMENTAL`.
-2. Enter replication key `updated_at`.
-3. Save.
-4. Run manually again.
-5. Add a schedule.
+1. Open **Source**.
+2. Change `public.orders` to **Incremental**.
+3. Enter `updated_at` as the cursor and save stream settings.
+4. Run manually again and inspect **Runs**.
+5. Add a schedule in **Settings**.

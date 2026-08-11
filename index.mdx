@@ -8,33 +8,35 @@ MySQL, Airtable, HubSpot, or Stripe source data flows through isolated staging
 and explicit SQL models into supported PostgreSQL, MySQL, or Airtable
 destinations.
 
-The documentation intentionally avoids partially implemented connector paths and future roadmap features. If a connector appears in product code or an internal test guide but is not available end to end in the live workspace, it is not presented here as available.
+The current product uses a **tabbed pipeline workspace**. The former canvas and
+node editor has been removed. Old `/builder` links redirect to the corresponding
+tab in the pipeline workspace.
 
 ## What is live
 
-- PostgreSQL source connections
+- PostgreSQL source and destination connections
 - MySQL source and destination connections when enabled by runtime capabilities
 - Airtable source and destination connections when enabled by runtime capabilities
 - HubSpot production source connections with ten supported streams
 - Stripe source connections with 34 supported streams
-- PostgreSQL destination connections
-- Pipeline shell creation from **Data Pipelines**
-- Canvas builder with a **Source** node and a **Destination** node
-- Source table selection as `schema.table`
-- Destination-scoped Normalisation rules: rename and cast
-- Destination-scoped SQL models that read from raw staging tables
-- Manual destination runs
-- Run history and run status tracking
-- Scheduling for Incremental sync destinations only
+- Pipeline creation from **Data Pipelines**
+- One pipeline workspace with **Overview**, **Source**, **Transformations**,
+  **Destinations**, **Runs**, **GitHub**, and **Settings** tabs
+- Source stream selection, sync mode, cursor, fields, and preview in **Source**
+- Destination-owned SQL drafts, validation, preview, publishing, and revision history
+- Independent destination editors and published output assignments
+- **Run all** from the pipeline header and detailed execution history in **Runs**
+- Fixed-interval or UTC cron scheduling from **Settings**
 
 ## What is not documented as live
 
+- The removed canvas or node-based pipeline editor
+- A separate Normalisation panel; rename and cast values in SQL transformations
 - Other non-live database and SaaS connectors
-- Transform or Filter canvas nodes
 - Log-based change capture
 - Automatic destination table creation by the delivery runner
 - Non-Upsert write modes
-- Public AI Copilot, MCP, or embedded-agent workflows
+- Public MCP or embedded-agent workflows
 
 ## Recommended reading order
 

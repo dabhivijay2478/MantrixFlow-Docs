@@ -1,34 +1,33 @@
 ---
 title: Full Table sync
-description: Use Full Table sync for manual PostgreSQL validation runs and controlled refreshes.
+description: Configure Full table extraction per source stream for validation runs or complete refreshes.
 ---
 
-`FULL_TABLE` rereads the selected source stream for a run.
+`FULL_TABLE` rereads all visible rows for the selected source stream.
 
-Use it for:
+Use it for first-run validation, small reference tables, controlled complete
+refreshes, or confirming a published SQL model and destination contract.
 
-- first-run validation
-- controlled manual refreshes
-- debugging source and destination shape
-- confirming SQL model output before moving to Incremental
+## Configure Full table
 
-## How to configure
-
-1. Open the **Destination** panel.
-2. In **Config**, choose `FULL_TABLE`.
-3. Keep write mode as **Upsert**.
-4. Save the destination.
-5. Run manually from the Destination node.
+1. Open the pipeline **Source** tab.
+2. Discover the catalog.
+3. Enable the stream.
+4. Choose **Full table** in that stream's **Sync mode** column.
+5. Preview the stream and click **Save stream settings**.
+6. Complete destination and transformation setup.
+7. Validate in **Overview** and click **Run all**.
 
 ## Scheduling
 
-Full Table destinations are manual-only in the current app. The Scheduling tab is disabled until the destination uses `INCREMENTAL`.
+Schedules are configured at pipeline level in **Settings**. A scheduled pipeline
+with Full table streams rereads those complete streams each time, so review
+source size and API limits before enabling an interval or UTC cron expression.
 
 ## Run behavior
 
-Full Table still follows the strict delivery contract:
-
-- source rows are staged in temporary storage
-- SQL models run against raw staged tables
-- final destination tables must already exist
-- temporary staging is cleaned up after checkpoint extraction
+- source rows are staged in temporary storage;
+- published destination-owned SQL revisions run against staged relations;
+- assigned final destination tables must exist;
+- Upsert keys control matching; and
+- temporary staging is cleaned up after checkpoint extraction.

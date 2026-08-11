@@ -1,34 +1,52 @@
 ---
 title: Getting started
-description: "Start with the current MantrixFlow app flow: create PostgreSQL, HubSpot, or Stripe sources, configure the builder, and run into PostgreSQL."
+description: "Connect a source and destination, configure the tabbed pipeline workspace, publish SQL, and run a supported pipeline."
 ---
 
-The current app flow is connection-first and builder-driven.
+The current app flow is connection-first and workspace-driven. You create
+reusable connections and a lightweight pipeline, then complete setup on the
+pipeline detail page. There is no canvas editor.
 
-You create reusable source and PostgreSQL destination connections, create a
-lightweight pipeline shell, then finish the operational configuration in the
-canvas builder. Sources can be PostgreSQL, HubSpot, or Stripe.
+## Current pipeline workspace
+
+Every pipeline opens at `/workspace/data-pipelines/[id]` with these tabs:
+
+| Tab | Purpose |
+| --- | --- |
+| **Overview** | Review the source → pipeline → transformations → destinations relationship and readiness checks |
+| **Source** | Test the source, discover the catalog, select streams, choose sync modes/cursors, inspect fields, and preview rows |
+| **Transformations** | Manage destination-owned SQL models, drafts, published revisions, and revision history |
+| **Destinations** | Add and edit independent delivery targets and their output assignments |
+| **Runs** | Inspect executions, rows, revisions, destination targets, warnings, and failures |
+| **GitHub** | Manage the pipeline's repository integration when enabled |
+| **Settings** | Edit metadata, activate/pause, validate, schedule, or delete the pipeline |
 
 ## Current app flow
 
-1. Create a PostgreSQL, HubSpot, or Stripe source connection.
-2. Create a PostgreSQL destination connection.
-3. Create a pipeline shell from **Data Pipelines** with a name and source connection.
-4. Open the builder.
-5. Use the **Source** node to test the source, discover tables, include source streams, and preview rows.
-6. Use the **Destination** node to choose the destination connection, enter final delivery tables as `schema.table`, add optional rename/cast rules, write SQL models, validate, preview, and save.
-7. Run the destination manually.
-8. Review run status and run history.
-9. Switch the destination to Incremental sync before enabling a schedule.
+1. Create a PostgreSQL, MySQL, Airtable, HubSpot, or Stripe source connection.
+2. Create a PostgreSQL, MySQL, or Airtable destination connection.
+3. Create a pipeline from **Data Pipelines** with a name and source connection.
+4. Open the pipeline and use **Source** to discover, preview, select, and save streams.
+5. Use **Destinations** → **Add destination** to choose a connection and save a delivery target.
+6. Use **Transformations**, select that destination, and create a SQL transformation.
+7. Save the draft, then **Validate draft**, **Preview output**, and **Publish revision**.
+8. Return to the destination editor, configure the published output table and Upsert keys, then save.
+9. Use **Overview** → **Validate pipeline** until all readiness checks pass.
+10. Click **Run all** in the pipeline header.
+11. Use **Runs** to inspect the execution.
+12. Add a fixed interval or UTC cron schedule from **Settings** after a manual run succeeds.
 
-## Before you build
+## Before you configure delivery
 
-Prepare the destination table yourself before running the pipeline. MantrixFlow validates that the table exists and that model output columns match the destination columns; it does not create destination tables during delivery.
-
-For the fastest first run, start with one PostgreSQL table or one HubSpot stream
-and one destination table.
+The delivery runner does not create final destination tables. For database
+destinations, use **Create or verify destination table** when that explicit
+setup action is available, or create the reviewed DDL yourself. For Airtable,
+create the table and writable fields in Airtable first, then refresh them in the
+destination editor.
 
 ## Next
 
 Follow the [Quick Start](/getting-started/quick-start) for an end-to-end PostgreSQL example.
 For CRM data, follow the [HubSpot source guide](/connections/sources/crm/hubspot).
+For bidirectional SaaS/database delivery, follow the
+[Airtable and MySQL guide](/example/pipelines/airtable-and-mysql).

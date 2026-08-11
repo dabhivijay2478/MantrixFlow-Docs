@@ -1,23 +1,16 @@
 ---
 title: Quick Start
-description: Build and run a real PostgreSQL-to-PostgreSQL pipeline in the current MantrixFlow workspace.
+description: Build and run a PostgreSQL-to-PostgreSQL pipeline in the current tabbed MantrixFlow workspace.
 ---
 
-This quick start follows the live app flow.
-
-**Scenario:** a team wants to copy `public.orders` from an application PostgreSQL database into `analytics.orders_live` in a reporting PostgreSQL database.
+**Scenario:** copy `public.orders` from an application PostgreSQL database into
+`analytics.orders_live` in a reporting PostgreSQL database.
 
 ## Before you begin
 
-Have these ready:
-
-- PostgreSQL source host, port, database, username, password, and SSL mode
-- PostgreSQL destination host, port, database, username, password, and SSL mode
-- A source user with read access to `public.orders`
-- A destination user with write access to `analytics.orders_live`
-- A pre-created destination table named `analytics.orders_live`
-
-Example destination shape:
+Have source and destination PostgreSQL credentials ready. The source user needs
+read access to `public.orders`; the destination user needs write access to
+`analytics.orders_live`.
 
 ```sql
 CREATE SCHEMA IF NOT EXISTS analytics;
@@ -32,23 +25,38 @@ CREATE TABLE IF NOT EXISTS analytics.orders_live (
 );
 ```
 
-## Build the pipeline
+## 1. Create connections and pipeline
 
-1. Open **Connections** and create a **Source** connection with **PostgreSQL**.
-2. Fill the connection form and click **Test Connection**.
-3. Save the source after the test succeeds.
-4. Create a second **PostgreSQL** connection with the role set to **Destination**.
-5. Click **Test Connection** and save the destination after the test succeeds.
-6. Open **Data Pipelines** and create a new pipeline with a name and the source connection.
-7. In the builder, click the settings icon on the **Source** node.
-8. Click **Discover schema** or **Refresh tables**.
-9. Include `public.orders` and preview the rows.
-10. Click the settings icon on the **Destination** node.
-11. Choose the destination connection.
-12. Keep **Sync mode** as `FULL_TABLE` for the first validation run.
-13. Keep **Write mode** as `Upsert`.
-14. In the **SQL Layer** tab, set the final delivery table to `analytics.orders_live`.
-15. Use a simple SQL model:
+1. Open **Connections** and create/test a PostgreSQL **Source** connection.
+2. Create/test a PostgreSQL **Destination** connection.
+3. Open **Data Pipelines**, click **New Pipeline**, enter a name, select the
+   source connection, and create the pipeline.
+4. Open the new pipeline. It opens in the tabbed pipeline workspace.
+
+## 2. Configure Source
+
+1. Open **Source**.
+2. Click **Test connection**.
+3. Click **Discover catalog**.
+4. Enable `public.orders`.
+5. Keep **Full table** for the first run.
+6. Click **Preview** and inspect the rows.
+7. Click **Save stream settings**.
+
+## 3. Add a destination
+
+1. Open **Destinations**.
+2. Click **Add destination**.
+3. Choose the destination connection, enter a display name, and set the target
+   schema to `analytics`.
+4. Click **Save destination**.
+
+## 4. Create and publish a transformation
+
+1. Open **Transformations** and select the new destination.
+2. Click **New transformation**.
+3. Enter a name, stable key, output model, and select `public.orders` as input.
+4. Use this SQL:
 
 ```sql
 SELECT
@@ -62,14 +70,30 @@ FROM {{ source('raw', 'public__orders') }}
 WHERE order_status IS NOT NULL
 ```
 
-16. Click **Validate SQL**.
-17. Click **Preview output**.
-18. Click **Save destination**.
-19. Run the destination manually from the destination node.
-20. Open run status or run history and confirm the run succeeded.
+5. Click **Save draft**.
+6. Click **Validate draft**.
+7. Click **Preview output** and inspect the result.
+8. Click **Publish revision** and confirm.
 
-## Add a schedule later
+## 5. Assign the output target
 
-Scheduling is available after switching the destination to `INCREMENTAL` and providing a replication key such as `updated_at`.
+1. Return to **Destinations** and open the destination.
+2. Under **Published output targets**, set the table to
+   `analytics.orders_live`.
+3. Set the Upsert key to `id`.
+4. Click **Create or verify destination table** when appropriate, then
+   **Save destination**.
 
-Validate at least one manual run before enabling a recurring schedule.
+## 6. Validate and run
+
+1. Open **Overview**.
+2. Click **Validate pipeline** and resolve any incomplete readiness check.
+3. Click **Run all** in the header.
+4. Open **Runs**, select the execution, and confirm the destination, published
+   revision, rows written, duration, and success status.
+
+## Add automation later
+
+After a manual run succeeds, open **Settings**. Choose a fixed 1–24 hour
+interval or enter a five-field UTC cron expression, save the schedule, and keep
+the pipeline active.

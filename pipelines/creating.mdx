@@ -1,46 +1,63 @@
 ---
 title: Creating a pipeline
-description: Create a PostgreSQL-to-PostgreSQL pipeline shell and finish configuration in the builder.
+description: Create a pipeline and complete setup in the current tabbed pipeline workspace.
 ---
 
-Pipeline creation starts with a small form and continues in the builder.
+Pipeline creation starts with a small form and continues on the pipeline detail
+page. There is no canvas or node editor.
 
-## Create the shell
+## Create the pipeline
 
 1. Open **Data Pipelines**.
 2. Click **New Pipeline**.
-3. Enter a pipeline name.
-4. Choose a PostgreSQL source connection.
-5. Create the pipeline and open the builder.
+3. Enter a name and optional description.
+4. Choose the source connection.
+5. Create and open the pipeline.
 
-The shell does not ask for destination tables or SQL up front. Those decisions live in the builder.
+## Configure Source
 
-## Configure the Source node
+1. Open **Source**.
+2. Test the connection and click **Discover catalog**.
+3. Enable the required streams.
+4. Choose **Full table** or **Incremental** for each supported stream.
+5. Enter a cursor for Incremental streams.
+6. Inspect fields, preview rows, and click **Save stream settings**.
 
-1. Click the settings icon on the **Source** node.
-2. Click **Test connection** if you want to re-check credentials.
-3. Click **Discover schema** or **Refresh tables**.
-4. Include one or more source streams.
-5. Preview the active stream.
+Start with one stream for the first run.
 
-Start with one table for the first run.
+## Add a destination
 
-## Configure the Destination node
+1. Open **Destinations**.
+2. Click **Add destination**.
+3. Choose a destination connection and set its schema/database or Airtable
+   base/table.
+4. Click **Save destination**.
 
-1. Click the settings icon on the **Destination** node.
-2. Select the PostgreSQL destination connection.
-3. Keep the first run as `FULL_TABLE`.
-4. Keep the write mode as `Upsert`.
-5. Open the **SQL Layer** tab.
-6. Enter the final delivery table as `schema.table`.
-7. Write the SQL model against the raw staged table.
-8. Validate SQL and preview output.
-9. Save the destination.
+## Create a transformation
 
-## Run manually
+1. Open **Transformations** and select the destination.
+2. Click **New transformation**.
+3. Choose input streams, enter the output model name, and write SQL against the
+   staged source relations.
+4. **Save draft**, **Validate draft**, **Preview output**, and **Publish revision**.
 
-Run manually from the Destination node after saving. Use run status and run history to verify row counts, failures, warnings, and duration.
+Published revisions remain isolated to their owning destination.
+
+## Configure output targets
+
+1. Return to **Destinations** and open the destination.
+2. Under **Published output targets**, enter each final table and Upsert key.
+3. For Airtable, map output columns to writable fields and select merge fields.
+4. Use **Create or verify destination table** for database targets when needed.
+5. Save the destination.
+
+## Validate and run
+
+Open **Overview**, click **Validate pipeline**, and complete all readiness
+checks. Then click **Run all** in the header and inspect the result in **Runs**.
 
 ## Add automation later
 
-Scheduling is available for Incremental destinations. Provide a replication key and validate a manual Incremental run before adding a recurring schedule.
+Open **Settings** after a successful manual run. Configure a fixed 1–24 hour
+interval or a five-field UTC cron schedule, save it, and keep the pipeline
+active.

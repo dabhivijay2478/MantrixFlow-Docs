@@ -10,7 +10,7 @@ configured table.
 ## Destination contract
 
 The final MySQL table must exist before delivery begins. Create it with the
-explicit setup action in the pipeline builder when available, or run reviewed
+explicit setup action in the destination editor when available, or run reviewed
 DDL in MySQL yourself. The delivery runner does not create final tables.
 
 The table should:
@@ -87,13 +87,14 @@ omitted when the table permits it.
 
 ## Configure delivery
 
-1. Open the pipeline's **Destination** node.
-2. Choose the MySQL destination connection.
-3. Select or enter the existing target as `database.table`, for example
-   `analytics.airtable_customers`.
-4. Publish the SQL model that defines the final output columns.
-5. Choose the stable primary or unique key as the Upsert key.
-6. Run destination validation and save.
+1. Open **Destinations** and click **Add destination**.
+2. Choose the MySQL connection, target database, and save.
+3. Open **Transformations**, select that destination, and create the SQL model.
+4. Save, validate, preview, and publish the revision.
+5. Return to the destination editor and, under **Published output targets**,
+   enter `database.table`, for example `analytics.airtable_customers`.
+6. Choose the stable primary or unique key as the Upsert key.
+7. Create/verify the table when needed and save the destination.
 
 ## Upsert behavior
 

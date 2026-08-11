@@ -1,13 +1,19 @@
 ---
-title: SQL Layer
-description: Write destination-scoped SQL models that read from temporary staging tables and deliver to pre-created PostgreSQL tables.
+title: SQL transformations
+description: Write destination-owned SQL drafts, validate and preview them, and publish revisions for delivery.
 ---
 
-The SQL Layer is the live SQL transformation surface in MantrixFlow.
+SQL transformations are managed from **Transformations**, not from a canvas or
+Destination panel.
 
-Open the **Destination** panel and select the **SQL Layer** tab.
+## Create or open a model
 
-## Source reference
+1. Open the pipeline's **Transformations** tab.
+2. Select a destination.
+3. Click **New transformation** or open an existing row.
+4. Choose input streams, enter a stable key and output model, and write SQL.
+
+## Source references
 
 Use `source()` references to read staged source data:
 
@@ -15,30 +21,38 @@ Use `source()` references to read staged source data:
 {{ source('raw', 'public__orders') }}
 ```
 
-The source stream `public.orders` becomes the raw staging table `public__orders`.
+The source stream `public.orders` becomes `public__orders`. SaaS sources use
+names such as `stripe__customers`; Airtable uses the lowercase table-ID staging
+name shown by the editor.
 
-## Example model
+## Example
 
 ```sql
 SELECT
   id,
   customer_id,
   LOWER(order_status) AS order_status,
-  total_amount,
+  CAST(total_amount AS DECIMAL(12, 2)) AS total_amount,
   created_at,
   updated_at
 FROM {{ source('raw', 'public__orders') }}
 WHERE order_status IS NOT NULL
 ```
 
-Set the final delivery table to `analytics.orders_live`.
+## Draft and publish lifecycle
 
-## Validation
+1. **Save draft** stores the SQL without affecting runs.
+2. **Validate draft** checks the SQL and output model.
+3. **Preview output** executes the valid draft for inspection.
+4. **Publish revision** makes it the destination's active run input.
 
-Use **Validate SQL** to check the model before saving. Use **Preview output** to stage a small sample and inspect the model result.
+The editor also shows revision history and the currently published version.
 
-MantrixFlow validates the output against the final destination table. A column that appears in the model output but not in the destination table fails with a named column error.
+## Delivery assignment
 
-## Delivery
+Publishing creates an output that can be assigned in the owning destination
+editor. Under **Published output targets**, enter the exact final table and
+Upsert keys. Airtable destinations map output columns to writable fields and
+select merge fields.
 
-The model output is delivered to the exact `schema.table` you enter in the Destination panel. The final table must already exist in PostgreSQL.
+The final destination table must exist before delivery.

@@ -120,19 +120,20 @@ CREATE TABLE analytics.airtable_customers (
 
 ### 2. Configure Airtable source
 
-1. Open the **Source** node.
+1. Open **Source**.
 2. Click **Load bases** and select the base containing `Customers`.
 3. Select the `Customers` table.
 4. Preview rows and confirm `_airtable_record_id`, `External ID`, `Name`, and
    `Email` appear.
-5. Keep **Full Table** mode and save.
+5. Keep **Full table** mode and click **Save stream settings**.
 
 ### 3. Configure MySQL destination
 
-1. Open the **Destination** node.
-2. Choose the MySQL destination connection.
-3. Set the final table to `analytics.airtable_customers`.
-4. Publish this model, replacing the staging relation with the exact lowercase
+1. Open **Destinations**, click **Add destination**, choose the MySQL connection,
+   set the target database to `analytics`, and save.
+2. Open **Transformations**, select the MySQL destination, and create a model
+   using the Airtable source stream.
+3. Use this SQL, replacing the staging relation with the exact lowercase
    value shown in the editor:
 
 ```sql
@@ -146,13 +147,16 @@ WHERE "External ID" IS NOT NULL
   AND TRIM("External ID") <> ''
 ```
 
-5. Validate SQL and preview output.
-6. Select `external_id` as the Upsert key.
-7. Save the destination.
+4. **Save draft**, **Validate draft**, **Preview output**, and **Publish revision**.
+5. Return to the destination editor.
+6. Under **Published output targets**, set `analytics.airtable_customers` and
+   select `external_id` as the Upsert key.
+7. Create/verify the table if needed, then save the destination.
 
 ### 4. Run and verify
 
-Start the pipeline and wait for **Succeeded**. Then run:
+Validate the pipeline from **Overview**, click **Run all**, and wait for
+**Succeeded** in **Runs**. Then run:
 
 ```sql
 SELECT external_id, name, email, airtable_created_at
@@ -172,12 +176,16 @@ count.
 
 ### 2. Configure MySQL source
 
-1. Discover the source database.
-2. Select `source_app.customers`.
+1. Open **Source** and click **Discover catalog**.
+2. Enable `source_app.customers`.
 3. Preview the three test rows.
-4. Use **Full Table** for the first run.
+4. Use **Full table** for the first run and click **Save stream settings**.
 
-### 3. Publish the model
+### 3. Add the destination and publish the model
+
+Open **Destinations**, add and save the Airtable destination connection. Then
+open **Transformations**, select it, create a transformation using the MySQL
+stream, and use:
 
 ```sql
 SELECT
@@ -190,14 +198,14 @@ FROM {{ source('raw', 'source_app__customers') }}
 WHERE id IS NOT NULL
 ```
 
-Validate and preview the output before configuring the Airtable fields.
+Save the draft, validate, preview, and publish the revision before configuring
+the Airtable fields.
 
 ### 4. Map Airtable destination fields
 
-1. Choose the Airtable destination connection.
-2. Click **Load bases** and select the destination base.
-3. Select `Pipeline Sink`.
-4. Map fields:
+1. Return to the Airtable destination editor.
+2. Click **Load bases**, select the destination base, and choose `Pipeline Sink`.
+3. Under **Published output targets**, map fields:
 
 | SQL output | Airtable field | Merge key |
 | --- | --- | --- |
@@ -207,7 +215,7 @@ Validate and preview the output before configuring the Airtable fields.
 | `source` | `Source` | No |
 | `notes` | `Notes` | No |
 
-5. Save and run.
+4. Save the destination, validate from **Overview**, and click **Run all**.
 
 ### 5. Verify Upsert
 
@@ -247,11 +255,11 @@ Before each run, confirm:
 - both connections still pass their connection tests;
 - source discovery shows the expected table;
 - preview returns representative rows;
-- the published SQL model uses the staging name shown by the builder;
+- the published SQL model uses the staging name shown by the transformation editor;
 - the database table or Airtable table already exists;
 - every destination column has a compatible type or field mapping;
 - the Upsert key is unique and populated for every output row; and
-- run history reports `failed rows = 0`.
+- the **Runs** tab reports `failed rows = 0`.
 
 ## Common errors
 
@@ -263,7 +271,7 @@ Before each run, confirm:
 | Airtable destination table not accessible | Restore token resource access or refresh and select the table again. |
 | Airtable field is read-only | Map to a writable field instead of a formula, lookup, or rollup. |
 | Airtable upsert field has no value | Filter empty keys in SQL or choose another merge field. |
-| SQL relation does not exist | Copy the lowercase staging relation from the builder. |
+| SQL relation does not exist | Copy the lowercase staging relation from the transformation editor. |
 | Database is locked during concurrent runs | Retry after active work completes and confirm the ELT service includes serialized dbt execution. |
 
 ## Production rollout
@@ -275,4 +283,4 @@ After a successful Full Table validation:
 3. Update a source record and confirm an in-place destination update.
 4. Review the token and database grants for least privilege.
 5. Set an operational schedule only after the manual run is stable.
-6. Monitor run history for row-count changes, retries, and mapping failures.
+6. Monitor **Runs** for row-count changes, retries, and mapping failures.

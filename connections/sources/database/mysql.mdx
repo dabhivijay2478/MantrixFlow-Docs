@@ -58,11 +58,12 @@ If the database uses an IP allowlist or private network, complete
 ## Discover and preview tables
 
 1. Create a pipeline using the MySQL source connection.
-2. Open the **Source** node.
-3. Click **Discover schema** or **Refresh tables**.
-4. Select each required `database.table` stream.
-5. Preview representative rows and inspect detected types.
-6. Save the source configuration.
+2. Open **Source**.
+3. Click **Discover catalog**.
+4. Enable each required `database.table` stream.
+5. Choose its sync mode and cursor when applicable.
+6. Preview representative rows and inspect detected types.
+7. Click **Save stream settings**.
 
 For example, `application_db.customers` is staged as
 `application_db__customers`. The SQL editor shows the exact normalized staging
@@ -141,7 +142,7 @@ ORDER BY updated_at DESC
 LIMIT 10;
 ```
 
-Compare the source count with **Extract + Stage** in run history. A filtered SQL
+Compare the source count with **Extract + Stage** in **Runs**. A filtered SQL
 model can intentionally produce fewer destination rows.
 
 ## Troubleshooting
@@ -155,7 +156,7 @@ model can intentionally produce fewer destination rows.
 | TLS handshake fails | Match the provider's SSL requirement and certificate settings. |
 | Incremental rows are missing | Confirm the cursor is non-null and changes on every update. |
 | Boolean values appear as `0`/`1` | Convert `TINYINT(1)` explicitly in the SQL model. |
-| SQL cannot find the staging table | Use `database__table` exactly as shown in the builder. |
+| SQL cannot find the staging table | Use `database__table` exactly as shown in the transformation editor. |
 
 Continue with [MySQL destination](/connections/destinations/mysql) or the
 [Airtable and MySQL pipeline guide](/example/pipelines/airtable-and-mysql).

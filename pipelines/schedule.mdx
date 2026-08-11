@@ -1,26 +1,30 @@
 ---
 title: Schedule and automation
-description: Configure schedules for Incremental PostgreSQL destinations after manual validation.
+description: Configure a fixed interval or UTC cron schedule from pipeline Settings after manual validation.
 ---
 
-Scheduling is configured from the **Scheduling** tab in the **Destination** panel.
+Scheduling is configured in the pipeline **Settings** tab. It is a pipeline-level
+control, not a Destination panel.
 
-## Requirement
+## Available schedule types
 
-The destination must use `INCREMENTAL` sync. Full Table destinations are manual-only in the current app.
+- No schedule
+- Fixed interval from 1 through 24 hours
+- Five-field cron expression evaluated in UTC
 
 ## Recommended sequence
 
-1. Build the pipeline in Full Table mode.
-2. Run manually and validate the destination rows.
-3. Switch the destination to Incremental.
-4. Enter a replication key such as `updated_at`.
-5. Save the destination.
-6. Run manually again.
-7. Add a schedule.
+1. Configure source streams, destinations, and published transformations.
+2. Validate the pipeline from **Overview**.
+3. Click **Run all** and confirm a successful manual execution in **Runs**.
+4. Open **Settings**.
+5. Configure the interval or UTC cron expression.
+6. Click **Save schedule** and keep the pipeline active.
 
 ## Operational notes
 
-- Keep the replication key stable and indexed when possible.
+- Cursor-based Incremental streams should use stable, indexed cursor columns.
+- Full Table streams reread all visible rows on every scheduled execution.
+- Pause the pipeline from the header or **Settings** without deleting its schedule.
 - Re-test connections after credential rotation.
-- Review run history after enabling a schedule.
+- Review **Runs** after enabling or changing automation.

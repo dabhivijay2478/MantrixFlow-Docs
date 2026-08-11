@@ -70,15 +70,18 @@ Upsert. Write access is required to create and update records.
 
 ## Configure the destination
 
-1. Open a pipeline and select the **Destination** node.
+1. Open **Destinations** and click **Add destination**.
 2. Choose the Airtable destination connection.
-3. Click **Load bases**.
-4. Select the destination base.
-5. Select the existing destination table.
-6. Publish or select the SQL model that produces the final output columns.
-7. Map every required SQL output column to a writable Airtable field.
-8. Mark at least one mapped Airtable field as a **Merge key**.
-9. Save the destination configuration.
+3. Click **Load bases**, then select the base and existing table.
+4. Save the destination.
+5. Open **Transformations**, select the Airtable destination, and create the SQL
+   model that produces the final output columns.
+6. Save, validate, preview, and publish the revision.
+7. Return to the destination editor.
+8. Under **Published output targets**, map every required output column to a
+   writable Airtable field.
+9. Mark at least one mapped Airtable field as a **Merge key**.
+10. Save the destination.
 
 The saved route uses stable base, table, and field IDs. Refreshing table schema
 preserves the selected table assignment when it still exists.

@@ -17,9 +17,9 @@ streams.
 ## 2. Discover the Stripe catalog
 
 1. Create a pipeline with the Stripe source.
-2. Open the **Source** node and click **Discover schema**.
-3. Select `account`.
-4. Preview the stream and review its typed fields.
+2. Open **Source** and click **Discover catalog**.
+3. Enable `account`.
+4. Preview the stream, review its typed fields, and click **Save stream settings**.
 
 For broader coverage, select additional streams after preparing one model and
 destination table for each delivered output. Valid empty streams are successful
@@ -27,14 +27,17 @@ and do not require fabricated sample records.
 
 ## 3. Prepare the destination
 
-In the Destination panel, select the PostgreSQL connection and use the explicit
-table setup action after previewing the model. Name the table
-`analytics.stripe_account` and use the stable account identifier as its merge
-key.
+Open **Destinations**, add the PostgreSQL connection, and save it. After the SQL
+revision is published, open this destination's **Published output targets**,
+enter `analytics.stripe_account`, use the stable account identifier as its
+Upsert key, and use the explicit table setup action when needed.
 
 The final table must exist before the run starts.
 
-## 4. Add a stable model
+## 4. Add and publish a stable model
+
+Open **Transformations**, select the PostgreSQL destination, create a
+transformation using `stripe.account` as input, and use:
 
 ```sql
 SELECT
@@ -54,12 +57,12 @@ fields that are not part of your destination contract.
 ## 5. Validate and run
 
 1. Set the final table to `analytics.stripe_account`.
-2. Set write mode to **Upsert**.
-3. Validate the model.
-4. Preview output.
-5. Save and publish the model.
-6. Run the pipeline manually.
-7. Confirm success, rows written, and the destination target in Run History.
+2. Set the Upsert key.
+3. **Save draft**, **Validate draft**, and **Preview output**.
+4. **Publish revision**.
+5. Validate the pipeline from **Overview**.
+6. Click **Run all**.
+7. Confirm success, rows written, revision, and target in **Runs**.
 
 ## 6. Expand to more streams
 

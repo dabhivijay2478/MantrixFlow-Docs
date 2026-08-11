@@ -5,23 +5,33 @@ description: Answers about current connectors, destination tables, transformatio
 
 ## Which connectors are live in the public docs?
 
-PostgreSQL is available as a source and destination. HubSpot and Stripe are
-available as sources for PostgreSQL delivery. Stripe exposes 34 supported
-streams, and HubSpot exposes ten supported streams.
+PostgreSQL, MySQL, and Airtable are available as sources and destinations.
+HubSpot and Stripe are available as sources. Stripe exposes 34 supported
+streams, and HubSpot exposes ten supported streams. MySQL and Airtable are
+runtime-capability gated, so the connection picker shows them only when both
+the API and ELT runtime report support for the selected role.
 
 See [Connections Overview](/connections/overview) for the canonical availability table. Other connector pages remain as direct-link status notices and are not live self-serve workflows.
 
 ## Does MantrixFlow create destination tables?
 
-No. Create the destination table before running the pipeline. The runner validates the table and columns, then fails with a clear error if the destination is missing or mismatched.
+The delivery runner does not create final tables. Create the destination table
+before running, or use the explicit setup action when the selected database
+destination exposes it. For Airtable, create the table and fields in Airtable,
+then refresh destination discovery. The runner validates the final contract and
+fails clearly when it is missing or mismatched.
 
 ## Where do I select source tables?
 
-Open the builder and click the settings icon on the **Source** node. Use **Discover schema**, **Refresh tables**, **Include**, and **Preview**.
+Open the pipeline **Source** tab. Click **Discover catalog**, enable streams in
+the table, choose sync modes/cursors, use **Preview**, and click **Save stream
+settings**.
 
 ## Where do I write SQL?
 
-Use the **SQL Layer** tab in the **Destination** panel.
+Open **Transformations**, select a destination, and create or open its
+transformation editor. Save SQL as a draft, validate it, preview output, and
+publish the revision.
 
 Reference staged source data with the source helper:
 
@@ -30,9 +40,11 @@ SELECT *
 FROM {{ source('raw', 'public__orders') }}
 ```
 
-## What Normalisation rules are available?
+## Where are rename and cast rules?
 
-The live Normalisation rules are Rename and Cast. They run before the SQL Layer.
+The former Normalisation panel is no longer part of the current workspace. Use
+explicit SQL aliases and `CAST(...)` expressions in the destination-owned
+transformation.
 
 ## Which write mode should I use?
 
@@ -42,7 +54,9 @@ If the destination table has a primary key, delivery uses merge behavior. If it 
 
 ## Can I schedule a Full Table sync?
 
-No. Scheduling is enabled for Incremental sync. For Full Table sync, run manually.
+Yes, schedules are pipeline-level controls in **Settings**. A scheduled Full
+table stream rereads all visible rows, so review source size and API limits
+before enabling it.
 
 ## Why did my run fail before writing rows?
 

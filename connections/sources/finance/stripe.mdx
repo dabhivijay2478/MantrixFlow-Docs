@@ -1,15 +1,15 @@
 ---
 title: Stripe source
-description: Connect Stripe, discover 34 supported streams, and deliver selected data to PostgreSQL.
+description: Connect Stripe, discover 34 supported streams, and deliver selected data to PostgreSQL or Airtable.
 ---
 
-Stripe is available as a source connector for PostgreSQL delivery. It supports
+Stripe is available as a source connector for PostgreSQL or Airtable delivery. It supports
 connection testing, typed discovery, preview, pagination, full and incremental
 stream extraction, empty streams, SQL models, and idempotent Upsert delivery.
 
 <Note>
-  The supported path is **Stripe → PostgreSQL**. Stripe cannot be selected as a
-  destination.
+  Validated paths include **Stripe → PostgreSQL** and **Stripe → Airtable**.
+  Stripe cannot be selected as a destination.
 </Note>
 
 ## Supported streams
@@ -50,11 +50,12 @@ The connection test validates authentication without copying Stripe records.
 ## Discover and select streams
 
 1. Create a pipeline with the saved Stripe source.
-2. Open the **Source** node.
-3. Click **Discover schema**.
+2. Open **Source**.
+3. Click **Discover catalog**.
 4. Search or filter the discovered stream catalog.
 5. Select only the streams the pipeline will model and deliver.
-6. Preview representative rows before configuring destination tables.
+6. Preview representative rows and click **Save stream settings** before
+   configuring destinations.
 
 A valid empty Stripe response is successful. New or lightly used accounts
 commonly return zero rows for `charges`, `refunds`, `subscriptions`, or
@@ -69,9 +70,11 @@ Use Full Table for the first validation run. Move eligible streams to
 Incremental only after the initial run succeeds and the destination key is
 verified.
 
-## PostgreSQL destination requirements
+## Destination requirements
 
-Create or explicitly reconcile destination tables before delivery. The runner
+Create or explicitly reconcile PostgreSQL destination tables before delivery.
+For Airtable, create the destination table and writable fields in Airtable,
+then configure field mappings and a stable merge key. The runner
 does not create final tables while a pipeline run is executing.
 
 - Use a stable Stripe `id` as the primary key where the resource exposes one.
@@ -120,7 +123,7 @@ the key or authorization headers.
 ## Current limitations
 
 - Stripe is source-only.
-- The destination path is PostgreSQL.
+- Validated destination paths are PostgreSQL and Airtable.
 - Webhook ingestion and write-back to Stripe are not supported.
 - Feature-gated stream families listed above are not selectable.
 - API fields can vary by account and API version; refresh discovery before

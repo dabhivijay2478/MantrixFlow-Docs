@@ -1,20 +1,49 @@
 ---
-title: Normalisation and SQL
-description: Shape data with destination-scoped Normalisation and SQL models in the current builder.
+title: SQL transformations and revisions
+description: Create destination-owned SQL drafts, validate and preview output, then publish isolated revisions.
 ---
 
-The transformation workflow is destination-scoped. This guide identifies where the controls appear; the topic pages contain the rules and examples.
+The current transformation workflow is destination-owned and revision-based.
+There is no canvas transformation node and no separate Normalisation panel.
 
-## Normalisation
+## Create a transformation
 
-Use the **Normalisation** tab for rename and cast rules. See [Normalisation](/pipelines/normalisation) for supported rules and examples.
+1. Open **Transformations**.
+2. Select a destination in the left navigator.
+3. Click **New transformation**.
+4. Enter a name, stable key, and output model.
+5. Select one or more source input streams.
+6. Write the SQL model.
+7. Click **Save draft**.
 
-## SQL Layer
+## Release a revision
 
-Use the **SQL Layer** tab for SQL models. See [SQL Layer](/pipelines/dbt-layer) for source references, validation, previews, and destination-table requirements.
+Use the editor's release workflow in order:
 
-## Multiple outputs
+1. **Validate draft** checks SQL and the output model.
+2. **Preview output** runs the valid draft and shows its result.
+3. **Publish revision** makes that revision available to the owning destination's next run.
 
-When multiple source streams are selected, configure a SQL model and final delivery table for each stream you intend to deliver.
+Unsaved or unpublished drafts do not change production runs. Revision history
+keeps earlier releases visible.
 
-Each final destination table must already exist.
+## Rename and cast values
+
+Express renames and casts directly in SQL:
+
+```sql
+SELECT
+  id,
+  status AS order_status,
+  CAST(total_amount AS DECIMAL(12, 2)) AS total_amount
+FROM {{ source('raw', 'public__orders') }}
+```
+
+Use SQL for filtering, joins, JSON extraction, derived fields, aggregates, and
+final output selection. See [SQL transformations](/pipelines/dbt-layer).
+
+## Assign the published output
+
+After publishing, open the owning destination. Under **Published output
+targets**, enter the final table and Upsert keys, or configure Airtable field
+mappings and merge fields. Final destination tables must exist before delivery.

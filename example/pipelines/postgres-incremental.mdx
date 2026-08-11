@@ -65,13 +65,13 @@ FROM generate_series(1, 8000) AS g;
 ## 3. Configure the pipeline
 
 1. Create and test PostgreSQL source and destination connections.
-2. Create a pipeline with the source connection.
-3. Discover and select `mantrix_source.large_dataset`.
-4. Choose the PostgreSQL destination.
-5. Set sync mode to **Incremental**.
-6. Set replication key to `updated_at`.
-7. Set merge key to `id`.
-8. Set destination table to `mantrix_destination.large_dataset`.
+2. Create a pipeline with the source connection and open its workspace.
+3. In **Source**, discover and enable `mantrix_source.large_dataset`.
+4. Set its sync mode to **Incremental**, cursor to `updated_at`, preview, and
+   save stream settings.
+5. In **Destinations**, add and save the PostgreSQL destination.
+6. In **Transformations**, select that destination and create a transformation
+   using the source stream.
 
 Use this model:
 
@@ -88,8 +88,10 @@ SELECT
 FROM {{ source('raw', 'mantrix_source__large_dataset') }}
 ```
 
-Validate, preview, save, and run manually. The first run should deliver 8,000
-rows.
+Save the draft, validate, preview, and publish it. Return to the destination
+editor, set the output table to `mantrix_destination.large_dataset`, set the
+Upsert key to `id`, and save. Validate from **Overview**, click **Run all**, and
+inspect **Runs**. The first run should deliver 8,000 rows.
 
 ## 4. Apply the incremental delta
 
@@ -116,7 +118,7 @@ SET
 WHERE id BETWEEN 1 AND 25;
 ```
 
-Run the pipeline again. The Incremental run should process 2,025 changed rows.
+Click **Run all** again. The Incremental run should process 2,025 changed rows.
 
 ## 5. Verify
 

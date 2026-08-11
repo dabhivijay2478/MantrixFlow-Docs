@@ -1,46 +1,40 @@
 ---
-title: Pipelines and run history
-description: Configure the current Source and Destination builder flow, run manually, and inspect run history.
+title: Pipelines and runs
+description: Configure the current tabbed pipeline workspace, run all destinations, and inspect the Runs tab.
 ---
 
-The builder is where production pipeline decisions happen.
+The pipeline detail page is where production pipeline decisions happen. The
+former canvas builder has been removed.
 
 ## Key routes
 
 - List: `/workspace/data-pipelines`
-- Create shell: `/workspace/data-pipelines/new`
-- Builder: `/workspace/data-pipelines/[id]/builder`
-- Detail: `/workspace/data-pipelines/[id]`
+- Create: `/workspace/data-pipelines/new`
+- Pipeline workspace: `/workspace/data-pipelines/[id]`
+- Destination editor: `/workspace/data-pipelines/[id]/destinations/[destinationId]`
+- Transformation editor: `/workspace/data-pipelines/[id]/transformations/[transformationId]`
 
-## Create the shell
+Legacy `/builder` URLs redirect to the corresponding workspace tab.
 
-Create the pipeline with a name and source connection. Then open the builder.
+## Workspace workflow
 
-## Configure Source
+1. Use **Source** to test, discover, select, configure, preview, and save streams.
+2. Use **Destinations** to add an independent delivery target.
+3. Use **Transformations** to select that destination and manage its SQL drafts
+   and published revisions.
+4. Return to the destination editor to configure published output tables,
+   Upsert keys, or Airtable field mappings.
+5. Use **Overview** to validate readiness.
+6. Click **Run all** in the header.
+7. Use **Runs** to inspect execution details.
+8. Use **Settings** for metadata, activation, validation, scheduling, and
+   lifecycle controls.
 
-Use the **Source** node to:
+## Runs
 
-- test connection
-- discover schema
-- refresh tables
-- include streams
-- preview rows
+The **Runs** tab shows status, destination, start time, duration, rows written,
+and published revision count. Select a run for detailed phases, targets,
+warnings, and sanitized errors.
 
-## Configure Destination
-
-Use the **Destination** node to:
-
-- select the destination connection
-- choose Full Table or Incremental sync
-- keep the live write mode as Upsert
-- add rename/cast Normalisation rules
-- write SQL models
-- validate and preview output
-- save the destination
-- run manually
-
-## Run history
-
-After a run, use run history to check status, row counts, duration, destination targets, warnings, and errors.
-
-Investigate immediately when row counts drop unexpectedly, a run fails after credential changes, or repeated warnings appear for the same destination.
+Investigate immediately when row counts drop unexpectedly, a run fails after
+credential changes, or repeated warnings appear for the same destination.
