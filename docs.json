@@ -100,6 +100,7 @@
               "connections/sources/database/mysql",
               "connections/sources/productivity/airtable",
               "connections/sources/productivity/asana",
+              "connections/sources/productivity/notion",
               "connections/sources/crm/hubspot",
               "connections/sources/finance/stripe",
               "connections/destinations/postgresql",

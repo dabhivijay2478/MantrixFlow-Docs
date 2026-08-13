@@ -1,11 +1,12 @@
 ---
 title: Connections Overview
-description: Create and test PostgreSQL, MySQL, Airtable, Asana, HubSpot, and Stripe connections supported by MantrixFlow.
+description: Create and test PostgreSQL, MySQL, Airtable, Asana, Notion, HubSpot, and Stripe connections supported by MantrixFlow.
 ---
 
 Connections are reusable encrypted credentials. PostgreSQL, MySQL, and Airtable
 are available as both sources and destinations. HubSpot and Stripe are available
-as sources. Asana is available as a source with workspace and project scoping.
+as sources. Asana supports workspace/project scoping, and Notion supports shared
+data-source discovery with dlt-backed incremental extraction.
 
 ## Current live connectors
 
@@ -15,6 +16,7 @@ as sources. Asana is available as a source with workspace and project scoping.
 | Source | MySQL | Available when reported by runtime capabilities |
 | Source | Airtable | Available when reported by runtime capabilities |
 | Source | Asana | Available when reported by runtime capabilities |
+| Source | Notion | Available when reported by runtime capabilities |
 | Source | HubSpot | Available |
 | Source | Stripe | Available |
 | Destination | PostgreSQL | Available |
@@ -39,14 +41,19 @@ See [Asana source](/connections/sources/productivity/asana) for PAT setup,
 workspace/project scope, eight streams, task incremental behavior, and current
 limitations.
 
+See [Notion source](/connections/sources/productivity/notion) for integration
+sharing, data-source discovery, dlt-backed Full Table and Incremental behavior,
+stable staging names, and API safety limits.
+
 ## Create a source connection
 
 1. Open **Connections**.
 2. Click **+ New Connection**.
 3. Set the role to **Source**.
-4. Choose **PostgreSQL**, **MySQL**, **Airtable**, **Asana**, **HubSpot**, or **Stripe**.
+4. Choose **PostgreSQL**, **MySQL**, **Airtable**, **Asana**, **Notion**, **HubSpot**, or **Stripe**.
 5. Fill the connector-specific fields. Airtable and Asana use Personal Access
-   Tokens; HubSpot uses a private app access token.
+   Tokens; Notion uses an internal integration token; HubSpot uses a private
+   app access token.
 6. Click **Test Connection**.
 7. Save after the test succeeds.
 

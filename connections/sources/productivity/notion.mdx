@@ -1,10 +1,190 @@
 ---
 title: Notion source
-description: Status notice for Notion source support.
+description: Connect a Notion internal integration, discover shared data sources, and sync page rows with dlt-backed Full Table or Incremental extraction.
 ---
 
-Notion source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
+Notion is available as a source-only connector when the MantrixFlow runtime
+reports the connector healthy. It reads content shared with a Notion internal
+integration, discovers modern Notion data sources, previews rows, stages them
+through dlt, applies published SQL transformations, and delivers the result to
+a supported destination.
 
-The public docs cover available PostgreSQL, MySQL, Airtable, Asana, HubSpot, and Stripe workflows. This page is kept as a safe landing page for older or direct links and intentionally does not provide Notion setup steps.
+MantrixFlow never writes to Notion.
 
-Use [Connections Overview](/connections/overview) for the supported live connector list.
+## Supported resources
+
+Notion separates a database container from the data sources inside that
+database. MantrixFlow exposes each discovered data source as its own stable
+stream so renaming a database or data source does not change pipeline identity.
+
+| Resource | Sync modes | Primary key | Cursor |
+| --- | --- | --- | --- |
+| Discovered data source | Full Table, Incremental | `id` | `last_edited_time` |
+| Workspace users | Full Table | `id` | None |
+
+A data-source stream has this form:
+
+```text
+notion.data_source_<data_source_uuid_without_hyphens>
+```
+
+Its DuckDB staging relation is:
+
+```text
+notion__data_source_<data_source_uuid_without_hyphens>
+```
+
+The row payload preserves Notion page metadata and properties, including
+`id`, `created_time`, `last_edited_time`, `in_trash`, `url`, `parent`,
+`properties`, `created_by`, and `last_edited_by`. Property values remain JSON
+because every Notion data source can define a different schema.
+
+## Before you begin
+
+1. Open [Notion integrations](https://www.notion.so/my-integrations).
+2. Create an internal integration for the workspace that MantrixFlow will
+   read.
+3. Enable read-content access and copy the internal integration token.
+4. Open each page or database that should be visible to MantrixFlow.
+5. Use **Connections** in Notion to share that content with the integration.
+
+<Note>
+  Creating an integration does not automatically grant access to workspace
+  content. Notion returns only pages and databases explicitly shared with the
+  integration or inherited through a shared parent page.
+</Note>
+
+Treat the integration token like a password. MantrixFlow encrypts it at rest,
+masks it after saving, and removes it from agent-visible configuration and
+sanitized errors.
+
+## Create the source connection
+
+1. Open **Connections** in your MantrixFlow workspace.
+2. Click **+ New Connection** and select **Source**.
+3. Select **Notion**.
+4. Enter a descriptive connection name and the internal integration token.
+5. Click **Test Connection**. MantrixFlow validates the token against the
+   authenticated Notion bot identity.
+6. Save the connection after the test succeeds.
+
+If Notion does not appear in the connector catalog, the ELT runtime has not
+reported the Notion capability as healthy. Refresh the page after the runtime
+is available.
+
+## Discover and select data sources
+
+1. Create or open a pipeline that uses the Notion connection.
+2. Open **Source** and click **Discover catalog**.
+3. Expand the database groups and select the required data-source streams.
+4. Choose **Full Table** or **Incremental** for each selected data source.
+5. Preview representative rows.
+6. Save the stream settings.
+
+Discovery uses Notion Search only to find content visible to the integration.
+MantrixFlow then retrieves each data source directly to obtain authoritative
+schema and parent-database metadata. Search is never used to extract the rows
+for a pipeline run.
+
+Notion Search indexing can be delayed. After sharing new content, wait briefly
+and refresh discovery if it does not appear immediately.
+
+## Full Table and Incremental
+
+**Full Table** reads every visible row from the selected data source and
+replaces its staging resource for the run.
+
+**Incremental** uses dlt merge semantics with `id` as the merge key and
+`last_edited_time` as the cursor. The request uses an inclusive timestamp
+boundary so records sharing the last checkpoint timestamp are reread safely and
+deduplicated by primary key.
+
+Checkpoint state advances only after successful staging and delivery. A failed
+or partial run does not commit the candidate Notion cursor.
+
+Incremental extraction is scheduled polling, not CDC. Deleted or permission-
+revoked content may require a periodic Full Table reconciliation depending on
+the destination model.
+
+## Transform Notion properties
+
+Notion properties are stored in the `properties` JSON object. Inspect a preview
+to confirm each property's type before writing SQL.
+
+Example model for a task data source:
+
+```sql
+SELECT
+  id,
+  last_edited_time,
+  url,
+  properties -> 'Name' -> 'title' -> 0 ->> 'plain_text' AS task_name,
+  properties -> 'Status' -> 'status' ->> 'name' AS status
+FROM {{ source('raw', 'notion__data_source_<id>') }}
+```
+
+Replace `<id>` with the staging relation shown in the transformation editor.
+Use `id` as the destination Upsert key unless the published model produces a
+different stable, unique key.
+
+## API behavior and safety limits
+
+The connector uses the Notion `2026-03-11` API contract and queries rows through
+the modern data-source endpoint. Requests are limited to an average of three
+per second per connection. `429` responses honor `Retry-After`; transient
+server failures use bounded exponential retry.
+
+Notion data-source queries can return at most 10,000 results for one query. If
+Notion reports an incomplete request or the connector reaches that cap,
+MantrixFlow fails the run instead of reporting partial data as complete. Split
+very large operational datasets into smaller Notion data sources before
+syncing them.
+
+## Multi-data-source databases
+
+A single Notion database can contain multiple data sources. Discovery presents
+each one independently. Select the exact data source you want to sync.
+
+Older saved configurations that contain only a database ID are resolved
+automatically when the database has exactly one data source. When it has more
+than one, MantrixFlow asks for an explicit data-source selection rather than
+guessing.
+
+## Verify a run
+
+After starting the pipeline, open **Runs** and confirm:
+
+- the expected `notion.data_source_...` streams are listed;
+- **Rows failed** is `0`;
+- the destination shows the expected target tables;
+- direct destination counts match the run result; and
+- a second Incremental run updates edited pages without duplicating `id`.
+
+## Limitations
+
+- Notion is source-only.
+- Authentication uses an internal integration token; OAuth is not available.
+- Only content shared with the integration can be discovered or read.
+- Search discovery can lag after permission changes.
+- Data-source queries reaching 10,000 results fail safely; automatic time-window
+  partitioning is not implemented.
+- Rich page properties remain nested JSON and may need SQL extraction.
+- Explicit page-content and nested-block resources are not selectable in the
+  current self-serve catalog.
+- The connector does not provide realtime CDC.
+
+## Troubleshooting
+
+| Symptom | Resolution |
+| --- | --- |
+| Notion is missing from Connections | Confirm the ELT service is running and reports the Notion source capability as available, then refresh. |
+| Authentication failed | Replace the internal integration token and test the connection again. |
+| Database or data source is missing | Share its parent page or database with the integration, wait for Search indexing, and refresh discovery. |
+| Multiple data sources are reported | Select the specific child data source instead of the database container. |
+| Preview returns no rows | Confirm the data source contains pages and the integration can open them in Notion. |
+| Run stops at 10,000 rows | Split the content into smaller data sources; partial results are intentionally rejected. |
+| Rate limited | Allow the bounded retry to complete or reduce concurrent pipelines using the same token. |
+| SQL cannot find the source | Use the exact `notion__data_source_<id>` relation shown by the transformation editor. |
+
+Next, review [Sync modes](/pipelines/sync-modes) and
+[Incremental sync](/sync-reference/incremental-sync).

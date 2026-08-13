@@ -1,6 +1,6 @@
 ---
 title: Connections
-description: Create and test PostgreSQL, MySQL, Airtable, Asana, HubSpot, and Stripe connections in the MantrixFlow workspace.
+description: Create and test PostgreSQL, MySQL, Airtable, Asana, Notion, HubSpot, and Stripe connections in the MantrixFlow workspace.
 ---
 
 Open **Connections** to create reusable database and SaaS credentials.
@@ -9,7 +9,7 @@ Open **Connections** to create reusable database and SaaS credentials.
 
 1. Click **+ New Connection**.
 2. Choose the role: Source or Destination.
-3. Choose **PostgreSQL**, **MySQL**, **Airtable**, **Asana**, **HubSpot**, or **Stripe**
+3. Choose **PostgreSQL**, **MySQL**, **Airtable**, **Asana**, **Notion**, **HubSpot**, or **Stripe**
    for a source. Choose **PostgreSQL**, **MySQL**, or **Airtable** for a
    destination.
 4. Fill the connection fields.
@@ -31,6 +31,10 @@ setup.
 
 Asana sources use a Personal Access Token and store workspace/project scope on
 each pipeline. See the [Asana source guide](/connections/sources/productivity/asana).
+
+Notion sources use an internal integration token and can read only pages and
+databases shared with that integration. See the
+[Notion source guide](/connections/sources/productivity/notion).
 
 ## Destination connections
 
