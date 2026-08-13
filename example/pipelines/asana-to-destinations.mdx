@@ -1,0 +1,128 @@
+---
+title: Asana to PostgreSQL, MySQL, and Airtable
+description: Configure all eight Asana streams and deliver published models to PostgreSQL, MySQL, or an existing Airtable table.
+---
+
+This example uses one Asana source with all eight supported streams. The route
+has been verified through the customer UI against PostgreSQL, MySQL, and
+Airtable destinations.
+
+## 1. Prepare connections
+
+1. Create, test, and save an Asana source by following the
+   [Asana source guide](/connections/sources/productivity/asana).
+2. Create and test any destination connections you need:
+   - PostgreSQL
+   - MySQL
+   - Airtable
+
+For Airtable, prepare an existing base and table. Runtime delivery does not
+create Airtable tables.
+
+## 2. Configure the Asana Source tab
+
+1. Create a pipeline with the saved Asana connection.
+2. Open **Source** and run discovery.
+3. Select one workspace and the required projects.
+4. Save the Asana scope.
+5. Select `workspaces`, `projects`, `sections`, `tags`, `tasks`, `stories`,
+   `teams`, and `users`.
+6. Use Full Table for all streams in the first run.
+7. Preview each stream and save stream settings.
+
+<Warning>
+  Keep tasks in Full Table mode when stories are selected. Stories require the
+  complete task dependency traversal.
+</Warning>
+
+## 3. Add destinations
+
+Open **Destinations** and add each saved destination connection. You can test
+all three routes in one pipeline or use a separate pipeline per destination.
+
+Suggested destination names:
+
+- `Asana → PostgreSQL`
+- `Asana → MySQL`
+- `Asana → Airtable`
+
+## 4. Publish eight transformations per destination
+
+Create one destination-owned transformation for every Asana stream. Start with
+an explicit projection and use `gid` as the stable output key.
+
+Example tasks model:
+
+```sql
+SELECT
+  gid,
+  name,
+  completed,
+  assignee__gid AS assignee_gid,
+  due_on,
+  modified_at
+FROM {{ source('raw', 'asana__tasks') }}
+```
+
+For every transformation:
+
+1. Save the draft.
+2. Validate it.
+3. Preview the output.
+4. Publish the revision.
+
+Only published revisions run.
+
+## 5. Configure PostgreSQL and MySQL targets
+
+Use one table per stream. Example contracts:
+
+| Stream | PostgreSQL | MySQL | Upsert key |
+| --- | --- | --- | --- |
+| Workspaces | `public.postgres_asana_workspaces` | `defaultdb.mysql_asana_workspaces` | `gid` |
+| Projects | `public.postgres_asana_projects` | `defaultdb.mysql_asana_projects` | `gid` |
+| Sections | `public.postgres_asana_sections` | `defaultdb.mysql_asana_sections` | `gid` |
+| Tags | `public.postgres_asana_tags` | `defaultdb.mysql_asana_tags` | `gid` |
+| Tasks | `public.postgres_asana_tasks` | `defaultdb.mysql_asana_tasks` | `gid` |
+| Stories | `public.postgres_asana_stories` | `defaultdb.mysql_asana_stories` | `gid` |
+| Teams | `public.postgres_asana_teams` | `defaultdb.mysql_asana_teams` | `gid` |
+| Users | `public.postgres_asana_users` | `defaultdb.mysql_asana_users` | `gid` |
+
+Use **Create or verify destination table** before the first run. This explicit
+setup action may add newly discovered flattened columns. Runtime delivery only
+writes to the configured tables; it does not create surprise tables.
+
+## 6. Configure the Airtable target
+
+Select an existing Airtable base and table. Map the Asana `gid` output column
+to a writable Airtable field, usually the primary `Name` field in a dedicated
+test table, and select that field as the merge key.
+
+The current Airtable destination assigns one selected table to the destination.
+If all eight transformations share it, their records share that table. Use
+separate Airtable destinations or tables when each stream needs an independent
+business schema.
+
+## 7. Validate and run
+
+1. Open **Overview** and click **Validate pipeline**.
+2. Resolve every missing published revision, destination table, or merge key.
+3. Click **Run all**, or use a destination's **Run** action to test one target.
+4. Open **Runs** and confirm the latest row for each destination is successful.
+5. Verify direct counts in PostgreSQL, MySQL, or Airtable.
+
+Source data can change between destination runs, so small differences in row
+counts are normal. A successful run must report zero failed rows and its direct
+destination counts must match that run's delivered output.
+
+## 8. Move tasks to Incremental
+
+After a successful Full Table baseline, tasks can use Incremental mode with:
+
+- cursor: `modified_at`
+- merge key: `gid`
+- optional initial sync start: ISO timestamp saved in Asana extraction scope
+
+Do not select stories in the same run when tasks are incremental. Schedule a
+periodic Full Table reconciliation for project membership changes that do not
+advance Asana's task `modified_at` value.

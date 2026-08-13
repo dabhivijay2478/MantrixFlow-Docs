@@ -1,11 +1,11 @@
 ---
 title: Connections Overview
-description: Create and test PostgreSQL, MySQL, Airtable, HubSpot, and Stripe connections supported by MantrixFlow.
+description: Create and test PostgreSQL, MySQL, Airtable, Asana, HubSpot, and Stripe connections supported by MantrixFlow.
 ---
 
 Connections are reusable encrypted credentials. PostgreSQL, MySQL, and Airtable
 are available as both sources and destinations. HubSpot and Stripe are available
-as sources.
+as sources. Asana is available as a source with workspace and project scoping.
 
 ## Current live connectors
 
@@ -14,6 +14,7 @@ as sources.
 | Source | PostgreSQL | Available |
 | Source | MySQL | Available when reported by runtime capabilities |
 | Source | Airtable | Available when reported by runtime capabilities |
+| Source | Asana | Available when reported by runtime capabilities |
 | Source | HubSpot | Available |
 | Source | Stripe | Available |
 | Destination | PostgreSQL | Available |
@@ -34,15 +35,18 @@ See [HubSpot source](/connections/sources/crm/hubspot) for its ten supported
 streams, private app token setup, UTC extraction window, and PostgreSQL
 requirements. See [Stripe source](/connections/sources/finance/stripe) for its
 34 supported streams, authentication, sync modes, and empty-stream behavior.
+See [Asana source](/connections/sources/productivity/asana) for PAT setup,
+workspace/project scope, eight streams, task incremental behavior, and current
+limitations.
 
 ## Create a source connection
 
 1. Open **Connections**.
 2. Click **+ New Connection**.
 3. Set the role to **Source**.
-4. Choose **PostgreSQL**, **MySQL**, **Airtable**, **HubSpot**, or **Stripe**.
-5. Fill the connector-specific fields. Airtable uses a Personal Access Token;
-   HubSpot uses a private app access token.
+4. Choose **PostgreSQL**, **MySQL**, **Airtable**, **Asana**, **HubSpot**, or **Stripe**.
+5. Fill the connector-specific fields. Airtable and Asana use Personal Access
+   Tokens; HubSpot uses a private app access token.
 6. Click **Test Connection**.
 7. Save after the test succeeds.
 

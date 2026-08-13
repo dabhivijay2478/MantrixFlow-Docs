@@ -1,0 +1,166 @@
+---
+title: Asana source
+description: Connect Asana with a Personal Access Token, scope a pipeline to workspaces and projects, and sync eight supported streams.
+---
+
+Asana is available as a source connector. MantrixFlow can read eight streams,
+scope extraction to one workspace and selected projects, preview records, stage
+the result, apply published SQL transformations, and deliver rows to
+PostgreSQL, MySQL, or Airtable.
+
+## Supported streams
+
+| Stream | Scope | Sync modes | Stable key or cursor |
+| --- | --- | --- | --- |
+| `workspaces` | Connected user | Full Table | Asana `gid` in the output |
+| `projects` | Selected workspace | Full Table | Asana `gid` in the output |
+| `sections` | Selected projects | Full Table | Asana `gid` in the output |
+| `tags` | Selected workspace | Full Table | Asana `gid` in the output |
+| `tasks` | Selected projects | Full Table, Incremental | Primary key `gid`; cursor `modified_at` |
+| `stories` | Tasks in selected projects | Full Table | Append-only activity and comments |
+| `teams` | Selected organization | Full Table | Asana `gid` in the output |
+| `users` | Selected workspace | Full Table | Asana `gid` in the output |
+
+## Before you begin
+
+Create an Asana Personal Access Token in the
+[Asana developer console](https://app.asana.com/0/my-apps). A PAT has the same
+access as the Asana user who created it, so use a user who can read only the
+workspaces and projects this pipeline needs. Asana documents PAT behavior in
+its [authentication guide](https://developers.asana.com/docs/authentication).
+
+Store the token in a password manager. MantrixFlow encrypts the saved token and
+masks it after saving. The token is sent to the MantrixFlow API and is not
+exposed in pipeline logs or run errors.
+
+<Note>
+  The current connector supports Personal Access Tokens. OAuth and service
+  accounts are not available for this source yet.
+</Note>
+
+## Create the source connection
+
+1. Open **Connections** in your MantrixFlow workspace.
+2. Click **+ New Connection** and choose **Source**.
+3. Select **Asana**.
+4. Enter a descriptive connection name and the Personal Access Token.
+5. Click **Test Connection**. MantrixFlow validates the token against the
+   authenticated Asana user.
+6. Save the connection after the test succeeds.
+
+## Select workspace and project scope
+
+Asana scope belongs to the pipeline, not the shared connection. Two pipelines
+can therefore reuse one connection while reading different projects.
+
+1. Create or open a pipeline that uses the Asana connection.
+2. Open **Source** and click **Discover catalog**.
+3. In **Asana extraction scope**, select one workspace.
+4. Select the projects this pipeline may read.
+5. Enable **Include archived projects** only when archived project data is
+   required.
+6. Optionally set an ISO timestamp for the first incremental task read.
+7. Click **Save Asana scope**.
+8. Select the required streams, preview them, and click **Save stream
+   settings**.
+
+Projects require a workspace. Sections, tasks, and stories require at least one
+project. Tags, teams, and users are read from the selected workspace or
+organization.
+
+## Staging and SQL
+
+Each public stream has a stable DuckDB staging relation:
+
+| Stream | Staging relation |
+| --- | --- |
+| Workspaces | `asana__workspaces` |
+| Projects | `asana__projects` |
+| Sections | `asana__sections` |
+| Tags | `asana__tags` |
+| Tasks | `asana__tasks` |
+| Stories | `asana__stories` |
+| Teams | `asana__teams` |
+| Users | `asana__users` |
+
+Nested Asana objects such as assignees, owners, memberships, custom fields,
+tags, and workspace references can appear as flattened columns or JSON values.
+Use the columns shown by the transformation editor instead of assuming every
+optional field is present.
+
+Example task model:
+
+```sql
+SELECT
+  gid,
+  name,
+  completed,
+  assignee__gid AS assignee_gid,
+  due_on,
+  modified_at
+FROM {{ source('raw', 'asana__tasks') }}
+```
+
+Use `gid` as the destination Upsert key for resources that expose it.
+
+## Full Table and Incremental tasks
+
+All eight streams support Full Table. Tasks also support Incremental mode with
+`modified_at` as the cursor and `gid` as the merge key.
+
+Asana does not update `modified_at` for every project or container membership
+move. Incremental tasks are scheduled incremental extraction, not CDC. Run a
+periodic Full Table reconciliation when complete membership accuracy is
+required.
+
+Stories depend on a complete task traversal. When tasks and stories are
+selected together, configure tasks as Full Table. If one task disappears or is
+no longer readable after task discovery, MantrixFlow skips only that task's
+optional stories; authentication, rate-limit, timeout, and server failures
+still fail the run.
+
+## Rate limits and retries
+
+Asana assigns API limits per authorization token and returns `429` with a
+`Retry-After` value. MantrixFlow follows that delay with bounded retries and
+limits concurrent Asana requests. Asana's current policies are documented in
+its [rate-limit guide](https://developers.asana.com/docs/rate-limits).
+
+For large workspaces, reduce the selected project scope or run fewer Asana
+pipelines with the same token at the same time.
+
+## Verify a run
+
+Open **Runs** after starting the pipeline and confirm:
+
+- the run lists the expected eight or selected stream revisions;
+- **Rows failed** is `0`;
+- the destination reports the expected target tables;
+- direct destination counts agree with the run result.
+
+For PostgreSQL or MySQL, query each configured destination table. For Airtable,
+open the selected existing table and verify the mapped merge-field values.
+
+## Limitations
+
+- Asana is source-only.
+- Authentication is PAT-only.
+- Attachments are not downloaded.
+- Subtasks are not recursively expanded beyond fields returned with tasks.
+- Task incremental mode is not CDC.
+- Stories require Full Table task traversal.
+- The connector never changes data in Asana.
+
+## Troubleshooting
+
+| Symptom | Resolution |
+| --- | --- |
+| Authentication failed | Create a new PAT, update the connection, and test again. |
+| Workspace or project is missing | Confirm the PAT owner can open it in Asana, then refresh discovery. |
+| Project list is empty | Select a workspace before refreshing projects. |
+| Sections, tasks, or stories cannot preview | Select and save at least one project in Asana extraction scope. |
+| Rate limited | Wait for the automatic retry or reduce concurrent pipelines using the same token. |
+| Incremental tasks missed a project move | Run a Full Table reconciliation; Asana does not update `modified_at` for every membership change. |
+| SQL cannot find a source | Use the `asana__<stream>` staging relation shown in the transformation editor. |
+
+Next, follow [Asana to supported destinations](/example/pipelines/asana-to-destinations).

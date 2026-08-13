@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "MantrixFlow",
-  "description": "Documentation for MantrixFlow PostgreSQL, MySQL, Airtable, HubSpot, and Stripe pipelines, connections, transformations, runs, billing, and security.",
+  "description": "Documentation for MantrixFlow PostgreSQL, MySQL, Airtable, Asana, HubSpot, and Stripe pipelines, connections, transformations, runs, billing, and security.",
   "theme": "almond",
   "colors": {
     "primary": "#00a859",
@@ -99,6 +99,7 @@
               "connections/sources/database/postgresql",
               "connections/sources/database/mysql",
               "connections/sources/productivity/airtable",
+              "connections/sources/productivity/asana",
               "connections/sources/crm/hubspot",
               "connections/sources/finance/stripe",
               "connections/destinations/postgresql",
@@ -179,7 +180,8 @@
               "example/pipelines/postgres-incremental",
               "example/pipelines/stripe-to-postgres",
               "example/pipelines/hubspot-to-postgres",
-              "example/pipelines/airtable-and-mysql"
+              "example/pipelines/airtable-and-mysql",
+              "example/pipelines/asana-to-destinations"
             ]
           }
         ]
