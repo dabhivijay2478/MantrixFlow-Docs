@@ -1,0 +1,177 @@
+---
+title: Linear source
+description: Connect Linear with a Personal API Key, scope extraction to teams and projects, and sync eight supported resources.
+---
+
+Linear is available as a Beta source connector. MantrixFlow reads eight
+resources through Linear's GraphQL API, previews records, stages each selected
+resource, applies published SQL transformations, and delivers rows to a
+supported destination.
+
+MantrixFlow never creates, edits, or deletes data in Linear.
+
+## Supported resources
+
+| Resource | Sync modes | Primary key | Incremental cursor |
+| --- | --- | --- | --- |
+| `teams` | Full Table | `id` | None |
+| `users` | Full Table | `id` | None |
+| `workflow_states` | Full Table | `id` | None |
+| `issue_labels` | Full Table | `id` | None |
+| `projects` | Full Table, Incremental | `id` | `updatedAt` |
+| `cycles` | Full Table, Incremental | `id` | `updatedAt` |
+| `issues` | Full Table, Incremental | `id` | `updatedAt` |
+| `comments` | Full Table, Incremental | `id` | `updatedAt` |
+
+Each resource has a stable DuckDB staging relation:
+
+| Resource | Staging relation |
+| --- | --- |
+| Teams | `linear__teams` |
+| Users | `linear__users` |
+| Workflow states | `linear__workflow_states` |
+| Issue labels | `linear__issue_labels` |
+| Projects | `linear__projects` |
+| Cycles | `linear__cycles` |
+| Issues | `linear__issues` |
+| Comments | `linear__comments` |
+
+## Before you begin
+
+1. Open **Linear Settings**.
+2. Go to **Security & access**.
+3. Under **Personal API keys**, create a key for MantrixFlow.
+4. Limit the key to the teams the pipeline needs, when that option is
+   available for your workspace.
+5. Copy the key and store it in a password manager.
+
+Linear documents Personal API Keys in its
+[GraphQL authentication guide](https://linear.app/developers/graphql) and
+[Security & access guide](https://linear.app/docs/security-and-access).
+
+<Note>
+  Linear authentication is currently Personal API Key only in MantrixFlow.
+  OAuth is not available for this connector yet.
+</Note>
+
+The key has the access of the Linear user who created it. MantrixFlow encrypts
+the saved key, masks it after saving, and removes it from sanitized errors and
+pipeline logs.
+
+## Create the source connection
+
+1. Open **Connections** in your MantrixFlow workspace.
+2. Select **Source**.
+3. Select **Linear**.
+4. Enter a descriptive connection name and the Personal API Key.
+5. Click **Test Connection**. MantrixFlow validates the key against the
+   authenticated Linear user.
+6. Save the connection after the test succeeds.
+
+If Linear is missing or disabled, refresh the page after the ELT runtime is
+healthy. The connector is shown only when runtime capabilities report Linear
+source support.
+
+## Select team and project scope
+
+Scope is stored on the pipeline, not in the reusable connection. Two pipelines
+can therefore use the same Linear connection while reading different teams or
+projects.
+
+1. Create or open a pipeline that uses the Linear connection.
+2. Open the **Source** tab and discover the catalog.
+3. Under **Linear source scope**, select the teams the pipeline may read.
+4. Optionally select projects from those teams.
+5. Click **Save Linear scope**.
+6. Select resources, preview representative rows, and save the stream settings.
+
+An empty team selection includes every team accessible to the key. An empty
+project selection includes every accessible project within the selected team
+scope. Team scope applies to teams, workflow states, issue labels, projects,
+cycles, issues, and related comments. Project scope narrows projects, issues,
+and related comments. Users remain workspace-level because Linear user records
+do not belong to one project.
+
+Archived records are excluded by default. Enable archived resources in the
+pipeline's connector options only when they are required.
+
+## Full Table and Incremental
+
+**Full Table** replaces the staged resource with the current API result.
+
+**Incremental** is available for projects, cycles, issues, and comments.
+MantrixFlow orders those resources by `updatedAt`, stores the latest cursor,
+and requests records whose `updatedAt` is greater than or equal to the saved
+value. The inclusive boundary prevents records with the same timestamp from
+being skipped; the `id` primary key removes duplicates during merge.
+
+Incremental extraction is scheduled polling, not change data capture. It does
+not detect hard-deleted records. Run a periodic Full Table reconciliation when
+the destination must reflect deletions or access changes.
+
+Linear list queries use cursor-based pagination. MantrixFlow follows
+`pageInfo.endCursor` while `hasNextPage` is true and applies bounded request,
+page, complexity, retry, and runtime limits. See Linear's
+[pagination guide](https://linear.app/developers/pagination) and
+[rate-limit guide](https://linear.app/developers/rate-limiting).
+
+## Transform Linear data
+
+Relationships are flattened into stable identifier columns where practical.
+For example, issues expose fields such as `team_id`, `project_id`, `cycle_id`,
+`state_id`, `assignee_id`, and `creator_id`. Projects preserve `team_ids` and
+`team_names` as JSON arrays.
+
+Example issue model:
+
+```sql
+SELECT
+  id,
+  identifier,
+  title,
+  priority,
+  state_id,
+  assignee_id,
+  project_id,
+  createdAt AS created_at,
+  updatedAt AS updated_at
+FROM {{ source('raw', 'linear__issues') }}
+```
+
+Use `id` as the destination Upsert key. Use the exact columns shown by the
+transformation editor because optional Linear relationships can be null.
+
+## Verify a run
+
+After starting the pipeline, open **Runs** and confirm:
+
+- the expected selected resource revisions are present;
+- **Rows failed** is `0`;
+- each published model reports its intended destination table;
+- destination row counts and representative IDs match Linear.
+
+For an Incremental test, complete the first run, edit one issue or project in
+Linear, run the pipeline again, and verify that the changed `id` is merged into
+the destination.
+
+## Limitations
+
+- Linear is Beta and source-only.
+- Authentication is Personal API Key only.
+- Extraction is read-only and uses GraphQL queries; no mutations are sent.
+- Incremental mode is polling, not CDC, and does not detect hard deletes.
+- Attachments and private uploaded file contents are not downloaded.
+- Resource access is limited to what the API-key owner can read.
+
+## Troubleshooting
+
+| Symptom | Resolution |
+| --- | --- |
+| Linear is not in the catalog | Confirm the ELT runtime is healthy and reports Linear source support, then refresh Connections. |
+| Authentication failed | Create a new Personal API Key, update the connection, and test again. |
+| A team or project is missing | Confirm the key owner can open it in Linear and that the key is not scoped away from that team, then refresh discovery. |
+| A preview is empty | Clear or broaden the saved team/project scope and verify the selected resource contains readable records. |
+| Rate limited | Wait for the bounded retry or reduce concurrent pipelines using keys owned by the same Linear user. |
+| Incremental data looks stale | Confirm the resource supports Incremental, then run a Full Table reconciliation. |
+| SQL cannot find a source | Use the exact `linear__<resource>` staging relation shown in the transformation editor. |
+
