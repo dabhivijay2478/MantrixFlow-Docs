@@ -1,0 +1,156 @@
+---
+title: ClickHouse source
+description: Configure ClickHouse as a source for Full Table and Incremental pipelines.
+---
+
+ClickHouse is available as a source connector. MantrixFlow connects over the
+HTTP transport using the same SQL-first pipeline workflow used by relational
+sources. Discovered schemas and tables are previewed, staged, transformed with
+saved SQL models, and delivered to a supported destination.
+
+## Required access
+
+Use a dedicated read-only database user. Source privileges should not include
+`CREATE`, `DROP`, `ALTER`, `INSERT`, or `DELETE`.
+
+```sql
+CREATE USER mantrixflow_reader
+  IDENTIFIED BY 'replace-with-a-secret';
+
+GRANT SELECT ON analytics.* TO mantrixflow_reader;
+```
+
+Grant `SELECT` only on the schemas and tables the workspace needs. Use a
+secret manager for the real password. Do not commit it to source control.
+
+## Connection fields
+
+| Field | Notes |
+| --- | --- |
+| Connection Name | Descriptive workspace name, such as `Analytics ClickHouse` |
+| Host | ClickHouse hostname or cloud endpoint |
+| Database | Source database, such as `default` |
+| Username | Dedicated source user |
+| Password | Optional for local development; required for ClickHouse Cloud |
+| Connection Security | Secure / TLS for cloud and remote deployments, Non-secure for trusted local environments |
+| HTTP Port | `8443` for secure, `8123` for plain |
+| Native Port (advanced) | `9440` for secure, `9000` for plain |
+
+For ClickHouse Cloud, copy the host, username, password, and database from
+the cloud console and select **Secure / TLS**. The HTTP port defaults to
+`8443` and the native port defaults to `9440` automatically.
+
+## Create the connection
+
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Set the role to **Source**.
+4. Choose **ClickHouse**.
+5. Fill the connection fields.
+6. Click **Test Connection**.
+7. Save only after the test succeeds.
+
+If the database uses an IP allowlist or private network, follow
+[Private database access](/connections/private-database-access) before testing.
+
+## Discover and preview
+
+After creating a pipeline:
+
+1. Open the pipeline **Source** tab.
+2. Click **Discover catalog**.
+3. Enable each required `database.table` stream.
+4. Choose its sync mode and cursor when applicable.
+5. Preview representative rows and confirm field types.
+6. Click **Save stream settings**.
+
+System schemas such as `system` and `INFORMATION_SCHEMA` are filtered out of
+discovery. The `default` database is treated as a regular user database and
+is preserved.
+
+Selected streams receive stable staging names such as `default__events`.
+
+## Full Table mode
+
+Use Full Table for the first run, small reference tables, or deliberate
+snapshots. A run reads every selected source row visible to the source user.
+
+## Incremental mode
+
+Use Incremental for growing tables with a stable cursor:
+
+- `updated_at` for inserts and updates;
+- `created_at` for append-only tables; or
+- a monotonically increasing identifier.
+
+The cursor should be populated, indexed, and updated whenever a row changes.
+Use a stable primary key such as `id` for Upsert delivery.
+
+```sql
+CREATE INDEX IF NOT EXISTS events_updated_at_idx
+  ON events (updated_at)
+  TYPE set(0) GRANULARITY 1;
+```
+
+MantrixFlow stores checkpoint state only after a successful run. Failed runs
+do not advance the saved checkpoint.
+
+## Type compatibility
+
+The ClickHouse path supports common analytical types, including:
+
+- `UInt*`, `Int*`, `Float*`, `Decimal*`
+- `String`, `FixedString`, `LowCardinality(String)`
+- `Date`, `DateTime`, `DateTime64(precision, timezone)`
+- `UUID`, `IPv4`, `IPv6`
+- `Enum8`, `Enum16`
+- `Nullable(...)`, `Array(...)`, `Map(...)`, `Tuple(...)`, `Nested(...)`
+- `JSON` and `Object` where the engine version supports them
+
+Use a stable primary or unique key for Upsert delivery. For high-precision
+`Decimal` and `DateTime64` values, prefer the existing destination's
+type-compatibility table to avoid lossy conversions.
+
+## Source reference
+
+The source uses the official `clickhouse-connect` driver with its `clickhousedb`
+SQLAlchemy dialect over the HTTP transport. The destination-side uses the
+native dlt ClickHouse destination, which supports merge, replace,
+JSONL/Parquet loading, and the `clickhouse_adapter` for table-engine hints.
+
+The connector does not rely on `FINAL` rewrites. For ReplacingMergeTree
+tables, physical duplicate versions may exist until merges occur; treat
+duplicates as a normal property of the engine and resolve on the destination
+side when needed.
+
+## Sample source table
+
+```sql
+CREATE TABLE events (
+  event_id UInt64,
+  event_time DateTime64(3, 'UTC'),
+  user_id UInt64,
+  amount Decimal(18, 4),
+  status Enum8('new' = 1, 'done' = 2, 'failed' = 3)
+) ENGINE = MergeTree
+ORDER BY (event_time, event_id);
+```
+
+## Troubleshooting
+
+- **Connection refused:** verify host, HTTP port, network allowlist, and
+  firewall rules.
+- **Authentication failed:** verify username, password, and database name.
+- **TLS connection failure:** check the **Secure / TLS** toggle and the
+  HTTP port. For self-hosted ClickHouse on TLS, ensure the certificate is
+  trusted by the ELT runtime.
+- **No tables discovered:** grant `SELECT` on the schema and tables. System
+  schemas are filtered out by design.
+- **Preview fails:** check table permissions and unsupported custom types.
+- **Incremental rows missing:** confirm the cursor changes on updates and
+  is not null.
+- **Duplicate destination rows:** use a stable primary key and Upsert
+  delivery.
+
+For a list of pairings validated by the platform, see the
+[ClickHouse source and destination connector reference](/example/pipelines/clickhouse-and-mysql).

@@ -1,0 +1,120 @@
+---
+title: ClickHouse and MySQL pipelines
+description: Build, run, and verify ClickHouse-to-MySQL, MySQL-to-ClickHouse, and ClickHouse-to-ClickHouse pipelines.
+---
+
+This guide covers the cross-connector routes that the ClickHouse source and
+destination connector pair supports. Every route uses the same SQL-first
+pipeline workflow used by PostgreSQL, MySQL, and MariaDB.
+
+## Validated connector routes
+
+The following routes were exercised through the MantrixFlow browser workflow
+with real source previews and destination verification:
+
+| Source | Destination | Result |
+| --- | --- | --- |
+| ClickHouse | PostgreSQL | Passed |
+| ClickHouse | MySQL | Passed |
+| ClickHouse | MariaDB | Passed |
+| PostgreSQL | ClickHouse | Passed |
+| MySQL | ClickHouse | Passed |
+| MariaDB | ClickHouse | Passed |
+| ClickHouse | ClickHouse | Passed |
+
+This is a functional verification matrix, not a throughput benchmark.
+Validate the matrix on your own clusters before promoting it to production.
+
+## Required access
+
+### Source access
+
+The source user needs read-only access to the source tables. See the
+[ClickHouse source connection guide](/connections/sources/database/clickhouse)
+for the canonical `mantrixflow_reader` setup.
+
+For PostgreSQL, MySQL, and MariaDB sources, use the dedicated reader
+profile documented in the respective source guides.
+
+### Destination access
+
+The destination user needs write access to the destination database and
+tables. See the
+[ClickHouse destination connection guide](/connections/destinations/clickhouse)
+for the canonical `mantrixflow_writer` setup.
+
+For PostgreSQL, MySQL, and MariaDB destinations, grant `SELECT`, `INSERT`,
+and `UPDATE` on the destination schema. Add `CREATE`, `ALTER`, and `DROP`
+only when the destination editor is allowed to reconcile tables.
+
+## ClickHouse cross-connector setup
+
+For ClickHouse sources, configure the connection with **Secure / TLS**
+enabled for cloud and remote deployments. The HTTP port defaults to
+`8443` and the native port to `9440`. The HTTP port is the transport used
+by the source extractor and the destination loader. The native port is the
+transport used by the dlt ClickHouse destination's native protocol.
+
+For ClickHouse destinations, the destination loader needs both ports. Use
+the secure defaults for ClickHouse Cloud and the plain defaults for local
+development.
+
+## Full Table flow
+
+The Full Table flow mirrors the rest of the platform:
+
+1. Open **Connections** and create both the source and destination
+   connections.
+2. Open **Pipelines** and click **+ New Pipeline**.
+3. Choose the source connection and select one or more tables.
+4. Choose the destination connection and enter the published output
+   target.
+5. Open **Transformations** and create a SQL model that maps the source
+   columns to the destination columns.
+6. Save, validate, preview, and publish the revision.
+7. Run the pipeline once and verify the **rows written** value against the
+   destination count.
+
+## Incremental flow
+
+Incremental flows use a stable cursor on the source side and a stable
+Upsert key on the destination side:
+
+1. Choose the same source connection and select one or more tables.
+2. Choose the destination connection and select the stable primary or
+   unique key.
+3. Set the source sync mode to **Incremental** and pick the cursor column.
+4. Save, validate, preview, and publish the revision.
+5. Run the pipeline twice and confirm that the second run only delivers
+   the delta.
+
+## Verify rows after the run
+
+Use the same verification queries in the
+[ClickHouse destination guide](/connections/destinations/clickhouse) and
+the equivalent queries for the destination database. The duplicate query
+should return no rows after the second run.
+
+## Troubleshooting
+
+- **Connection refused:** verify host, HTTP port, network allowlist, and
+  firewall rules.
+- **Authentication failed:** verify username, password, and database name.
+- **TLS connection failure:** check the **Secure / TLS** toggle and the
+  HTTP port. For self-hosted ClickHouse on TLS, ensure the certificate is
+  trusted by the ELT runtime.
+- **No tables discovered:** grant `SELECT` on the source schema and tables.
+  System schemas are filtered out by design.
+- **Duplicate destination rows:** use a stable primary key and Upsert
+  delivery.
+- **HTTP port mismatch:** update the **HTTP Port** field to match the
+  listener. Use `8443` for secure cloud and `8123` for plain local.
+- **Native port mismatch:** update the **Native Port** field to match the
+  listener. Use `9440` for secure and `9000` for plain.
+
+For a long-form connector reference, see the
+[ClickHouse source guide](/connections/sources/database/clickhouse),
+the
+[ClickHouse destination guide](/connections/destinations/clickhouse),
+and the
+[PostgreSQL incremental example](/example/pipelines/postgres-incremental).

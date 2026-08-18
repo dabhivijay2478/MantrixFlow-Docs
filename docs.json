@@ -98,6 +98,7 @@
             "pages": [
               "connections/sources/database/postgresql",
               "connections/sources/database/mysql",
+              "connections/sources/database/clickhouse",
               "connections/sources/productivity/airtable",
               "connections/sources/productivity/asana",
               "connections/sources/productivity/linear",
@@ -106,6 +107,7 @@
               "connections/sources/finance/stripe",
               "connections/destinations/postgresql",
               "connections/destinations/mysql",
+              "connections/destinations/clickhouse",
               "connections/destinations/airtable"
             ]
           },
@@ -183,6 +185,7 @@
               "example/pipelines/stripe-to-postgres",
               "example/pipelines/hubspot-to-postgres",
               "example/pipelines/airtable-and-mysql",
+              "example/pipelines/clickhouse-and-mysql",
               "example/pipelines/asana-to-destinations"
             ]
           }

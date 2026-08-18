@@ -1,0 +1,156 @@
+---
+title: ClickHouse destination
+description: Configure ClickHouse as a destination, prepare the target table, and verify Upsert delivery.
+---
+
+ClickHouse is available as a destination connector. MantrixFlow validates the
+target contract, then delivers only the published SQL model's columns into
+the configured destination table.
+
+## Destination contract
+
+The final ClickHouse table must exist before delivery begins. You can create
+it with the explicit setup action in the destination editor when available,
+or run reviewed DDL in ClickHouse yourself. The delivery runner does not
+create final tables.
+
+The table should:
+
+- use a `MergeTree` engine family member such as `MergeTree` or
+  `ReplacingMergeTree`;
+- contain every column selected by the published SQL model;
+- use compatible types; and
+- define a primary or unique key for deterministic Upsert behavior.
+
+## Required destination access
+
+Create a dedicated writer. If table creation is managed separately, the
+runtime user needs only data access to existing tables.
+
+```sql
+CREATE USER mantrixflow_writer
+  IDENTIFIED BY 'replace-with-a-secret';
+
+GRANT SELECT, INSERT, ALTER, CREATE, DROP, TRUNCATE
+  ON analytics.*
+  TO mantrixflow_writer;
+```
+
+Grant `CREATE`, `ALTER`, and `DROP` only to a separate setup user or when
+your operating policy explicitly allows the app's setup action to reconcile
+tables.
+
+## Connection fields
+
+| Field | Notes |
+| --- | --- |
+| Connection Name | Descriptive workspace name, such as `Analytics ClickHouse` |
+| Host | ClickHouse hostname or cloud endpoint |
+| Database | Destination database |
+| Username | Dedicated destination user |
+| Password | Optional for local development; required for ClickHouse Cloud |
+| Connection Security | Secure / TLS for cloud and remote deployments, Non-secure for trusted local environments |
+| HTTP Port | `8443` for secure, `8123` for plain |
+| Native Port (advanced) | `9440` for secure, `9000` for plain |
+
+The HTTP port is the transport used by the loader to deliver rows into
+ClickHouse. The native port is the transport used by the dlt ClickHouse
+destination's native protocol. Both ports are required by the destination.
+
+## Create the connection
+
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Set the role to **Destination**.
+4. Choose **ClickHouse**.
+5. Fill the connection fields.
+6. Click **Test Connection**.
+7. Save after the test succeeds.
+
+## Prepare a destination table
+
+This example accepts event rows from a relational source:
+
+```sql
+CREATE TABLE analytics.events (
+  event_id UInt64,
+  event_time DateTime64(3, 'UTC'),
+  user_id UInt64,
+  amount Decimal(18, 4),
+  status LowCardinality(String),
+  synced_at DateTime DEFAULT now()
+) ENGINE = MergeTree
+ORDER BY (event_time, event_id);
+```
+
+The SQL model must output `event_id`, `event_time`, `user_id`, `amount`,
+and `status`. Columns with database defaults, such as `synced_at`, can be
+omitted when the table permits it.
+
+## Configure delivery
+
+1. Open **Destinations** and click **Add destination**.
+2. Choose the ClickHouse connection, target database, and save.
+3. Open **Transformations**, select that destination, and create the SQL
+   model.
+4. Save, validate, preview, and publish the revision.
+5. Return to the destination editor and, under **Published output targets**,
+   enter `database.table`, for example `analytics.events`.
+6. Choose the stable primary or unique key as the Upsert key.
+7. Create/verify the table when needed and save the destination.
+
+## Upsert behavior
+
+With a primary or unique key, a first run inserts rows and later runs update
+the matching rows. This is the recommended production configuration.
+
+Without a key, delivery cannot identify an existing row deterministically.
+Add a stable primary or unique key before enabling repeated runs.
+
+For tables that use `ReplacingMergeTree`, physical duplicate versions may
+exist until merges occur. Resolve duplicates deterministically on the
+destination side when needed.
+
+## Verify delivery
+
+```sql
+SELECT COUNT(*) AS delivered_rows
+FROM analytics.events;
+
+SELECT event_id, COUNT(*) AS occurrences
+FROM analytics.events
+GROUP BY event_id
+HAVING COUNT(*) > 1;
+
+SELECT event_id, event_time, user_id, amount, status
+FROM analytics.events
+ORDER BY event_time
+LIMIT 25;
+```
+
+The duplicate query should return no rows. Compare the count with the run's
+**rows written** value, accounting for any SQL filters.
+
+Confirm that no internal loader tables were written into the destination:
+
+```sql
+SELECT name
+FROM system.tables
+WHERE database = 'analytics'
+  AND name LIKE '\\_dlt\\_%';
+```
+
+## Troubleshooting
+
+| Error | Resolution |
+| --- | --- |
+| Destination table does not exist | Create the exact `database.table` before running, then validate again. |
+| Column is missing | Add the column to the table or remove it from the published SQL output. |
+| Access denied | Grant `SELECT`, `INSERT`, `ALTER`, `CREATE`, `DROP`, and `TRUNCATE` on the destination database. |
+| HTTP port mismatch | Update the **HTTP Port** field to match the listener. Use `8443` for secure cloud and `8123` for plain local. |
+| Native port mismatch | Update the **Native Port** field to match the listener. Use `9440` for secure and `9000` for plain. |
+| TLS connection failure | Use the provider-required TLS mode and certificate settings. For ClickHouse Cloud, ensure **Secure / TLS** is enabled. |
+| Duplicate-key failure | Confirm the selected Upsert key matches the table's primary or unique key. |
+
+For a list of pairings validated by the platform, see the
+[ClickHouse source and destination connector reference](/example/pipelines/clickhouse-and-mysql).
