@@ -104,6 +104,7 @@
               "connections/sources/productivity/asana",
               "connections/sources/productivity/linear",
               "connections/sources/productivity/notion",
+              "connections/sources/developer-tools/github",
               "connections/sources/customer-support/zendesk",
               "connections/sources/cms/strapi",
               "connections/sources/crm/hubspot",

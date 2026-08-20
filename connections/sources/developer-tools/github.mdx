@@ -1,10 +1,191 @@
 ---
 title: GitHub source
-description: Status notice for GitHub source support.
+description: Connect one GitHub.com repository with a Personal Access Token and sync issues, pull requests, commits, releases, and repository metadata.
 ---
 
-GitHub source setup is not part of the live self-serve MantrixFlow workflow documented for the current app.
+GitHub is an enabled Beta, source-only connector. MantrixFlow reads selected
+resources from one GitHub.com repository, stages them with stable relation
+names, applies published SQL transformations, and delivers the reviewed rows
+to a supported destination.
 
-The public docs cover available PostgreSQL, MySQL, Airtable, Asana, Notion, HubSpot, and Stripe workflows. This page is kept as a safe landing page for older or direct links and intentionally does not provide GitHub setup steps.
+The data connector is read-only. It does not clone repositories, push commits,
+open pull requests, change issues, or download release binaries.
 
-Use [Connections Overview](/connections/overview) for the supported live connector list.
+<Note>
+  The GitHub data source is separate from the GitHub App integration used to
+  version pipeline configuration. Connecting one does not authorize the other.
+</Note>
+
+## Supported resources
+
+The source catalog advertises 12 resources:
+
+| Resource | API | Sync mode | Primary key | Staging relation |
+| --- | --- | --- | --- | --- |
+| Issues | GraphQL | Full Table | repository ID + number | `github__issues` |
+| Pull requests | GraphQL | Full Table | repository ID + number | `github__pull_requests` |
+| Stargazers | GraphQL | Full Table | repository ID + user | `github__stargazers` |
+| Commits | REST | Full Table | SHA | `github__commits` |
+| Releases | REST | Full Table | ID | `github__releases` |
+| Contributors | REST | Full Table | ID | `github__contributors` |
+| Milestones | REST | Full Table | ID | `github__milestones` |
+| Labels | REST | Full Table | ID | `github__labels` |
+| Forks | REST | Full Table | ID | `github__forks` |
+| Branches | REST | Full Table | repository ID + name | `github__branches` |
+| Tags | REST | Full Table | repository ID + name | `github__tags` |
+| Repository events | REST | Full Table | ID | `github__events` |
+
+Every root row includes repository identity fields so records remain
+traceable to the configured repository.
+
+A legacy incremental `repo_events` resource is retained only for previously
+saved pipelines. It is not offered for new stream selection because GitHub
+exposes only a limited recent event window and may create tables dynamically
+by event type. It is not change data capture or a historical audit log.
+
+## Before you begin
+
+You need:
+
+- the GitHub account or organization name that owns the repository;
+- the repository name;
+- a Personal Access Token owned by a user who can read that repository; and
+- permission to create source connections in the MantrixFlow workspace.
+
+For the complete Beta resource set, use a classic Personal Access Token with
+read access to the repository. Private repositories normally require the
+classic `repo` scope. Public-only access can use a narrower token where GitHub
+allows it.
+
+Fine-grained Personal Access Tokens can work for REST resources when their
+repository access and endpoint permissions are sufficient, but coverage varies
+by resource. Classic PAT is the supported Beta contract for the GraphQL issue,
+pull-request, stargazer, comment, and reaction data.
+
+<Warning>
+  Grant access only to repositories the pipeline needs. MantrixFlow treats the
+  token as an opaque secret, so the token prefix is not used to decide whether
+  it is valid or sufficiently privileged.
+</Warning>
+
+## Create the source connection
+
+1. Open **Connections** in your MantrixFlow workspace.
+2. Click **+ New Connection** and choose **Source**.
+3. Select **GitHub**. The card is marked **Source only** and **Beta**.
+4. Enter a descriptive connection name.
+5. Enter the repository owner, such as `octocat`.
+6. Enter the repository name, such as `Hello-World`.
+7. Paste the Personal Access Token.
+8. Click **Test Connection**.
+9. Save after the connection test succeeds.
+
+The connection test validates the authenticated GitHub user and the exact
+repository. A successful user lookup does not hide a missing repository or
+insufficient repository permission.
+
+The current Beta form accepts one repository per connection. GitHub Enterprise
+Server and custom API hosts are not supported.
+
+## Select and preview resources
+
+1. Create or open a pipeline that uses the GitHub connection.
+2. Open the **Source** tab.
+3. Discover the source catalog.
+4. Select the required GitHub resources.
+5. Preview representative records and review the detected fields.
+6. Keep **Full Table** selected for newly configured resources.
+7. Save the stream configuration.
+
+Preview is read-only and bounded. It does not advance incremental state or
+modify the repository.
+
+An empty resource selection is rejected. An unknown resource name also fails
+explicitly rather than silently loading a different default resource.
+
+## Full Table behavior
+
+All 12 advertised resources use **Full Table** extraction. Each successful run
+reads the complete API result visible to the token and replaces the selected
+staging resource before transformation.
+
+Full Table is appropriate for repository snapshots, but these API semantics
+still matter:
+
+- rewritten Git history and force pushes can change the commit snapshot;
+- contributor rows are API summaries, not a canonical historical user table;
+- release assets are metadata only and asset files are never downloaded; and
+- the repository events endpoint exposes a limited recent window, commonly
+  around 300 events.
+
+## Pagination and rate limits
+
+MantrixFlow follows GitHub REST `Link` headers and GraphQL opaque cursors until
+the API reports no next page. Repeated links or cursors fail the run instead of
+looping forever.
+
+The connector applies bounded requests, pages, retries, runtime, and GraphQL
+query cost. It honors GitHub primary reset headers and `Retry-After` responses,
+and uses bounded backoff for secondary limits. A GraphQL response containing
+`errors` fails the resource even when GitHub returns HTTP 200; partial data is
+not reported as complete.
+
+Root issue, pull-request, and stargazer pagination is complete. Nested comments,
+reactions, labels, and assignees are currently limited to the first 100 items
+per parent.
+
+## Transform GitHub data
+
+Use the exact staging relation shown by discovery. For example:
+
+```sql
+SELECT
+  number AS issue_number,
+  title,
+  state,
+  url,
+  _repository_full_name AS repository
+FROM {{ source('raw', 'github__issues') }}
+```
+
+GraphQL nested objects and arrays may be normalized into child relations. Check
+the discovered schema before referencing comments, reactions, labels, or
+assignees in a model.
+
+## Credential security
+
+- The PAT is encrypted when saved and masked when returned to the browser.
+- Leaving the masked value unchanged while editing preserves the stored token.
+- Tokens are sent only in authorization headers to fixed HTTPS GitHub.com API
+  endpoints; they are never placed in request URLs.
+- Connector errors and metrics exclude token values and repository content.
+- Rotate or revoke the PAT in GitHub, then re-test the connection in
+  MantrixFlow after updating it.
+
+## Current Beta limitations
+
+- One GitHub.com repository per connection.
+- Personal Access Token authentication only; GitHub App authentication is a
+  separate integration and is not reused by this source.
+- Full Table only for newly selected resources; no advertised CDC.
+- Nested GraphQL connections are limited to 100 rows per parent.
+- Repository discovery exists in the connector runtime, but the current form
+  still uses explicit owner and repository fields.
+- GitHub Enterprise Server, anonymous extraction, conditional requests, and
+  multi-repository extraction are not enabled.
+- Live source-to-every-destination release validation remains in progress, so
+  monitor Beta pipelines and verify destination row counts.
+
+## Troubleshooting
+
+| Symptom | What to check |
+| --- | --- |
+| GitHub rejects the token | Confirm the token is active, owned by a user with repository access, and has the required repository permissions. |
+| Repository not found | Check owner and repository spelling. GitHub may return not found when the token cannot see a private repository. |
+| One resource is forbidden | Add only the least permission required for that resource, then re-test and rediscover. |
+| A run pauses or fails on limits | Review the run error, wait for the GitHub reset window, and retry; request budgets prevent unbounded waiting. |
+| Nested comments or labels stop at 100 | This is a current Beta limitation; split the use case or wait for nested pagination support. |
+| SQL cannot find a source | Use the exact `github__<resource>` relation shown in discovery and preview. |
+| Repository events look incomplete | The GitHub events API exposes only a recent snapshot and is not an audit log. |
+
+For connection-wide behavior, see [Connections Overview](/connections/overview).
