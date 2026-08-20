@@ -7,7 +7,8 @@ description: "Current MantrixFlow concepts: connections, the pipeline workspace,
 
 Connections store reusable encrypted credentials. PostgreSQL, MySQL, and
 Airtable can be sources or destinations when their runtime capability is
-enabled. Asana, Notion, HubSpot, and Stripe are sources.
+enabled. Asana, Notion, Strapi, HubSpot, and Stripe are sources. Strapi is a
+Beta, Strapi 5-only source with dynamic Content API IDs and Full Table sync.
 
 Source connections need read access. Destination connections need write access
 to final tables that already exist.
@@ -35,7 +36,7 @@ Use the **Source** tab to:
 Streams use stable keys such as `public.orders`, `stripe.customers`,
 `airtable.tbl...`, or `notion.data_source_...`. Database staging relations use
 names such as `public__orders`; Notion data-source relations use
-`notion__data_source_...`.
+`notion__data_source_...`; Strapi collections use `strapi__<api_id>`.
 
 ## Destinations
 

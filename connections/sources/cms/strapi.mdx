@@ -1,0 +1,185 @@
+---
+title: Strapi source
+description: Connect Strapi 5 with a read-only API token, validate dynamic Content API collections, preview records, and run Full Table extraction.
+---
+
+Strapi is available as a Beta, source-only connector for Strapi 5. MantrixFlow
+reads selected REST Content API collections, normalizes nested records with
+dlt, stages each resource in DuckDB, applies published SQL transformations,
+and delivers the result to a configured destination.
+
+The connector never creates, updates, deletes, publishes, or unpublishes Strapi
+content. It does not use the admin API, execute GraphQL mutations, upload media,
+or download media binaries.
+
+<Warning>
+  Strapi 4 is not supported. The connector expects the flattened Strapi 5
+  response shape and rejects the older `attributes` envelope rather than
+  silently producing an incorrect schema.
+</Warning>
+
+## Before you begin
+
+You need:
+
+- a Strapi 5 project reachable through an HTTPS origin;
+- a **Read Only** API token, or a custom token with `find` and `findOne`
+  permission for every collection you intend to sync; and
+- the Content API ID for each collection, such as `articles`, `authors`, or
+  `product-categories`.
+
+The Strapi URL is the origin only:
+
+```text
+https://cms.example.com
+```
+
+Do not append `/api`. MantrixFlow constructs `/api/{api_id}` server-side.
+
+## Create the source connection
+
+1. Open **Connections** in your MantrixFlow workspace.
+2. Click **+ New Connection** and choose **Source**.
+3. Select **Strapi**.
+4. Enter a descriptive connection name.
+5. Enter the Strapi HTTPS origin without `/api`, a path, query, or fragment.
+6. Enter the read-only API token.
+7. Click **Test Connection** and save the connection.
+
+The initial connection test validates the URL and host reachability. After a
+Content API ID is configured, MantrixFlow also requests one record from that
+collection to verify the token and its content permission. Host reachability
+alone does not prove access to every collection.
+
+The token is encrypted at rest and returned to the browser only as a masked
+value. Leaving that masked value unchanged during an edit preserves the stored
+token.
+
+## Add Content API collections
+
+Strapi projects define their own content types, so there is no universal stream
+catalog. Configure the collections used by this pipeline:
+
+1. Create or open a pipeline that uses the Strapi connection.
+2. Open the **Source** tab.
+3. In **Strapi content types**, enter a Content API ID such as `articles`.
+4. Click **Add** and repeat for the other required collections.
+5. Click **Save content types**.
+6. Discover the catalog, preview each collection, enable the required streams,
+   and save the stream configuration.
+
+Content API IDs accept lowercase letters, numbers, and single hyphens. Enter
+`product-categories`, not `/api/product-categories` or a full URL. MantrixFlow
+rejects paths, traversal, admin/plugin routes, arbitrary query strings, and
+endpoint URLs.
+
+Each collection has a stable staging relation:
+
+```text
+strapi__<api_id>
+```
+
+For example, `articles` is staged as `strapi__articles`.
+
+## Sync behavior
+
+Strapi currently supports **Full Table** only. Each run paginates every selected
+collection visible to the token and replaces that collection's staging
+resource. Unselected collections receive no extraction requests.
+
+Incremental sync and CDC are disabled. MantrixFlow does not yet advertise an
+`updatedAt` cursor or merge key because `documentId`, locale variants, inclusive
+timestamp boundaries, and failed-run recovery require additional live Strapi 5
+verification.
+
+Normal collection requests use published content by default. Draft ingestion
+is not currently exposed as a pipeline option.
+
+## Record shape and nested data
+
+Strapi 5 root records preserve fields returned by the Content API, including
+`id`, `documentId`, `createdAt`, `updatedAt`, `publishedAt`, and `locale` when
+present. dlt normalizes nested objects and arrays such as components, rich-text
+blocks, and dynamic zones into related staging tables.
+
+MantrixFlow does not automatically add `populate=*`. Relations and media fields
+contain only the data Strapi returns for the authorized collection request.
+Media metadata can pass through the source payload, but the connector does not
+follow or download media URLs.
+
+Use the exact root and child table names shown by discovery and preview when
+writing a transformation. A minimal article model can start with:
+
+```sql
+SELECT
+  document_id,
+  title,
+  locale,
+  published_at
+FROM {{ source('raw', 'strapi__articles') }}
+```
+
+Column normalization depends on the actual Strapi payload. Copy the column
+names from the transformation editor rather than assuming the example names.
+
+## URL and network security
+
+Hosted MantrixFlow requires HTTPS and blocks localhost, loopback, link-local,
+private, reserved, and cloud-metadata network addresses. DNS answers and
+redirects are validated before requests, and redirects must remain on the same
+validated origin under `/api/`.
+
+Private-network Strapi deployments require an explicit self-hosted MantrixFlow
+network policy. A browser-supplied endpoint cannot weaken the hosted SSRF
+policy.
+
+## Pagination and retries
+
+The connector uses explicit Strapi page/page-size pagination and treats
+`meta.pagination.page` and `pageCount` as authoritative. The default page size
+is conservative, and request/page budgets prevent unbounded extraction.
+
+Retries are bounded for network failures, `429`, `502`, `503`, and `504`.
+`Retry-After` is honored when Strapi or an upstream proxy returns it. Invalid
+queries, authentication failures, permission errors, and missing content types
+fail without endless retries.
+
+## Verify a run
+
+After starting a pipeline, open **Runs** and confirm:
+
+- every selected `strapi__<api_id>` resource is listed;
+- extracted counts match the published records visible in Strapi;
+- **Rows failed** is `0`;
+- nested component or dynamic-zone child tables contain the expected rows; and
+- each published transformation reaches its intended destination table.
+
+## Current limitations
+
+- Strapi is Beta, source-only, and supports Strapi 5 only.
+- Full Table is the only sync mode; Incremental and CDC are disabled.
+- Only collection types are advertised. Single types are not supported.
+- Draft selection, locale selection, and explicit relation population are not
+  exposed yet.
+- OpenAPI import and automatic content-type discovery are not implemented.
+- Media binaries are never downloaded.
+- Private fields omitted by Strapi remain unavailable.
+- Production readiness still requires live Strapi-to-destination validation.
+
+## Troubleshooting
+
+| Symptom | Resolution |
+| --- | --- |
+| Strapi is missing from Connections | Confirm the Go API and ELT runtime report the Strapi source capability as available, then refresh. |
+| The URL is rejected | Enter an HTTPS origin such as `https://cms.example.com` without `/api`, another path, credentials, query, or fragment. |
+| Host reachable, token not verified | Add a Content API ID and confirm the token has `find` permission for that collection. |
+| Authentication fails | Replace the API token with a valid Read Only or correctly scoped custom token. |
+| A collection returns `403` | Grant `find`/`findOne` for that content type to the token. |
+| A collection returns `404` | Confirm the exact plural Content API ID generated by Strapi. |
+| Content API ID is rejected | Use lowercase letters, numbers, and single hyphens only; do not enter `/api` or a URL. |
+| Relations or media details are missing | Strapi does not populate every relationship automatically. The current connector does not request `populate=*`. |
+| Draft records are absent | Published content is the current default and draft selection is not exposed. |
+| SQL cannot find the source | Use the exact `strapi__<api_id>` staging relation shown in the transformation editor. |
+
+See the [Strapi 5 documentation](https://docs.strapi.io/) for Content API and
+API-token administration guidance.
