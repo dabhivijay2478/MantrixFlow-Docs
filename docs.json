@@ -99,6 +99,7 @@
               "connections/sources/database/postgresql",
               "connections/sources/database/mysql",
               "connections/sources/database/clickhouse",
+              "connections/sources/database/duckdb",
               "connections/sources/productivity/airtable",
               "connections/sources/productivity/asana",
               "connections/sources/productivity/linear",
@@ -109,6 +110,7 @@
               "connections/destinations/postgresql",
               "connections/destinations/mysql",
               "connections/destinations/clickhouse",
+              "connections/destinations/duckdb",
               "connections/destinations/airtable"
             ]
           },

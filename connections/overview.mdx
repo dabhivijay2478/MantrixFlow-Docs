@@ -4,7 +4,8 @@ description: Create and test database and SaaS connections supported by MantrixF
 ---
 
 Connections are reusable encrypted credentials. PostgreSQL, MySQL, Airtable,
-and ClickHouse are available as both sources and destinations. HubSpot and
+and ClickHouse are available as both sources and destinations. DuckDB is
+visible as a Beta managed-artifact source and destination. HubSpot and
 Stripe are available as sources. Asana supports workspace/project scoping,
 and Notion supports shared data-source discovery with dlt-backed incremental
 extraction. Linear is a Beta source with team/project scope and eight
@@ -19,6 +20,7 @@ Support resources.
 | Source | MySQL | Available when reported by runtime capabilities |
 | Source | Airtable | Available when reported by runtime capabilities |
 | Source | ClickHouse | Available when reported by runtime capabilities |
+| Source | DuckDB | Beta; requires a pre-provisioned managed file reference and runtime support |
 | Source | Asana | Available when reported by runtime capabilities |
 | Source | Linear | Beta when reported by runtime capabilities |
 | Source | Notion | Available when reported by runtime capabilities |
@@ -29,6 +31,7 @@ Support resources.
 | Destination | MySQL | Available when reported by runtime capabilities |
 | Destination | Airtable | Available when reported by runtime capabilities |
 | Destination | ClickHouse | Available when reported by runtime capabilities |
+| Destination | DuckDB | Beta UI; durable artifact publication is not generally available yet |
 
 Other connector tiles may appear in the catalog, but they are not available
 until their create, test, save, pipeline, and run path is enabled in the app.
@@ -46,6 +49,11 @@ native port handling, the `clickhousedb` SQLAlchemy dialect, MergeTree
 destination tables, and cross-connector setup. See the
 [ClickHouse and MySQL pipeline example](/example/pipelines/clickhouse-and-mysql)
 for the validated cross-connector matrix.
+
+See [DuckDB source](/connections/sources/database/duckdb) and
+[DuckDB destination](/connections/destinations/duckdb) for the managed
+`file_...` reference contract, read-only source behavior, and current
+destination persistence limitations.
 
 See [HubSpot source](/connections/sources/crm/hubspot) for its ten supported
 streams, private app token setup, UTC extraction window, and PostgreSQL
@@ -72,7 +80,7 @@ incremental ticket and event behavior, and reconnect guidance.
 1. Open **Connections**.
 2. Click **+ New Connection**.
 3. Set the role to **Source**.
-4. Choose **PostgreSQL**, **MySQL**, **Airtable**, **ClickHouse**, **Asana**, **Linear**, **Notion**, **Zendesk**, **HubSpot**, or **Stripe**.
+4. Choose **PostgreSQL**, **MySQL**, **Airtable**, **ClickHouse**, **DuckDB**, **Asana**, **Linear**, **Notion**, **Zendesk**, **HubSpot**, or **Stripe**.
 5. Fill the connector-specific fields. Airtable and Asana use Personal Access
    Tokens; Linear uses a Personal API Key; Notion uses an internal integration
    token; Zendesk uses OAuth; HubSpot uses a private app access token.
@@ -84,7 +92,7 @@ incremental ticket and event behavior, and reconnect guidance.
 1. Open **Connections**.
 2. Click **+ New Connection**.
 3. Set the role to **Destination**.
-4. Choose **PostgreSQL**, **MySQL**, **Airtable**, or **ClickHouse**.
+4. Choose **PostgreSQL**, **MySQL**, **Airtable**, **ClickHouse**, or **DuckDB**.
 5. Fill the destination database credentials.
 6. Click **Test Connection**.
 7. Save after the test succeeds.

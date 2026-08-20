@@ -1,0 +1,103 @@
+---
+title: DuckDB source
+description: Configure an organization-managed DuckDB artifact as a read-only source.
+---
+
+DuckDB is available as a Beta source connector for organization-managed
+`.duckdb` artifacts. MantrixFlow opens source artifacts read-only, discovers
+their schemas, tables, views, and columns, and uses the standard SQL source
+pipeline for Full Table and Incremental extraction.
+
+<Warning>
+  DuckDB currently requires a pre-provisioned managed file reference. The
+  connection form does not upload a local file or accept a browser/server file
+  path. If your workspace has not been given a `file_...` reference, contact
+  your MantrixFlow administrator before creating the connection.
+</Warning>
+
+## Connection fields
+
+| Field | Notes |
+| --- | --- |
+| Connection Name | Descriptive workspace name, such as `Analytics DuckDB` |
+| Managed DuckDB File Reference | Organization-scoped opaque reference beginning with `file_` |
+| Default Schema | Schema used when a table is not qualified; defaults to `main` |
+
+Do not enter `/tmp/...`, `../...`, `file://...`, a SQLAlchemy URL, or a local
+filesystem path. Hosted MantrixFlow accepts only an authorized managed file
+reference.
+
+## Create the source connection
+
+1. Open **Connections** and click **+ New Connection**.
+2. Set the role to **Source**.
+3. Choose **DuckDB**.
+4. Enter a connection name and the managed `file_...` reference.
+5. Keep **Default Schema** as `main` unless the artifact uses another schema.
+6. Click **Test Connection**.
+7. Save only after the test succeeds.
+
+The connection test fails safely if the reference is invalid, unavailable, or
+not resolvable by the runtime. Internal materialized paths are never returned
+to the browser.
+
+## Read-only source behavior
+
+MantrixFlow opens DuckDB sources with read-only driver configuration for
+connection tests, discovery, preview, and extraction. A source run must not
+create tables, write rows, install extensions, or attach another database to
+the customer artifact.
+
+DuckDB source and destination connections in the same pipeline must reference
+different artifacts.
+
+## Discover and preview
+
+After creating a pipeline:
+
+1. Choose the DuckDB connection in the pipeline **Source** tab.
+2. Discover the catalog.
+3. Select a `schema.table` stream.
+4. Preview representative rows and confirm the inferred column types.
+5. Choose Full Table or Incremental when a suitable cursor is available.
+6. Save the source configuration.
+
+The connector filters DuckDB system schemas and returns tables and views from
+the current database. The default user schema is `main`.
+
+## Full Table and Incremental
+
+Use **Full Table** for snapshots, reference data, or tables without a stable
+cursor. Every selected source row visible in the artifact is extracted.
+
+Use **Incremental** for growing tables with a stable cursor such as
+`updated_at`, `created_at`, or a monotonic integer. A primary key is strongly
+recommended for deterministic downstream delivery.
+
+## Type compatibility
+
+The current DuckDB source path maps common values including:
+
+- signed, unsigned, and huge integers;
+- floating-point and high-precision decimal values;
+- strings, Unicode, UUID, JSON, arrays, and binary values;
+- dates, times, timestamps, timezone-aware timestamps, and intervals; and
+- nullable columns.
+
+Preview representative nested values before publishing a pipeline. Deep
+`STRUCT`, `MAP`, `UNION`, and custom enum round trips remain dependent on the
+selected destination's type compatibility.
+
+## Troubleshooting
+
+| Error | Resolution |
+| --- | --- |
+| Invalid DuckDB connection configuration | Enter a valid organization-managed reference beginning with `file_`; do not enter a path. |
+| Managed artifact unavailable | Confirm the artifact still exists and that the workspace runtime can resolve it. |
+| Invalid DuckDB database | Replace the artifact with a valid `.duckdb` database. |
+| Read-only operation failed | Remove writes, extension installation, or attachment behavior from the source workflow. |
+| No schemas or tables discovered | Confirm the artifact contains user tables and the expected schema; use `main` when unsure. |
+| Incremental cursor unavailable | Choose Full Table or add a populated stable cursor column to the source table. |
+
+See [DuckDB destination](/connections/destinations/duckdb) for destination
+setup and the current managed-artifact limitations.

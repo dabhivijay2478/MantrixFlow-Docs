@@ -1,0 +1,83 @@
+---
+title: DuckDB destination
+description: Configure an organization-managed DuckDB artifact as a Beta destination.
+---
+
+DuckDB is visible as a Beta destination for lightweight analytical workflows.
+The connection uses an organization-managed `.duckdb` artifact identified by
+an opaque file reference rather than a host, port, username, password, or
+browser-supplied filesystem path.
+
+<Warning>
+  Durable destination publication is not generally available yet. The current
+  UI accepts an existing managed `file_...` reference, but artifact upload,
+  exclusive write leasing, immutable version publication, rollback, and
+  download are still being completed. Do not rely on DuckDB as a production
+  destination until runtime health and your workspace administrator confirm
+  those capabilities.
+</Warning>
+
+## Connection fields
+
+| Field | Notes |
+| --- | --- |
+| Connection Name | Descriptive workspace name, such as `Analytics DuckDB Output` |
+| Managed DuckDB File Reference | Existing organization-scoped destination reference beginning with `file_` |
+| Default Schema | Destination schema; defaults to `main` |
+
+The destination reference must differ from any DuckDB source reference used
+by the same pipeline. MantrixFlow rejects same-artifact source and destination
+configurations before dispatch.
+
+## Create the destination connection
+
+1. Open **Connections** and click **+ New Connection**.
+2. Set the role to **Destination**.
+3. Choose **DuckDB**.
+4. Enter a connection name and an existing managed destination reference.
+5. Keep **Default Schema** as `main` unless the destination contract specifies another schema.
+6. Click **Test Connection**.
+7. Save only after the test succeeds.
+
+The app does not accept `/tmp/...`, `../...`, `file://...`, or a SQLAlchemy
+connection URL. Only trusted runtime services may materialize an artifact to a
+worker-local path.
+
+## Destination behavior
+
+The ELT runtime uses dlt's native DuckDB destination with an explicit
+persistent materialized file. It never falls back to an in-memory database.
+
+Native append, key-based merge, and replace operations work at the isolated
+runtime level. Product delivery remains gated until the managed artifact
+service can coordinate one writer, publish a new immutable version, and retain
+the previous good version after a failure.
+
+Literal dlt `upsert` is not currently advertised for the DuckDB destination.
+Do not treat append or delete-insert merge as an automatic substitute for the
+workspace's Upsert contract.
+
+## Concurrency and version safety
+
+A production DuckDB destination requires:
+
+- one exclusive writer lease per artifact;
+- a fencing token or expected-version check before publication;
+- closed/checkpointed writers before copying or uploading the database;
+- atomic publication of a new immutable version; and
+- preservation of the previous good version when loading or publication fails.
+
+These controls are not yet available in the self-serve destination flow.
+
+## Troubleshooting
+
+| Error | Resolution |
+| --- | --- |
+| Invalid DuckDB connection configuration | Enter an existing managed reference beginning with `file_`. |
+| Source and destination must use different artifacts | Choose a distinct destination `file_...` reference. |
+| Managed artifact unavailable | Confirm the reference exists and belongs to the current organization. |
+| Destination runtime unavailable | Wait until DuckDB artifact storage, leasing, and version publication are enabled for the workspace. |
+| Disk capacity failure | Free worker/artifact capacity before retrying; the previous good artifact must remain unchanged. |
+
+See [DuckDB source](/connections/sources/database/duckdb) for read-only source,
+discovery, preview, and sync-mode guidance.
