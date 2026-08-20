@@ -1,0 +1,183 @@
+---
+title: Zendesk source
+description: Connect Zendesk Support with read-only OAuth, select from 13 supported resources, and configure bounded historical or incremental extraction.
+---
+
+Zendesk is available as a Beta, source-only connector. MantrixFlow reads
+Zendesk Support data with OAuth, stages each selected resource in DuckDB,
+applies published SQL transformations, and delivers the results to supported
+destinations.
+
+The connector never creates, updates, or deletes records in Zendesk.
+
+## Supported resources
+
+| Resource | Sync modes | Primary key | Incremental cursor |
+| --- | --- | --- | --- |
+| `tickets` | Full Table, Incremental | `id` | `updated_at` |
+| `ticket_events` | Full Table, Incremental | `id` | `timestamp` |
+| `ticket_metric_events` | Full Table, Incremental | `id` | `time` |
+| `ticket_fields` | Full Table | None | None |
+| `users` | Full Table | `id` | None |
+| `organizations` | Full Table | `id` | None |
+| `groups` | Full Table | `id` | None |
+| `brands` | Full Table | `id` | None |
+| `sla_policies` | Full Table | `id` | None |
+| `ticket_forms` | Full Table | `id` | None |
+| `ticket_metrics` | Full Table | `id` | None |
+| `satisfaction_ratings` | Full Table | `id` | None |
+| `tags` | Full Table | None | None |
+
+Each resource has a stable staging relation using the pattern
+`zendesk__<resource>`. For example, tickets are staged as `zendesk__tickets`
+and organizations as `zendesk__organizations`.
+
+<Note>
+  The current connector reads the Zendesk Support API. Zendesk Talk, Chat, and
+  the Conversations API are not enabled by this connection.
+</Note>
+
+## Before you begin
+
+You need:
+
+- an active Zendesk Support account;
+- the account subdomain, such as `acme` from `acme.zendesk.com`; and
+- a Zendesk user who can approve the requested read access and read the
+  resources the pipeline needs.
+
+You do not need to create or paste an API token. MantrixFlow uses Zendesk's
+authorization-code OAuth flow and requests only the `read` scope. Zendesk
+handles sign-in and approval on its own domain.
+
+For a MantrixFlow production deployment serving multiple Zendesk accounts, the
+platform operator must use a Zendesk-approved Global OAuth client. Individual
+customers authorize that client against their own Zendesk subdomain.
+
+## Create the source connection
+
+1. Open **Connections** in your MantrixFlow workspace.
+2. Click **+ New Connection** and choose **Source**.
+3. Select **Zendesk**.
+4. Enter a descriptive connection name.
+5. Enter only the Zendesk subdomain. For `acme.zendesk.com`, enter `acme`.
+6. Click **Connect Zendesk**.
+7. Sign in to Zendesk and review the read-only access request.
+8. Select **Allow**. Zendesk returns you to MantrixFlow and saves the
+   connection.
+
+Access and refresh tokens are stored encrypted. They are not returned in
+normal connection responses or sent to the browser after the OAuth callback.
+MantrixFlow refreshes short-lived access tokens server-side. If authorization
+or the refresh token expires, open the saved connection and select
+**Reconnect Zendesk**.
+
+## Configure the extraction window
+
+The Zendesk source settings belong to the pipeline, not the reusable
+connection.
+
+1. Create or open a pipeline using the Zendesk connection.
+2. Open the **Source** tab.
+3. Set **Initial sync start** when you need data older than the default
+   lookback.
+4. Optionally set **Backfill end** to create an exclusive upper boundary for a
+   historical run.
+5. Ensure the backfill end is later than the initial sync start.
+6. Save the Zendesk source settings.
+7. Discover the catalog, select resources, preview records, and save the stream
+   configuration.
+
+When the initial sync start is empty, the first incremental run uses a bounded
+90-day lookback. Leave the backfill end empty for ongoing extraction.
+
+## Full Table and Incremental
+
+Use **Incremental** for tickets and event history when you want subsequent runs
+to request records at or after the saved cursor. MantrixFlow preserves the
+inclusive boundary and relies on the resource primary key or append behavior
+to avoid losing records with the same timestamp.
+
+Use **Full Table** for reference resources such as users, organizations,
+groups, brands, SLA policies, ticket forms, ticket metrics, satisfaction
+ratings, and tags. Incremental extraction is scheduled polling, not change data
+capture, and it does not independently identify hard deletions.
+
+## Transform Zendesk data
+
+Ticket payloads preserve dynamic fields such as tags and custom fields as JSON
+where required. Use the exact columns shown by discovery and preview because
+optional fields depend on the Zendesk account configuration.
+
+Example ticket model:
+
+```sql
+SELECT
+  id,
+  subject,
+  status,
+  priority,
+  requester_id,
+  assignee_id,
+  organization_id,
+  created_at,
+  updated_at
+FROM {{ source('raw', 'zendesk__tickets') }}
+```
+
+Use `id` as the destination Upsert key for resources that expose it. Event
+resources preserve their historical event payloads and may be configured for
+append-style processing.
+
+## Rate limits and safety bounds
+
+MantrixFlow follows Zendesk pagination links and honors `Retry-After` responses
+with bounded retries. Extraction also has request, page, runtime, and timeout
+budgets so a malformed pagination response or unexpectedly large account does
+not run without a limit.
+
+For a large Zendesk account, start with tickets and the reference resources
+needed by your models. Add ticket-event history after verifying the initial
+pipeline runtime and destination capacity.
+
+## Verify a run
+
+After starting the pipeline, open **Runs** and confirm:
+
+- the selected Zendesk resource revisions are listed;
+- **Rows failed** is `0`;
+- each published model reports its intended destination table; and
+- representative ticket IDs and destination row counts match Zendesk.
+
+For an Incremental test, complete an initial run, update one ticket in Zendesk,
+run the pipeline again, and verify that the same ticket `id` is merged with its
+new `updated_at` value.
+
+## Limitations
+
+- Zendesk is Beta and source-only.
+- Authentication is OAuth-only; API tokens, passwords, and manually pasted
+  OAuth tokens are not accepted.
+- The connector currently reads Zendesk Support resources only.
+- Talk, Chat, Sunshine Conversations, and write-back are not enabled.
+- Incremental mode is polling, not CDC, and does not independently detect hard
+  deletions.
+- Resource visibility is limited to what the approving Zendesk user can read.
+
+## Troubleshooting
+
+| Symptom | Resolution |
+| --- | --- |
+| Zendesk is missing from the catalog | Confirm both the Go API OAuth configuration and ELT runtime capability are healthy, then refresh Connections. |
+| The Zendesk account cannot be reached | Enter only the core subdomain from `<account>.zendesk.com`; do not enter a full URL or custom host-mapped domain. |
+| Authorization is denied | Sign in with a Zendesk user allowed to approve the integration and read the requested resources. |
+| Zendesk shows a generic server-error page | Ask the MantrixFlow operator to verify the OAuth client identifier, confidential client kind, and exact registered callback URL. |
+| The connection previously worked but now returns `401` | Open the connection and select **Reconnect Zendesk** to replace expired or revoked OAuth authorization. |
+| A selected resource returns `403` | Confirm the approving Zendesk user and current plan can access that Support API resource. |
+| Extraction is rate limited | Wait for the bounded retry or reduce overlapping Zendesk runs. |
+| SQL cannot find a source | Use the exact `zendesk__<resource>` staging relation shown in the transformation editor. |
+
+For OAuth platform configuration, see Zendesk's
+[OAuth application guide](https://support.zendesk.com/hc/en-us/articles/4408845965210-Using-OAuth-authentication-with-your-application)
+and
+[Global OAuth client guide](https://developer.zendesk.com/documentation/marketplace/building-a-marketplace-app/set-up-a-global-oauth-client/).

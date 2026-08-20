@@ -1,6 +1,6 @@
 ---
 title: Connections Overview
-description: Create and test PostgreSQL, MySQL, Airtable, ClickHouse, Asana, Linear, Notion, HubSpot, and Stripe connections supported by MantrixFlow.
+description: Create and test database and SaaS connections supported by MantrixFlow, including Zendesk Support OAuth.
 ---
 
 Connections are reusable encrypted credentials. PostgreSQL, MySQL, Airtable,
@@ -8,7 +8,8 @@ and ClickHouse are available as both sources and destinations. HubSpot and
 Stripe are available as sources. Asana supports workspace/project scoping,
 and Notion supports shared data-source discovery with dlt-backed incremental
 extraction. Linear is a Beta source with team/project scope and eight
-supported resources.
+supported resources. Zendesk is a Beta, OAuth-only source with 13 Zendesk
+Support resources.
 
 ## Current live connectors
 
@@ -21,6 +22,7 @@ supported resources.
 | Source | Asana | Available when reported by runtime capabilities |
 | Source | Linear | Beta when reported by runtime capabilities |
 | Source | Notion | Available when reported by runtime capabilities |
+| Source | Zendesk | Beta when OAuth and runtime capabilities are available |
 | Source | HubSpot | Available |
 | Source | Stripe | Available |
 | Destination | PostgreSQL | Available |
@@ -61,15 +63,19 @@ See [Linear source](/connections/sources/productivity/linear) for Personal API
 Key setup, team/project scope, eight resources, `updatedAt` incremental
 behavior, and current Beta limitations.
 
+See [Zendesk source](/connections/sources/customer-support/zendesk) for
+read-only OAuth, 13 Support resources, historical extraction windows,
+incremental ticket and event behavior, and reconnect guidance.
+
 ## Create a source connection
 
 1. Open **Connections**.
 2. Click **+ New Connection**.
 3. Set the role to **Source**.
-4. Choose **PostgreSQL**, **MySQL**, **Airtable**, **ClickHouse**, **Asana**, **Linear**, **Notion**, **HubSpot**, or **Stripe**.
+4. Choose **PostgreSQL**, **MySQL**, **Airtable**, **ClickHouse**, **Asana**, **Linear**, **Notion**, **Zendesk**, **HubSpot**, or **Stripe**.
 5. Fill the connector-specific fields. Airtable and Asana use Personal Access
    Tokens; Linear uses a Personal API Key; Notion uses an internal integration
-   token; HubSpot uses a private app access token.
+   token; Zendesk uses OAuth; HubSpot uses a private app access token.
 6. Click **Test Connection**.
 7. Save after the test succeeds.
 

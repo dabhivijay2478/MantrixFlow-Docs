@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "MantrixFlow",
-  "description": "Documentation for MantrixFlow PostgreSQL, MySQL, Airtable, Asana, HubSpot, and Stripe pipelines, connections, transformations, runs, billing, and security.",
+  "description": "Documentation for MantrixFlow database and SaaS pipelines, including Zendesk Support OAuth, connections, transformations, runs, billing, and security.",
   "theme": "almond",
   "colors": {
     "primary": "#00a859",
@@ -103,6 +103,7 @@
               "connections/sources/productivity/asana",
               "connections/sources/productivity/linear",
               "connections/sources/productivity/notion",
+              "connections/sources/customer-support/zendesk",
               "connections/sources/crm/hubspot",
               "connections/sources/finance/stripe",
               "connections/destinations/postgresql",

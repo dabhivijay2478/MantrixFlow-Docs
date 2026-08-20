@@ -13,6 +13,10 @@ Verify the hostname, port, database, username, password, SSL mode, and network a
 
 Confirm that the source user can read the expected schema or API resources. For Asana, verify the PAT owner can access the selected workspace and projects. For HubSpot and Stripe, verify the required token permissions in the connector reference.
 
+For Zendesk, verify that the connection was authorized against the correct core
+subdomain and that the approving user can read the selected Support resource.
+Reconnect the account if OAuth access was revoked or expired.
+
 ## Data Preview is empty
 
 Confirm that the selected stream contains records and that the current connection can read them. Refresh discovery before retrying when the source schema changed.
