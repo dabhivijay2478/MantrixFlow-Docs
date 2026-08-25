@@ -1,0 +1,151 @@
+---
+title: MongoDB destination
+description: Configure MongoDB as a Beta destination and deliver transformed documents with deterministic Upsert keys.
+---
+
+MongoDB is available as a Beta destination connector. MantrixFlow delivers only
+the published SQL model's output through a custom dlt destination backed by
+PyMongo. Delivery uses bounded unordered bulk writes and removes internal dlt
+fields before documents reach the destination collection.
+
+## Required access
+
+Use a dedicated writer scoped to the destination database:
+
+```javascript
+use admin
+
+db.createUser({
+  user: "mantrixflow_writer",
+  pwd: passwordPrompt(),
+  roles: [{ role: "readWrite", db: "analytics" }]
+})
+```
+
+The writer needs permission to read index metadata and insert or update
+documents. If your operating policy requires pre-created collections,
+validators, or indexes, create those with a separate administrative identity.
+
+## Connection fields
+
+| Field | Notes |
+| --- | --- |
+| Connection Name | Descriptive workspace name, such as `Analytics MongoDB` |
+| Connection URI | Complete `mongodb://` or `mongodb+srv://` URI |
+| Database | Destination database, such as `analytics` |
+
+The complete URI is encrypted as one secret and masked after saving. URI query
+options such as `authSource`, `replicaSet`, and `tls=true` are passed to
+PyMongo.
+
+## Create the connection
+
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Set the role to **Destination**.
+4. Choose **MongoDB**.
+5. Enter the complete URI and destination database.
+6. Click **Test Connection**.
+7. Save after the test succeeds.
+
+## Prepare the collection
+
+MongoDB can create a collection on the first write, but production deployments
+should normally create and review the collection, validator, and indexes first.
+Create a unique index for the selected Upsert key:
+
+```javascript
+use analytics
+
+db.orders.createIndex(
+  { external_id: 1 },
+  { unique: true, name: "orders_external_id_unique" }
+)
+```
+
+Without an index, Upsert remains correct but may perform poorly as the
+collection grows. MantrixFlow reports a warning when it cannot verify a
+supporting index.
+
+## Configure delivery
+
+1. Open **Destinations** and click **Add destination**.
+2. Choose the MongoDB connection and target database.
+3. Open **Transformations**, select the MongoDB destination, and create the SQL
+   model.
+4. Save, validate, preview, and publish the revision.
+5. Set the published output target to `database.collection`, such as
+   `analytics.orders`.
+6. Select one or more stable, non-null Upsert keys.
+7. Save the destination and run the pipeline.
+
+The source and destination cannot be the same logical MongoDB database and
+collection in one pipeline.
+
+## Write behavior
+
+The public MongoDB destination uses **Upsert**. Every output row must contain a
+non-null value for each selected merge key. Matching documents are updated;
+new documents are inserted.
+
+- `_id` is the default stable key for MongoDB-to-MongoDB pipelines.
+- A business identifier such as `external_id` can be used for SQL sources.
+- Internal fields whose names begin with `_dlt` are never written.
+- A rerun with the same keys updates existing documents instead of duplicating
+  them.
+
+Internal APPEND support exists for controlled runtime operations but is not
+advertised in the public UI. REPLACE is disabled because a portable atomic
+collection swap cannot be guaranteed.
+
+## Document limits and BSON mapping
+
+Documents are BSON-encoded before network I/O. A document exceeding MongoDB's
+16 MiB limit is rejected with the collection and a bounded record identifier.
+Common SQL values map to BSON-safe strings, numbers, decimals, dates, binary
+values, arrays, and nested documents.
+
+## Verify delivery
+
+```javascript
+use analytics
+
+db.orders.countDocuments({})
+
+db.orders.aggregate([
+  { $group: { _id: "$external_id", count: { $sum: 1 } } },
+  { $match: { count: { $gt: 1 } } }
+])
+
+db.orders.find(
+  {},
+  { _id: 1, external_id: 1, amount: 1, updated_at: 1 }
+).limit(25)
+```
+
+The duplicate aggregation should return no rows. Compare the collection count
+with the run's **rows written** value, accounting for transformation filters.
+
+## Current limitations
+
+- REPLACE and Change Streams are disabled.
+- Atlas, replica-set, sharded-cluster, and live TLS destination certification
+  remains incomplete.
+- PostgreSQL-to-MongoDB and MongoDB-to-MongoDB are verified. MySQL, MariaDB,
+  ClickHouse, and customer DuckDB source pairings remain Beta until their
+  connector-specific E2E passes.
+
+## Troubleshooting
+
+| Error | Resolution |
+| --- | --- |
+| Upsert key is missing | Publish a model that includes every selected merge key with non-null values. |
+| Duplicate-key failure | Remove conflicting records or align the selected Upsert key with the unique index. |
+| Upsert key is not indexed | Create an index whose leading fields match the selected key order. |
+| Document exceeds the size limit | Remove or flatten large values so each BSON document is under 16 MiB. |
+| Write permission denied | Grant `readWrite` on the destination database. |
+| TLS or network failure | Verify URI options, provider access lists, DNS, and certificate trust. |
+| Same source and destination collection | Choose a different destination database or collection. |
+
+See [MongoDB source](/connections/sources/database/mongodb) and the
+[MongoDB and PostgreSQL verified paths](/example/pipelines/mongodb-and-postgresql).

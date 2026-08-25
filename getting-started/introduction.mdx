@@ -23,8 +23,8 @@ Every pipeline opens at `/workspace/data-pipelines/[id]` with these tabs:
 
 ## Current app flow
 
-1. Create a PostgreSQL, MySQL, Airtable, Asana, Notion, HubSpot, or Stripe source connection.
-2. Create a PostgreSQL, MySQL, or Airtable destination connection.
+1. Create a PostgreSQL, MySQL, MongoDB, Airtable, Asana, Notion, HubSpot, or Stripe source connection.
+2. Create a PostgreSQL, MySQL, MongoDB, or Airtable destination connection.
 3. Create a pipeline from **Data Pipelines** with a name and source connection.
 4. Open the pipeline and use **Source** to discover, preview, select, and save streams.
 5. Use **Destinations** → **Add destination** to choose a connection and save a delivery target.
@@ -38,11 +38,12 @@ Every pipeline opens at `/workspace/data-pipelines/[id]` with these tabs:
 
 ## Before you configure delivery
 
-The delivery runner does not create final destination tables. For database
+The SQL delivery runner does not create final destination tables. For database
 destinations, use **Create or verify destination table** when that explicit
 setup action is available, or create the reviewed DDL yourself. For Airtable,
 create the table and writable fields in Airtable first, then refresh them in the
-destination editor.
+destination editor. MongoDB can create a collection on first write, but
+production collections should have reviewed validators and Upsert-key indexes.
 
 ## Next
 
@@ -50,3 +51,5 @@ Follow the [Quick Start](/getting-started/quick-start) for an end-to-end Postgre
 For CRM data, follow the [HubSpot source guide](/connections/sources/crm/hubspot).
 For bidirectional SaaS/database delivery, follow the
 [Airtable and MySQL guide](/example/pipelines/airtable-and-mysql).
+For document workflows, follow the
+[MongoDB and PostgreSQL guide](/example/pipelines/mongodb-and-postgresql).

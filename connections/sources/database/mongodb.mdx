@@ -1,0 +1,145 @@
+---
+title: MongoDB source
+description: Configure MongoDB as a Beta source, discover collections, preview inferred schemas, and run Full Table or Incremental pipelines.
+---
+
+MongoDB is available as a Beta source connector. MantrixFlow uses the official
+dlt MongoDB verified source with PyMongo, stages selected collections in an
+isolated DuckDB file, runs published SQL models, and delivers the result to a
+supported destination.
+
+The connector accepts both `mongodb://` and `mongodb+srv://` connection URIs.
+Standalone MongoDB has been verified end to end. Atlas, replica-set, sharded,
+and live TLS deployments should be validated in your environment before
+production use.
+
+## Required access
+
+Use a dedicated read-only user scoped to the databases that MantrixFlow needs.
+For a self-managed deployment, create the user in the authentication database:
+
+```javascript
+use admin
+
+db.createUser({
+  user: "mantrixflow_reader",
+  pwd: passwordPrompt(),
+  roles: [{ role: "read", db: "application" }]
+})
+```
+
+For Atlas, create a database user with read access to the selected database and
+allow network access from the MantrixFlow runtime. Do not place a real URI in
+source control, support tickets, screenshots, or pipeline SQL.
+
+## Connection fields
+
+| Field | Notes |
+| --- | --- |
+| Connection Name | Descriptive workspace name, such as `Production MongoDB` |
+| Connection URI | Complete `mongodb://` or `mongodb+srv://` URI, including authentication and TLS options |
+| Database | Database to discover, such as `application` |
+
+The complete URI is encrypted as one secret. It is masked after saving and is
+not returned to the browser. On edit, leave the masked URI unchanged unless you
+intend to rotate it.
+
+Common URI options include `authSource`, `replicaSet`, `readPreference`,
+`tls=true`, and provider certificate options. MantrixFlow passes supported URI
+options to PyMongo rather than splitting them into separate fields.
+
+## Create the connection
+
+1. Open **Connections**.
+2. Click **+ New Connection**.
+3. Set the role to **Source**.
+4. Choose **MongoDB**.
+5. Enter the complete URI and database.
+6. Click **Test Connection**.
+7. Save only after the test succeeds.
+
+If the deployment uses an IP allowlist or private network, follow
+[Private database access](/connections/private-database-access) first.
+
+## Discover and preview
+
+After creating a pipeline:
+
+1. Open the pipeline **Source** tab.
+2. Click **Discover catalog**.
+3. Select the required `database.collection` streams.
+4. Choose **Full Table** or **Incremental** for each collection.
+5. For Incremental, select a stable cursor such as `updated_at` or `_id`.
+6. Preview representative documents and confirm the inferred field types.
+7. Click **Save stream settings**.
+
+Discovery is dynamic and returns collections visible to the configured user.
+It supports empty collections and identifies normal collections, views, and
+time-series collections. Schema inference reads a bounded sample; it does not
+scan or materialize the entire collection.
+
+MongoDB documents do not require a fixed schema. Discovery reports observed
+types, mixed fields, nullability, missing fields, arrays, nested objects,
+indexes, and `_id` primary-key semantics.
+
+## Full Table mode
+
+Use Full Table for an initial backfill, small reference collection, or deliberate
+snapshot. Documents are streamed from MongoDB in bounded batches rather than
+loaded into memory as one collection.
+
+## Incremental mode
+
+Use Incremental when the collection has a stable cursor:
+
+- `updated_at` for inserts and updates;
+- `created_at` for append-only collections; or
+- `_id` when ObjectId creation order matches the required extraction order.
+
+For a non-`_id` cursor, extraction sorts by the cursor and then `_id`. The next
+run includes the saved boundary value so documents tied at that value are
+replayed instead of skipped. Use a stable Upsert key in the destination to
+absorb this safe boundary replay.
+
+MantrixFlow advances checkpoint state only after a successful run. A failed run
+does not replace the previous successful checkpoint.
+
+## BSON handling
+
+The source handles common BSON values, including:
+
+- ObjectId and Decimal128;
+- dates and BSON timestamps;
+- binary values;
+- arrays and nested documents;
+- regular expressions and DBRef values; and
+- null, missing, and mixed-schema fields.
+
+ObjectIds are represented as stable strings during SQL staging. Decimal128 is
+kept as an exact decimal value rather than converted to a floating-point value.
+Special BSON values use loss-aware Extended JSON-compatible structures.
+
+## Current limitations
+
+- Change Streams and log-based CDC are not enabled.
+- Arbitrary multi-field incremental checkpoints are not exposed in the UI.
+- Atlas, replica sets, sharded clusters, and live TLS certificate scenarios
+  have not completed the production certification matrix.
+- MongoDB-to-PostgreSQL and MongoDB-to-MongoDB are verified; other SQL
+  destination pairings remain Beta until their connector-specific E2E passes.
+
+## Troubleshooting
+
+| Error | Resolution |
+| --- | --- |
+| Authentication failed | Verify the username, password, `authSource`, and database roles. |
+| DNS or SRV lookup failed | Check the `mongodb+srv://` hostname and local/provider DNS access. |
+| TLS handshake failed | Verify `tls` URI options, provider CA requirements, and certificate trust. |
+| Atlas network access denied | Add the MantrixFlow runtime network to the Atlas access list. |
+| No collections discovered | Confirm the database name and grant read access to it. |
+| Preview returns no rows | Confirm the collection contains documents and the user can read them. |
+| Incremental rows are missing | Use a populated, indexed cursor that changes on every relevant update. |
+| Duplicate destination rows | Configure a stable Upsert key; inclusive cursor boundaries intentionally replay ties. |
+
+Continue with [MongoDB destination](/connections/destinations/mongodb) or the
+[MongoDB and PostgreSQL verified paths](/example/pipelines/mongodb-and-postgresql).

@@ -1,7 +1,7 @@
 {
   "$schema": "https://mintlify.com/docs.json",
   "name": "MantrixFlow",
-  "description": "Documentation for MantrixFlow database and SaaS pipelines, including Strapi 5 and Zendesk source connections, transformations, runs, billing, and security.",
+  "description": "Documentation for MantrixFlow database and SaaS pipelines, including MongoDB source and destination connections, transformations, runs, billing, and security.",
   "theme": "almond",
   "colors": {
     "primary": "#00a859",
@@ -98,6 +98,7 @@
             "pages": [
               "connections/sources/database/postgresql",
               "connections/sources/database/mysql",
+              "connections/sources/database/mongodb",
               "connections/sources/database/clickhouse",
               "connections/sources/database/duckdb",
               "connections/sources/productivity/airtable",
@@ -111,6 +112,7 @@
               "connections/sources/finance/stripe",
               "connections/destinations/postgresql",
               "connections/destinations/mysql",
+              "connections/destinations/mongodb",
               "connections/destinations/clickhouse",
               "connections/destinations/duckdb",
               "connections/destinations/airtable"
@@ -191,6 +193,7 @@
               "example/pipelines/hubspot-to-postgres",
               "example/pipelines/airtable-and-mysql",
               "example/pipelines/clickhouse-and-mysql",
+              "example/pipelines/mongodb-and-postgresql",
               "example/pipelines/asana-to-destinations"
             ]
           }

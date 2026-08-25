@@ -1,0 +1,105 @@
+---
+title: MongoDB and PostgreSQL verified paths
+description: Build and verify MongoDB-to-PostgreSQL, PostgreSQL-to-MongoDB, and MongoDB-to-MongoDB Beta pipelines.
+---
+
+This guide summarizes the three MongoDB data-movement paths verified against a
+real standalone MongoDB 8.0 deployment and PostgreSQL 17.
+
+| Source | Destination | Verification |
+| --- | --- | --- |
+| MongoDB | PostgreSQL | Passed with an Incremental rerun and no duplicates |
+| PostgreSQL | MongoDB | Passed with an updated source row and idempotent Upsert |
+| MongoDB | Different MongoDB collection | Passed with `_id` Upsert and no internal dlt fields |
+
+Other SQL pairings, Atlas, replica sets, sharded clusters, and live TLS remain
+Beta until their deployment-specific E2E tests pass.
+
+## Prerequisites
+
+1. Create a [MongoDB source connection](/connections/sources/database/mongodb).
+2. Create a [MongoDB destination connection](/connections/destinations/mongodb)
+   when testing delivery into MongoDB.
+3. Create PostgreSQL reader or writer connections as required.
+4. Use separate MongoDB source and destination collections.
+5. Prepare stable keys and supporting indexes before repeated runs.
+
+## MongoDB to PostgreSQL
+
+1. Create a pipeline with the MongoDB source.
+2. Discover the required `database.collection` stream.
+3. Choose **Incremental** and select a stable cursor such as `updated_at`.
+4. Add the PostgreSQL destination and publish a SQL model that includes `_id`,
+   the cursor, and the required business fields.
+5. Map the PostgreSQL destination table and select `_id` as the Upsert key.
+6. Run the initial load.
+7. Add or update a MongoDB document with a later cursor value and run again.
+
+Verify that the PostgreSQL row count increases only for new keys and that tied
+cursor-boundary documents do not create duplicates.
+
+```sql
+SELECT COUNT(*) AS delivered_rows
+FROM public.mongo_orders;
+
+SELECT _id, COUNT(*) AS occurrences
+FROM public.mongo_orders
+GROUP BY _id
+HAVING COUNT(*) > 1;
+```
+
+## PostgreSQL to MongoDB
+
+1. Create a pipeline with the PostgreSQL source.
+2. Select the source table and configure Full Table or Incremental extraction.
+3. Add the MongoDB destination.
+4. Publish a SQL model containing a stable business key such as `id`.
+5. Set the output target to `analytics.pg_orders` and select `id` as the Upsert
+   key.
+6. Run the pipeline, update one PostgreSQL row, and run again.
+
+Confirm that the collection count is unchanged after the update rerun and the
+matching document contains the new value:
+
+```javascript
+use analytics
+
+db.pg_orders.countDocuments({})
+db.pg_orders.findOne({ id: "pg-1" })
+```
+
+## MongoDB to MongoDB
+
+Use different source and destination collections. A pipeline targeting the same
+logical database and collection is rejected.
+
+1. Select the source collection and use `_id` as the stable record identity.
+2. Add the destination connection and choose another database or collection.
+3. Publish the transformed document fields.
+4. Use `_id` as the Upsert key.
+5. Run twice and verify that the destination count remains stable.
+
+```javascript
+use copy_sink
+
+db.events_copy.countDocuments({})
+db.events_copy.find({ _dlt_id: { $exists: true } })
+```
+
+The second query should return no documents. MantrixFlow removes all top-level
+`_dlt*` fields before MongoDB delivery.
+
+## Operational checks
+
+- Test every connection before saving it.
+- Keep source identities read-only and destination identities scoped to one
+  database.
+- Index source cursor fields and destination Upsert keys.
+- Compare run row counts with direct database counts.
+- Confirm a failed run does not advance the previous successful checkpoint.
+- Review MongoDB index warnings before increasing batch volume.
+- Never paste a complete MongoDB URI into SQL, logs, tickets, or screenshots.
+
+For connector details and current limitations, read the
+[MongoDB source](/connections/sources/database/mongodb) and
+[MongoDB destination](/connections/destinations/mongodb) references.

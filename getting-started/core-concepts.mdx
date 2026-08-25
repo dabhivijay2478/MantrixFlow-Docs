@@ -5,13 +5,14 @@ description: "Current MantrixFlow concepts: connections, the pipeline workspace,
 
 ## Connections
 
-Connections store reusable encrypted credentials. PostgreSQL, MySQL, and
-Airtable can be sources or destinations when their runtime capability is
-enabled. Asana, Notion, Strapi, HubSpot, and Stripe are sources. Strapi is a
-Beta, Strapi 5-only source with dynamic Content API IDs and Full Table sync.
+Connections store reusable encrypted credentials. PostgreSQL, MySQL, MongoDB,
+and Airtable can be sources or destinations. MongoDB stores its complete URI
+as one encrypted secret and is currently Beta. Asana, Notion, Strapi, HubSpot,
+and Stripe are sources. Strapi is a Beta, Strapi 5-only source with dynamic
+Content API IDs and Full Table sync.
 
 Source connections need read access. Destination connections need write access
-to final tables that already exist.
+to the configured tables or collections.
 
 ## Pipeline workspace
 
@@ -33,8 +34,8 @@ Use the **Source** tab to:
 - inspect fields and primary keys; and
 - preview representative rows.
 
-Streams use stable keys such as `public.orders`, `stripe.customers`,
-`airtable.tbl...`, or `notion.data_source_...`. Database staging relations use
+Streams use stable keys such as `public.orders`, `application.orders`,
+`stripe.customers`, `airtable.tbl...`, or `notion.data_source_...`. Database staging relations use
 names such as `public__orders`; Notion data-source relations use
 `notion__data_source_...`; Strapi collections use `strapi__<api_id>`.
 
@@ -65,12 +66,14 @@ current workspace does not expose the former Normalisation panel.
 
 ## Destination tables and Upsert
 
-Published model output is assigned to an exact destination table. Database
-targets use `schema.table` or `database.table`; Airtable targets use the
+Published model output is assigned to an exact destination table or collection.
+Database targets use `schema.table` or `database.table`; MongoDB targets use
+`database.collection`; Airtable targets use the
 selected existing table and explicit writable-field mappings.
 
 The current delivery mode is **Upsert**. Configure stable, non-empty Upsert keys
-that match a primary/unique database key or writable Airtable merge fields.
+that match a primary/unique database key, indexed MongoDB field, or writable
+Airtable merge fields.
 
 ## Overview and readiness
 

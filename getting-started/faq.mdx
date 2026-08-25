@@ -5,13 +5,15 @@ description: Answers about current connectors, destination tables, transformatio
 
 ## Which connectors are live in the public docs?
 
-PostgreSQL, MySQL, and Airtable are available as sources and destinations.
+PostgreSQL, MySQL, MongoDB, and Airtable are available as sources and destinations.
 Asana, Notion, Strapi, HubSpot, and Stripe are available as sources. Asana exposes
 eight supported streams, Notion discovers each shared data source dynamically,
 Strapi accepts validated Content API IDs from each customer's Strapi 5 project,
 Stripe exposes 34, and HubSpot exposes ten. MySQL, Airtable, Asana, Notion, and
 Strapi are runtime-capability gated, so the connection picker shows them only
 when both the API and ELT runtime report support for the selected role.
+MongoDB is explicitly enabled as a Beta connector after real MongoDB-to-
+PostgreSQL, PostgreSQL-to-MongoDB, and MongoDB-to-MongoDB verification.
 
 See [Connections Overview](/connections/overview) for the canonical availability table. Other connector pages remain as direct-link status notices and are not live self-serve workflows.
 
@@ -22,6 +24,10 @@ before running, or use the explicit setup action when the selected database
 destination exposes it. For Airtable, create the table and fields in Airtable,
 then refresh destination discovery. The runner validates the final contract and
 fails clearly when it is missing or mismatched.
+
+MongoDB can create a collection on first write, but production deployments
+should pre-create and review validators and unique indexes for the selected
+Upsert keys.
 
 ## Where do I select source tables?
 
