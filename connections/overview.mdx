@@ -1,45 +1,43 @@
 ---
 title: Connections Overview
-description: Create and test database and SaaS connections supported by MantrixFlow, including the MongoDB Beta source and destination.
+description: Create and test the database and SaaS connections currently supported by MantrixFlow.
 ---
 
-Connections are reusable encrypted credentials. PostgreSQL, MySQL, Airtable,
-and ClickHouse are available as both sources and destinations. MongoDB is an
-explicitly enabled Beta source and destination using a complete encrypted
-connection URI. DuckDB is visible as a Beta managed-artifact source and
-destination. HubSpot and
-Stripe are available as sources. Asana supports workspace/project scoping,
-and Notion supports shared data-source discovery with dlt-backed incremental
-extraction. Linear is a Beta source with team/project scope and eight
-supported resources. GitHub is a Beta, source-only connector for read-only,
-single-repository extraction with a Personal Access Token. Zendesk is a Beta, OAuth-only source with 13 Zendesk
-Support resources. Strapi is a Beta, source-only connector for validated Strapi
-5 Content API collections.
+Connections are reusable encrypted credentials. PostgreSQL, MySQL, MongoDB,
+Airtable, ClickHouse, and DuckDB are Available Now as sources and destinations.
+Stripe, HubSpot, GitHub, Asana, Linear, Notion, Zendesk, and Strapi are Available
+Now as sources. Each connector retains the role and limitations documented below.
+
+<Note>
+  Available Now means owner-approved and code-supported. It is not an independent
+  production certification. Automated evidence and pending manual UI validation
+  are tracked separately in the engineering audit documents.
+</Note>
 
 ## Current live connectors
 
 | Role | Connector | Status |
 | --- | --- | --- |
-| Source | PostgreSQL | Available |
-| Source | MySQL | Available when reported by runtime capabilities |
-| Source | MongoDB | Enabled Beta; dynamic collection discovery with Full Table and Incremental sync |
-| Source | Airtable | Available when reported by runtime capabilities |
-| Source | ClickHouse | Available when reported by runtime capabilities |
-| Source | DuckDB | Beta; requires a pre-provisioned managed file reference and runtime support |
-| Source | Asana | Available when reported by runtime capabilities |
-| Source | Linear | Beta when reported by runtime capabilities |
-| Source | Notion | Available when reported by runtime capabilities |
-| Source | GitHub | Enabled Beta; Personal Access Token and one GitHub.com repository per connection |
-| Source | Zendesk | Beta when OAuth and runtime capabilities are available |
-| Source | Strapi | Beta when reported by runtime capabilities; Strapi 5 and Full Table only |
-| Source | HubSpot | Available |
-| Source | Stripe | Available |
-| Destination | PostgreSQL | Available |
-| Destination | MySQL | Available when reported by runtime capabilities |
-| Destination | MongoDB | Enabled Beta; key-required Upsert delivery |
-| Destination | Airtable | Available when reported by runtime capabilities |
-| Destination | ClickHouse | Available when reported by runtime capabilities |
-| Destination | DuckDB | Beta UI; durable artifact publication is not generally available yet |
+| Source | PostgreSQL | Available Now |
+| Source | MySQL | Available Now |
+| Source | MongoDB | Available Now; dynamic collection discovery with Full Table and Incremental sync |
+| Source | Airtable | Available Now |
+| Source | ClickHouse | Available Now |
+| Source | DuckDB | Available Now; requires a managed file reference |
+| Source | Asana | Available Now |
+| Source | Linear | Available Now |
+| Source | Notion | Available Now |
+| Source | GitHub | Available Now; Personal Access Token and one GitHub.com repository per connection |
+| Source | Zendesk | Available Now; OAuth required |
+| Source | Strapi | Available Now; Strapi 5 and Full Table only |
+| Source | HubSpot | Available Now |
+| Source | Stripe | Available Now |
+| Destination | PostgreSQL | Available Now |
+| Destination | MySQL | Available Now |
+| Destination | MongoDB | Available Now; key-required Upsert delivery |
+| Destination | Airtable | Available Now |
+| Destination | ClickHouse | Available Now |
+| Destination | DuckDB | Available Now; managed artifact, write lease, and expected-version checks required |
 
 Other connector tiles may appear in the catalog, but they are not available
 until their create, test, save, pipeline, and run path is enabled in the app.
@@ -67,8 +65,8 @@ for the validated cross-connector matrix.
 
 See [DuckDB source](/connections/sources/database/duckdb) and
 [DuckDB destination](/connections/destinations/duckdb) for the managed
-`file_...` reference contract, read-only source behavior, and current
-destination persistence limitations.
+`file_...` reference contract, read-only source behavior, direct Upsert into
+pre-existing tables, write leasing, and optimistic version checks.
 
 See [HubSpot source](/connections/sources/crm/hubspot) for its ten supported
 streams, private app token setup, UTC extraction window, and PostgreSQL
@@ -84,11 +82,11 @@ stable staging names, and API safety limits.
 
 See [Linear source](/connections/sources/productivity/linear) for Personal API
 Key setup, team/project scope, eight resources, `updatedAt` incremental
-behavior, and current Beta limitations.
+behavior, and current limitations.
 
 See [GitHub source](/connections/sources/developer-tools/github) for Personal
 Access Token setup, repository permissions, 12 discoverable resources,
-Full Table behavior, pagination safety, and Beta limitations.
+Full Table behavior, pagination safety, and limitations.
 
 See [Zendesk source](/connections/sources/customer-support/zendesk) for
 read-only OAuth, 13 Support resources, historical extraction windows,

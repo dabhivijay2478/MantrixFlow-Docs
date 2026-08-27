@@ -1,9 +1,9 @@
 ---
 title: MongoDB destination
-description: Configure MongoDB as a Beta destination and deliver transformed documents with deterministic Upsert keys.
+description: Configure MongoDB as an Available Now destination and deliver transformed documents with deterministic Upsert keys.
 ---
 
-MongoDB is available as a Beta destination connector. MantrixFlow delivers only
+MongoDB is available as an Available Now destination connector. MantrixFlow delivers only
 the published SQL model's output through a custom dlt destination backed by
 PyMongo. Delivery uses bounded unordered bulk writes and removes internal dlt
 fields before documents reach the destination collection.
@@ -131,9 +131,8 @@ with the run's **rows written** value, accounting for transformation filters.
 - REPLACE and Change Streams are disabled.
 - Atlas, replica-set, sharded-cluster, and live TLS destination certification
   remains incomplete.
-- PostgreSQL-to-MongoDB and MongoDB-to-MongoDB are verified. MySQL, MariaDB,
-  ClickHouse, and customer DuckDB source pairings remain Beta until their
-  connector-specific E2E passes.
+- PostgreSQL-to-MongoDB and MongoDB-to-MongoDB have automated evidence. MySQL,
+  ClickHouse, DuckDB, and manual UI pairings remain pending owner validation.
 
 ## Troubleshooting
 

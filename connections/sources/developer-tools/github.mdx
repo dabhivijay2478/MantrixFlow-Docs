@@ -3,7 +3,7 @@ title: GitHub source
 description: Connect one GitHub.com repository with a Personal Access Token and sync issues, pull requests, commits, releases, and repository metadata.
 ---
 
-GitHub is an enabled Beta, source-only connector. MantrixFlow reads selected
+GitHub is Available Now as a source-only connector. MantrixFlow reads selected
 resources from one GitHub.com repository, stages them with stable relation
 names, applies published SQL transformations, and delivers the reviewed rows
 to a supported destination.
@@ -52,14 +52,14 @@ You need:
 - a Personal Access Token owned by a user who can read that repository; and
 - permission to create source connections in the MantrixFlow workspace.
 
-For the complete Beta resource set, use a classic Personal Access Token with
+For the complete resource set, use a classic Personal Access Token with
 read access to the repository. Private repositories normally require the
 classic `repo` scope. Public-only access can use a narrower token where GitHub
 allows it.
 
 Fine-grained Personal Access Tokens can work for REST resources when their
 repository access and endpoint permissions are sufficient, but coverage varies
-by resource. Classic PAT is the supported Beta contract for the GraphQL issue,
+by resource. Classic PAT is the supported contract for the GraphQL issue,
 pull-request, stargazer, comment, and reaction data.
 
 <Warning>
@@ -72,7 +72,7 @@ pull-request, stargazer, comment, and reaction data.
 
 1. Open **Connections** in your MantrixFlow workspace.
 2. Click **+ New Connection** and choose **Source**.
-3. Select **GitHub**. The card is marked **Source only** and **Beta**.
+3. Select **GitHub**. The card is marked **Source only** and **Available Now**.
 4. Enter a descriptive connection name.
 5. Enter the repository owner, such as `octocat`.
 6. Enter the repository name, such as `Hello-World`.
@@ -84,7 +84,7 @@ The connection test validates the authenticated GitHub user and the exact
 repository. A successful user lookup does not hide a missing repository or
 insufficient repository permission.
 
-The current Beta form accepts one repository per connection. GitHub Enterprise
+The current form accepts one repository per connection. GitHub Enterprise
 Server and custom API hosts are not supported.
 
 ## Select and preview resources
@@ -162,7 +162,7 @@ assignees in a model.
 - Rotate or revoke the PAT in GitHub, then re-test the connection in
   MantrixFlow after updating it.
 
-## Current Beta limitations
+## Current limitations
 
 - One GitHub.com repository per connection.
 - Personal Access Token authentication only; GitHub App authentication is a
@@ -173,8 +173,8 @@ assignees in a model.
   still uses explicit owner and repository fields.
 - GitHub Enterprise Server, anonymous extraction, conditional requests, and
   multi-repository extraction are not enabled.
-- Live source-to-every-destination release validation remains in progress, so
-  monitor Beta pipelines and verify destination row counts.
+- Manual UI validation and live source-to-every-destination validation remain
+  pending owner checks; verify destination row counts for each deployment.
 
 ## Troubleshooting
 
@@ -184,7 +184,7 @@ assignees in a model.
 | Repository not found | Check owner and repository spelling. GitHub may return not found when the token cannot see a private repository. |
 | One resource is forbidden | Add only the least permission required for that resource, then re-test and rediscover. |
 | A run pauses or fails on limits | Review the run error, wait for the GitHub reset window, and retry; request budgets prevent unbounded waiting. |
-| Nested comments or labels stop at 100 | This is a current Beta limitation; split the use case or wait for nested pagination support. |
+| Nested comments or labels stop at 100 | This is a current limitation; split the use case or wait for nested pagination support. |
 | SQL cannot find a source | Use the exact `github__<resource>` relation shown in discovery and preview. |
 | Repository events look incomplete | The GitHub events API exposes only a recent snapshot and is not an audit log. |
 

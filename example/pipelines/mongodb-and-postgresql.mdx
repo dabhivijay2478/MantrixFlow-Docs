@@ -1,10 +1,15 @@
 ---
 title: MongoDB and PostgreSQL verified paths
-description: Build and verify MongoDB-to-PostgreSQL, PostgreSQL-to-MongoDB, and MongoDB-to-MongoDB Beta pipelines.
+description: Build and verify MongoDB-to-PostgreSQL, PostgreSQL-to-MongoDB, and MongoDB-to-MongoDB example pipelines.
 ---
 
 This guide summarizes the three MongoDB data-movement paths verified against a
 real standalone MongoDB 8.0 deployment and PostgreSQL 17.
+
+<Note>
+  Example records and identifiers in this guide are synthetic test fixtures,
+  not customer data or customer activity.
+</Note>
 
 | Source | Destination | Verification |
 | --- | --- | --- |
@@ -12,8 +17,9 @@ real standalone MongoDB 8.0 deployment and PostgreSQL 17.
 | PostgreSQL | MongoDB | Passed with an updated source row and idempotent Upsert |
 | MongoDB | Different MongoDB collection | Passed with `_id` Upsert and no internal dlt fields |
 
-Other SQL pairings, Atlas, replica sets, sharded clusters, and live TLS remain
-Beta until their deployment-specific E2E tests pass.
+Other SQL pairings, Atlas, replica sets, sharded clusters, and live TLS have
+pending deployment-specific validation. Available Now does not imply that each
+environment has been independently certified.
 
 ## Prerequisites
 

@@ -1,9 +1,9 @@
 ---
 title: MongoDB source
-description: Configure MongoDB as a Beta source, discover collections, preview inferred schemas, and run Full Table or Incremental pipelines.
+description: Configure MongoDB as an Available Now source, discover collections, preview inferred schemas, and run Full Table or Incremental pipelines.
 ---
 
-MongoDB is available as a Beta source connector. MantrixFlow uses the official
+MongoDB is available as an Available Now source connector. MantrixFlow uses the official
 dlt MongoDB verified source with PyMongo, stages selected collections in an
 isolated DuckDB file, runs published SQL models, and delivers the result to a
 supported destination.
@@ -125,8 +125,8 @@ Special BSON values use loss-aware Extended JSON-compatible structures.
 - Arbitrary multi-field incremental checkpoints are not exposed in the UI.
 - Atlas, replica sets, sharded clusters, and live TLS certificate scenarios
   have not completed the production certification matrix.
-- MongoDB-to-PostgreSQL and MongoDB-to-MongoDB are verified; other SQL
-  destination pairings remain Beta until their connector-specific E2E passes.
+- MongoDB-to-PostgreSQL and MongoDB-to-MongoDB have automated evidence; other
+  destination pairings and manual UI validation remain pending owner checks.
 
 ## Troubleshooting
 

@@ -7,6 +7,11 @@ This guide covers both directions between Airtable and MySQL. It uses an
 explicit destination contract, a published SQL model, and a stable Upsert key
 for repeatable runs.
 
+<Note>
+  Names, emails, companies, and rows shown in code blocks are synthetic fixtures.
+  They are examples, not customer records or live customer activity.
+</Note>
+
 ## Validated connector routes
 
 The following routes were exercised through the MantrixFlow browser workflow
@@ -88,7 +93,7 @@ CREATE TABLE source_app.customers (
 INSERT INTO source_app.customers (id, name, email, updated_at)
 VALUES
   ('mysql-001', 'MySQL Alpha', 'mysql-alpha@example.test', UTC_TIMESTAMP(6)),
-  ('mysql-002', 'MySQL Beta', 'mysql-beta@example.test', UTC_TIMESTAMP(6)),
+  ('mysql-002', 'MySQL Sample B', 'mysql-sample-b@example.test', UTC_TIMESTAMP(6)),
   ('mysql-003', 'MySQL Gamma', 'mysql-gamma@example.test', UTC_TIMESTAMP(6))
 ON DUPLICATE KEY UPDATE
   name = VALUES(name),

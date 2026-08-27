@@ -3,7 +3,7 @@ title: Strapi source
 description: Connect Strapi 5 with a read-only API token, validate dynamic Content API collections, preview records, and run Full Table extraction.
 ---
 
-Strapi is available as a Beta, source-only connector for Strapi 5. MantrixFlow
+Strapi is Available Now as a source-only connector for Strapi 5. MantrixFlow
 reads selected REST Content API collections, normalizes nested records with
 dlt, stages each resource in DuckDB, applies published SQL transformations,
 and delivers the result to a configured destination.
@@ -156,7 +156,7 @@ After starting a pipeline, open **Runs** and confirm:
 
 ## Current limitations
 
-- Strapi is Beta, source-only, and supports Strapi 5 only.
+- Strapi is Available Now, source-only, and supports Strapi 5 only.
 - Full Table is the only sync mode; Incremental and CDC are disabled.
 - Only collection types are advertised. Single types are not supported.
 - Draft selection, locale selection, and explicit relation population are not
@@ -164,7 +164,8 @@ After starting a pipeline, open **Runs** and confirm:
 - OpenAPI import and automatic content-type discovery are not implemented.
 - Media binaries are never downloaded.
 - Private fields omitted by Strapi remain unavailable.
-- Production readiness still requires live Strapi-to-destination validation.
+- Manual live Strapi-to-destination validation remains pending and is not an
+  independent production-certification claim.
 
 ## Troubleshooting
 

@@ -3,7 +3,7 @@ title: Linear source
 description: Connect Linear with a Personal API Key, scope extraction to teams and projects, and sync eight supported resources.
 ---
 
-Linear is available as a Beta source connector. MantrixFlow reads eight
+Linear is available as an Available Now source connector. MantrixFlow reads eight
 resources through Linear's GraphQL API, previews records, stages each selected
 resource, applies published SQL transformations, and delivers rows to a
 supported destination.
@@ -68,9 +68,8 @@ pipeline logs.
    authenticated Linear user.
 6. Save the connection after the test succeeds.
 
-If Linear is missing or disabled, refresh the page after the ELT runtime is
-healthy. The connector is shown only when runtime capabilities report Linear
-source support.
+Linear remains listed under Available Now. If a connection test fails, review
+the connector-health reason and the Personal API Key permissions.
 
 ## Select team and project scope
 
@@ -156,7 +155,7 @@ the destination.
 
 ## Limitations
 
-- Linear is Beta and source-only.
+- Linear is Available Now and source-only.
 - Authentication is Personal API Key only.
 - Extraction is read-only and uses GraphQL queries; no mutations are sent.
 - Incremental mode is polling, not CDC, and does not detect hard deletes.
@@ -174,4 +173,3 @@ the destination.
 | Rate limited | Wait for the bounded retry or reduce concurrent pipelines using keys owned by the same Linear user. |
 | Incremental data looks stale | Confirm the resource supports Incremental, then run a Full Table reconciliation. |
 | SQL cannot find a source | Use the exact `linear__<resource>` staging relation shown in the transformation editor. |
-

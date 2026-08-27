@@ -3,8 +3,8 @@ title: Notion source
 description: Connect a Notion internal integration, discover shared data sources, and sync page rows with dlt-backed Full Table or Incremental extraction.
 ---
 
-Notion is available as a source-only connector when the MantrixFlow runtime
-reports the connector healthy. It reads content shared with a Notion internal
+Notion is Available Now as a source-only connector. Protected runtime health
+reports dependency and configuration readiness as diagnostics. It reads content shared with a Notion internal
 integration, discovers modern Notion data sources, previews rows, stages them
 through dlt, applies published SQL transformations, and delivers the result to
 a supported destination.
@@ -68,9 +68,8 @@ sanitized errors.
    authenticated Notion bot identity.
 6. Save the connection after the test succeeds.
 
-If Notion does not appear in the connector catalog, the ELT runtime has not
-reported the Notion capability as healthy. Refresh the page after the runtime
-is available.
+If a Notion connection test fails, review the protected runtime diagnostic for
+the exact dependency or configuration reason, then retry after correcting it.
 
 ## Discover and select data sources
 
@@ -177,7 +176,7 @@ After starting the pipeline, open **Runs** and confirm:
 
 | Symptom | Resolution |
 | --- | --- |
-| Notion is missing from Connections | Confirm the ELT service is running and reports the Notion source capability as available, then refresh. |
+| Notion setup cannot continue | Confirm the Go API and ELT service are running, then review the protected Notion readiness reason. |
 | Authentication failed | Replace the internal integration token and test the connection again. |
 | Database or data source is missing | Share its parent page or database with the integration, wait for Search indexing, and refresh discovery. |
 | Multiple data sources are reported | Select the specific child data source instead of the database container. |
