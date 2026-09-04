@@ -4,23 +4,13 @@
  */
 
 :root {
-  --arcyria-background: #f9fafb;
-  --arcyria-foreground: #090a0b;
   --arcyria-active: #2563ef;
 }
 
 html.dark,
 body.dark,
 [data-theme="dark"] {
-  --arcyria-background: #090a0b;
-  --arcyria-foreground: #f9fafb;
   --arcyria-active: #91c5ff;
-}
-
-body {
-  background-color: var(--arcyria-background);
-  color: var(--arcyria-foreground);
-  letter-spacing: -0.01em;
 }
 
 a[aria-current="location"],
@@ -30,28 +20,23 @@ a[data-active-deepest="true"] {
   color: var(--arcyria-active) !important;
 }
 
-/* Center brand in the top bar and avoid a “squashed” strip */
-#navbar {
-  align-items: center !important;
-  padding-block: 0.5rem 0.55rem !important;
-  min-height: 3.5rem;
-  gap: 0.5rem 1rem;
-  row-gap: 0.5rem;
+/* Willow pins both desktop sidebars at the header edge; keep their first row clear. */
+@media (min-width: 1024px) {
+  #sidebar-content #navigation-items {
+    padding-top: 1rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  #table-of-contents {
+    padding-top: 1rem;
+  }
 }
 
 #navbar .nav-logo {
   display: inline-flex !important;
   align-items: center !important;
-  align-self: center;
   line-height: 0;
-}
-
-/* Breathing room between Documentation / Guides / … pills */
-#navbar #navigation-items,
-#navbar .navigation-items {
-  flex-wrap: wrap !important;
-  row-gap: 0.35rem;
-  column-gap: 0.5rem;
 }
 
 /* —— Brand link + theme-aware logo —— */
@@ -99,32 +84,25 @@ body.dark #navbar a[href^="https://arcyria.com"]::after,
 }
 
 /*
- * Sizing: use :where() so we never beat Mintlify/Tailwind `hidden` on display.
+ * Keep the mark within Willow's native header height. Use :where() so we never
+ * beat Mintlify/Tailwind `hidden` on display.
  * (A normal #navbar .nav-logo img rule can outrank .hidden and show both logos.)
  */
 :where(#navbar .nav-logo img, #navbar a[href="https://arcyria.com"] img, #navbar
     a[href^="https://arcyria.com"] img) {
   width: auto !important;
-  height: clamp(1.7rem, 1.85vw + 1.05rem, 2.4rem) !important;
-  max-height: 2.4rem !important;
+  height: 1.75rem !important;
+  max-height: 1.75rem !important;
   max-width: min(72vw, 20rem);
   object-fit: contain;
   object-position: left center;
 }
 
-@media (min-width: 1024px) {
-  :where(#navbar .nav-logo img, #navbar a[href="https://arcyria.com"] img, #navbar
-      a[href^="https://arcyria.com"] img) {
-    height: clamp(1.85rem, 1.5vw + 1.2rem, 2.55rem) !important;
-    max-height: 2.55rem !important;
-  }
-}
-
 @media (max-width: 480px) {
   :where(#navbar .nav-logo img, #navbar a[href="https://arcyria.com"] img, #navbar
       a[href^="https://arcyria.com"] img) {
-    height: clamp(1.45rem, 5vw, 1.85rem) !important;
-    max-height: 1.85rem !important;
+    height: 1.5rem !important;
+    max-height: 1.5rem !important;
     max-width: min(68vw, 16rem);
   }
 }

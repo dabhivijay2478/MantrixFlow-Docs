@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "name": "Arcyria",
   "description": "Documentation for Arcyria database and SaaS pipelines, including MongoDB source and destination connections, transformations, runs, billing, and security.",
-  "theme": "almond",
+  "theme": "willow",
   "colors": {
     "primary": "#2563ef",
     "light": "#91c5ff",
