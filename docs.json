@@ -4,9 +4,9 @@
   "description": "Documentation for Arcyria database and SaaS pipelines, including MongoDB source and destination connections, transformations, runs, billing, and security.",
   "theme": "almond",
   "colors": {
-    "primary": "#14b8a6",
-    "light": "#67e8f9",
-    "dark": "#0f766e"
+    "primary": "#2563ef",
+    "light": "#171717",
+    "dark": "#91c5ff"
   },
   "thumbnails": {
     "fonts": {
@@ -18,7 +18,10 @@
     "dark": "/images/brand-logo/dark-logo.png",
     "href": "https://arcyria.com"
   },
-  "favicon": "/images/brand-logo/dark-logo.png",
+  "favicon": {
+    "light": "/images/brand-logo/light-logo.png",
+    "dark": "/images/brand-logo/dark-logo.png"
+  },
   "appearance": {
     "default": "dark"
   },
@@ -38,8 +41,8 @@
   "background": {
     "decoration": "gradient",
     "color": {
-      "light": "#ffffff",
-      "dark": "#020d13"
+      "light": "#f9fafb",
+      "dark": "#090a0b"
     }
   },
   "navbar": {

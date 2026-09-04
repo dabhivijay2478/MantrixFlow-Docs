@@ -21,8 +21,8 @@ npm run dev
 ## Branding
 
 - **Logo:** the theme-aware Arcyria marks in `images/brand-logo/light-logo.png` and `images/brand-logo/dark-logo.png`.
-- **Favicon:** `images/brand-logo/dark-logo.png` (browser tab / bookmarks).
-- **Colors & fonts** in `docs.json` follow the Arcyria ocean palette (`#14b8a6`, `#67e8f9`, and `#020d13`) with **Geist**.
+- **Favicon:** theme-aware PNGs from `images/brand-logo/`, configured in `docs.json`.
+- **Colors & fonts** in `docs.json` use the shared neutral-and-blue product palette with **Geist**.
 
 Mintlify selects the matching light or dark logo from `docs.json`.
 
