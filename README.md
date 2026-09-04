@@ -20,11 +20,11 @@ npm run dev
 
 ## Branding
 
-- **Logo:** the vector Arcyria manta-ray wordmarks in `images/logo-wordmark-light.svg` and `images/logo-wordmark-dark.svg`.
-- **Favicon:** `favicon.svg` at repo root (browser tab / bookmarks).
+- **Logo:** the theme-aware Arcyria marks in `images/brand-logo/light-logo.png` and `images/brand-logo/dark-logo.png`.
+- **Favicon:** `images/brand-logo/dark-logo.png` (browser tab / bookmarks).
 - **Colors & fonts** in `docs.json` follow the Arcyria ocean palette (`#14b8a6`, `#67e8f9`, and `#020d13`) with **Geist**.
 
-The light and dark wordmarks are tuned separately for contrast in Mintlify navigation chrome.
+Mintlify selects the matching light or dark logo from `docs.json`.
 
 ## Images in MDX
 

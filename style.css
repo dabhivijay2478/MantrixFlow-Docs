@@ -1,5 +1,5 @@
 /**
- * Global Mintlify UI tweaks — brand wordmark sizing (responsive) and navbar polish.
+ * Global Mintlify UI tweaks — brand logo sizing (responsive) and navbar polish.
  * See https://www.mintlify.com/docs/settings/custom-scripts
  */
 
@@ -27,7 +27,7 @@
   column-gap: 0.5rem;
 }
 
-/* —— Brand link + wordmark (SVG img) —— */
+/* —— Brand link + theme-aware logo —— */
 #navbar a[href="https://arcyria.com"],
 #navbar a[href^="https://arcyria.com"] {
   display: inline-flex;
@@ -85,34 +85,40 @@
  * Only one should show. If global CSS or hydration beats Tailwind’s `hidden`, both appear.
  * We force the correct asset by filename (works on localhost and Mintlify CDN URLs).
  */
-#navbar img[src*="logo-wordmark-dark"] {
+#navbar img[src*="dark-logo"] {
   display: none !important;
 }
 
-html.dark #navbar img[src*="logo-wordmark-light"],
-body.dark #navbar img[src*="logo-wordmark-light"],
-.dark #navbar img[src*="logo-wordmark-light"],
-[data-theme="dark"] #navbar img[src*="logo-wordmark-light"] {
+html.dark #navbar img[src*="light-logo"],
+body.dark #navbar img[src*="light-logo"],
+.dark #navbar img[src*="light-logo"],
+[data-theme="dark"] #navbar img[src*="light-logo"] {
   display: none !important;
 }
 
-html.dark #navbar img[src*="logo-wordmark-dark"],
-body.dark #navbar img[src*="logo-wordmark-dark"],
-.dark #navbar img[src*="logo-wordmark-dark"],
-[data-theme="dark"] #navbar img[src*="logo-wordmark-dark"] {
+html.dark #navbar img[src*="dark-logo"],
+body.dark #navbar img[src*="dark-logo"],
+.dark #navbar img[src*="dark-logo"],
+[data-theme="dark"] #navbar img[src*="dark-logo"] {
   display: inline-block !important;
 }
 
 /* Subtle depth on dark chrome */
-html.dark
+.dark
+  :where(#navbar .nav-logo img, #navbar a[href="https://arcyria.com"] img, #navbar
+    a[href^="https://arcyria.com"] img),
+[data-theme="dark"]
   :where(#navbar .nav-logo img, #navbar a[href="https://arcyria.com"] img, #navbar
     a[href^="https://arcyria.com"] img) {
-  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
+  filter: invert(1) drop-shadow(0 1px 2px rgb(0 0 0 / 0.35));
 }
 
-html.dark #navbar a[href="https://arcyria.com"]:hover img,
-html.dark #navbar a[href^="https://arcyria.com"]:hover img {
-  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.35)) brightness(1.06);
+.dark #navbar a[href="https://arcyria.com"]:hover img,
+.dark #navbar a[href^="https://arcyria.com"]:hover img,
+[data-theme="dark"] #navbar a[href="https://arcyria.com"]:hover img,
+[data-theme="dark"] #navbar a[href^="https://arcyria.com"]:hover img {
+  filter: invert(1) drop-shadow(0 1px 2px rgb(0 0 0 / 0.35))
+    brightness(1.06);
 }
 
 /*
@@ -138,7 +144,15 @@ advanced-footer a[href^="https://arcyria.com"]::before {
   width: 1.25rem;
   height: 1.25rem;
   flex-shrink: 0;
-  background: url("/images/arcyria-mark.svg") center / contain no-repeat;
+  background: url("/images/brand-logo/light-logo.png") center / contain no-repeat;
+}
+
+html.dark #footer a[href^="https://arcyria.com"]::before,
+html.dark advanced-footer a[href^="https://arcyria.com"]::before,
+[data-theme="dark"] #footer a[href^="https://arcyria.com"]::before,
+[data-theme="dark"] advanced-footer a[href^="https://arcyria.com"]::before {
+  background-image: url("/images/brand-logo/dark-logo.png");
+  filter: invert(1);
 }
 
 #footer a[href^="https://arcyria.com"]::after,

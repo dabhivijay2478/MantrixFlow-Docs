@@ -14,11 +14,11 @@
     }
   },
   "logo": {
-    "light": "/images/logo-wordmark-light.svg",
-    "dark": "/images/logo-wordmark-dark.svg",
+    "light": "/images/brand-logo/light-logo.png",
+    "dark": "/images/brand-logo/dark-logo.png",
     "href": "https://arcyria.com"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "/images/brand-logo/dark-logo.png",
   "appearance": {
     "default": "dark"
   },
