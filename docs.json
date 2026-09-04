@@ -5,8 +5,8 @@
   "theme": "almond",
   "colors": {
     "primary": "#2563ef",
-    "light": "#171717",
-    "dark": "#91c5ff"
+    "light": "#91c5ff",
+    "dark": "#171717"
   },
   "thumbnails": {
     "fonts": {
