@@ -1,12 +1,12 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "name": "MantrixFlow",
-  "description": "Documentation for MantrixFlow database and SaaS pipelines, including MongoDB source and destination connections, transformations, runs, billing, and security.",
+  "name": "Arcyria",
+  "description": "Documentation for Arcyria database and SaaS pipelines, including MongoDB source and destination connections, transformations, runs, billing, and security.",
   "theme": "almond",
   "colors": {
-    "primary": "#00a859",
-    "light": "#4ade80",
-    "dark": "#15803d"
+    "primary": "#14b8a6",
+    "light": "#67e8f9",
+    "dark": "#0f766e"
   },
   "thumbnails": {
     "fonts": {
@@ -16,9 +16,9 @@
   "logo": {
     "light": "/images/logo-wordmark-light.svg",
     "dark": "/images/logo-wordmark-dark.svg",
-    "href": "https://mantrixflow.com"
+    "href": "https://arcyria.com"
   },
-  "favicon": "/favicon.ico",
+  "favicon": "/favicon.svg",
   "appearance": {
     "default": "dark"
   },
@@ -39,20 +39,20 @@
     "decoration": "gradient",
     "color": {
       "light": "#ffffff",
-      "dark": "#09090b"
+      "dark": "#020d13"
     }
   },
   "navbar": {
     "links": [
       {
         "label": "Talk to us",
-        "href": "mailto:support@mantrixflow.com"
+        "href": "mailto:support@arcyria.com"
       }
     ],
     "primary": {
       "type": "button",
       "label": "Launch app",
-      "href": "https://cloud.mantrixflow.com"
+      "href": "https://cloud.arcyria.com"
     }
   },
   "styling": {
@@ -222,7 +222,7 @@
   },
   "footer": {
     "socials": {
-      "website": "https://mantrixflow.com"
+      "website": "https://arcyria.com"
     }
   }
 }

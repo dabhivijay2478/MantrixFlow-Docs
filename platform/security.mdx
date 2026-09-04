@@ -1,9 +1,9 @@
 ---
 title: Security and encryption
-description: The current security model in MantrixFlow, including account controls, credential handling, and practical hardening guidance.
+description: The current security model in Arcyria, including account controls, credential handling, and practical hardening guidance.
 ---
 
-MantrixFlow security has two parts in day-to-day operations: securing user access to the workspace and securing the credentials used by pipelines.
+Arcyria security has two parts in day-to-day operations: securing user access to the workspace and securing the credentials used by pipelines.
 
 ## What the product exposes today
 
@@ -36,7 +36,7 @@ Based on the current connection experience and supporting product copy:
 - use dedicated service accounts for databases and SaaS sources
 - grant minimum required privileges
 - enable SSL for database connections where the form and provider support it
-- for managed PostgreSQL providers, allow MantrixFlow's static IP as a `/32` on port `5432` instead of opening broad database access
+- for managed PostgreSQL providers, allow Arcyria's static IP as a `/32` on port `5432` instead of opening broad database access
 - rotate credentials periodically
 - keep the owner role limited to a very small set of users
 

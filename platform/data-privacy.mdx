@@ -1,9 +1,9 @@
 ---
 title: Data privacy
-description: What MantrixFlow stores, what it uses transiently during sync and preview, and how operators should handle sensitive data responsibly.
+description: What Arcyria stores, what it uses transiently during sync and preview, and how operators should handle sensitive data responsibly.
 ---
 
-Data privacy in MantrixFlow is mostly about understanding the difference between configuration metadata, operational metadata, and the underlying business data flowing through your pipelines.
+Data privacy in Arcyria is mostly about understanding the difference between configuration metadata, operational metadata, and the underlying business data flowing through your pipelines.
 
 ## What the platform stores
 
@@ -18,12 +18,12 @@ Data privacy in MantrixFlow is mostly about understanding the difference between
 
 - your full source dataset as a product-owned warehouse copy
 - raw credentials in logs or standard product responses
-- destination business data as a separate durable MantrixFlow dataset
+- destination business data as a separate durable Arcyria dataset
 
 ## How data moves during normal operation
 
 1. A pipeline reads from the source.
-2. MantrixFlow applies transform logic and branch configuration.
+2. Arcyria applies transform logic and branch configuration.
 3. The processed records are written to the destination.
 4. Run metadata is retained so the team can audit and troubleshoot the flow.
 
@@ -43,4 +43,4 @@ A healthcare-adjacent operations team syncs appointment events into a reporting 
 
 ## The privacy mindset that works best
 
-Think of MantrixFlow as the control plane for movement and transformation, not as the permanent home for your business dataset. That framing leads to better decisions about field selection, masking, and destination governance.
+Think of Arcyria as the control plane for movement and transformation, not as the permanent home for your business dataset. That framing leads to better decisions about field selection, masking, and destination governance.

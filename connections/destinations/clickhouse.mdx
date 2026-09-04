@@ -3,7 +3,7 @@ title: ClickHouse destination
 description: Configure ClickHouse as a destination, prepare the target table, and verify Upsert delivery.
 ---
 
-ClickHouse is available as a destination connector. MantrixFlow validates the
+ClickHouse is available as a destination connector. Arcyria validates the
 target contract, then delivers only the published SQL model's columns into
 the configured destination table.
 
@@ -28,12 +28,12 @@ Create a dedicated writer. If table creation is managed separately, the
 runtime user needs only data access to existing tables.
 
 ```sql
-CREATE USER mantrixflow_writer
+CREATE USER arcyria_writer
   IDENTIFIED BY 'replace-with-a-secret';
 
 GRANT SELECT, INSERT, ALTER, CREATE, DROP, TRUNCATE
   ON analytics.*
-  TO mantrixflow_writer;
+  TO arcyria_writer;
 ```
 
 Grant `CREATE`, `ALTER`, and `DROP` only to a separate setup user or when

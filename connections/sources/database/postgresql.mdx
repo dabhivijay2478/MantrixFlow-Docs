@@ -3,7 +3,7 @@ title: PostgreSQL source
 description: Configure PostgreSQL as a source for Full Table and Incremental pipelines.
 ---
 
-PostgreSQL is available as a source connector. MantrixFlow discovers permitted
+PostgreSQL is available as a source connector. Arcyria discovers permitted
 schemas and tables, previews rows, stages selected streams, applies saved SQL
 models, and delivers approved output to PostgreSQL destination tables.
 
@@ -13,12 +13,12 @@ Use a dedicated read-only database user. Grant only the schemas and tables the
 workspace needs.
 
 ```sql
-CREATE USER mantrixflow_reader WITH PASSWORD 'replace-with-a-secret';
-GRANT CONNECT ON DATABASE app_db TO mantrixflow_reader;
-GRANT USAGE ON SCHEMA public TO mantrixflow_reader;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO mantrixflow_reader;
+CREATE USER arcyria_reader WITH PASSWORD 'replace-with-a-secret';
+GRANT CONNECT ON DATABASE app_db TO arcyria_reader;
+GRANT USAGE ON SCHEMA public TO arcyria_reader;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO arcyria_reader;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
-  GRANT SELECT ON TABLES TO mantrixflow_reader;
+  GRANT SELECT ON TABLES TO arcyria_reader;
 ```
 
 Use a secret manager for the real password. Do not commit it to source control.
@@ -87,7 +87,7 @@ CREATE INDEX IF NOT EXISTS orders_updated_at_idx
   ON public.orders (updated_at);
 ```
 
-MantrixFlow stores checkpoint state only after a successful run. Failed runs do
+Arcyria stores checkpoint state only after a successful run. Failed runs do
 not advance the saved checkpoint.
 
 ## Type compatibility

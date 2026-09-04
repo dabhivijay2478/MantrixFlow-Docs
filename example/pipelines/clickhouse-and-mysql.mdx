@@ -9,7 +9,7 @@ pipeline workflow used by PostgreSQL, MySQL, and MariaDB.
 
 ## Validated connector routes
 
-The following routes were exercised through the MantrixFlow browser workflow
+The following routes were exercised through the Arcyria browser workflow
 with real source previews and destination verification:
 
 | Source | Destination | Result |
@@ -31,7 +31,7 @@ Validate the matrix on your own clusters before promoting it to production.
 
 The source user needs read-only access to the source tables. See the
 [ClickHouse source connection guide](/connections/sources/database/clickhouse)
-for the canonical `mantrixflow_reader` setup.
+for the canonical `arcyria_reader` setup.
 
 For PostgreSQL, MySQL, and MariaDB sources, use the dedicated reader
 profile documented in the respective source guides.
@@ -41,7 +41,7 @@ profile documented in the respective source guides.
 The destination user needs write access to the destination database and
 tables. See the
 [ClickHouse destination connection guide](/connections/destinations/clickhouse)
-for the canonical `mantrixflow_writer` setup.
+for the canonical `arcyria_writer` setup.
 
 For PostgreSQL, MySQL, and MariaDB destinations, grant `SELECT`, `INSERT`,
 and `UPDATE` on the destination schema. Add `CREATE`, `ALTER`, and `DROP`

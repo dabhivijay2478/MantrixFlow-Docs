@@ -1,9 +1,9 @@
 ---
 title: Pipelines Overview
-description: "Understand the current MantrixFlow pipeline workspace, destination-owned transformations, readiness validation, runs, and schedules."
+description: "Understand the current Arcyria pipeline workspace, destination-owned transformations, readiness validation, runs, and schedules."
 ---
 
-A MantrixFlow pipeline combines one shared source configuration with one or more
+A Arcyria pipeline combines one shared source configuration with one or more
 independent destinations. Each destination owns its SQL transformations,
 published revisions, output assignments, and checkpoints.
 
@@ -42,7 +42,7 @@ links into the appropriate workspace tab.
 
 During a run:
 
-1. MantrixFlow extracts selected source streams into isolated temporary staging.
+1. Arcyria extracts selected source streams into isolated temporary staging.
 2. Published destination-owned SQL revisions read relations such as
    `raw.public__orders`.
 3. Each destination receives only its assigned model output.

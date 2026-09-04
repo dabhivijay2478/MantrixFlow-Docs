@@ -1,15 +1,15 @@
 ---
 title: PostgreSQL destination
-description: Configure PostgreSQL as a live MantrixFlow destination connection.
+description: Configure PostgreSQL as a live Arcyria destination connection.
 ---
 
-PostgreSQL is the live destination connector documented for the current MantrixFlow app.
+PostgreSQL is the live destination connector documented for the current Arcyria app.
 
 ## Required access
 
 Use a database user with write access to the destination schema and tables.
 
-MantrixFlow does not create final destination tables during delivery. Create the
+Arcyria does not create final destination tables during delivery. Create the
 table with the pipeline setup action or with SQL before starting a run.
 
 ## Connection fields
@@ -39,8 +39,8 @@ targets**, enter final targets as `schema.table`, for example
 
 The live write mode is **Upsert**.
 
-- If the destination table has a primary key, MantrixFlow uses merge-style delivery.
-- If the destination table has no primary key, MantrixFlow appends rows and records a no-primary-key warning.
+- If the destination table has a primary key, Arcyria uses merge-style delivery.
+- If the destination table has no primary key, Arcyria appends rows and records a no-primary-key warning.
 
 ## Setup flow
 

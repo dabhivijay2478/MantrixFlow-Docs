@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "mantrixflow-docs",
+      "name": "arcyria-docs",
       "devDependencies": {
         "mintlify": "^4.2.0",
       },

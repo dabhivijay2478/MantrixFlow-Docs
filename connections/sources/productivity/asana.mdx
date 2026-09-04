@@ -3,7 +3,7 @@ title: Asana source
 description: Connect Asana with a Personal Access Token, scope a pipeline to workspaces and projects, and sync eight supported streams.
 ---
 
-Asana is available as a source connector. MantrixFlow can read eight streams,
+Asana is available as a source connector. Arcyria can read eight streams,
 scope extraction to one workspace and selected projects, preview records, stage
 the result, apply published SQL transformations, and deliver rows to
 PostgreSQL, MySQL, or Airtable.
@@ -29,8 +29,8 @@ access as the Asana user who created it, so use a user who can read only the
 workspaces and projects this pipeline needs. Asana documents PAT behavior in
 its [authentication guide](https://developers.asana.com/docs/authentication).
 
-Store the token in a password manager. MantrixFlow encrypts the saved token and
-masks it after saving. The token is sent to the MantrixFlow API and is not
+Store the token in a password manager. Arcyria encrypts the saved token and
+masks it after saving. The token is sent to the Arcyria API and is not
 exposed in pipeline logs or run errors.
 
 <Note>
@@ -40,11 +40,11 @@ exposed in pipeline logs or run errors.
 
 ## Create the source connection
 
-1. Open **Connections** in your MantrixFlow workspace.
+1. Open **Connections** in your Arcyria workspace.
 2. Click **+ New Connection** and choose **Source**.
 3. Select **Asana**.
 4. Enter a descriptive connection name and the Personal Access Token.
-5. Click **Test Connection**. MantrixFlow validates the token against the
+5. Click **Test Connection**. Arcyria validates the token against the
    authenticated Asana user.
 6. Save the connection after the test succeeds.
 
@@ -115,14 +115,14 @@ required.
 
 Stories depend on a complete task traversal. When tasks and stories are
 selected together, configure tasks as Full Table. If one task disappears or is
-no longer readable after task discovery, MantrixFlow skips only that task's
+no longer readable after task discovery, Arcyria skips only that task's
 optional stories; authentication, rate-limit, timeout, and server failures
 still fail the run.
 
 ## Rate limits and retries
 
 Asana assigns API limits per authorization token and returns `429` with a
-`Retry-After` value. MantrixFlow follows that delay with bounded retries and
+`Retry-After` value. Arcyria follows that delay with bounded retries and
 limits concurrent Asana requests. Asana's current policies are documented in
 its [rate-limit guide](https://developers.asana.com/docs/rate-limits).
 

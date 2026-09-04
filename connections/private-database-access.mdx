@@ -1,16 +1,16 @@
 ---
 title: Private database access
-description: Connect managed PostgreSQL databases to MantrixFlow with a static IP allowlist for the live Postgres-to-Postgres release.
+description: Connect managed PostgreSQL databases to Arcyria with a static IP allowlist for the live Postgres-to-Postgres release.
 ---
 
-Most production databases block inbound traffic by default. For the Postgres-to-Postgres live release, MantrixFlow connects to databases from one static outbound IP address. Add that IP to your provider firewall or allowlist so only MantrixFlow can reach PostgreSQL port `5432`.
+Most production databases block inbound traffic by default. For the Postgres-to-Postgres live release, Arcyria connects to databases from one static outbound IP address. Add that IP to your provider firewall or allowlist so only Arcyria can reach PostgreSQL port `5432`.
 
 ## Supported now
 
 The supported private access path for this release is:
 
 ```text
-MantrixFlow ELT static IP -> provider firewall / allowlist -> PostgreSQL public endpoint
+Arcyria ELT static IP -> provider firewall / allowlist -> PostgreSQL public endpoint
 ```
 
 This works when the database has a public PostgreSQL endpoint and the provider lets you restrict access to specific IP addresses or CIDR ranges.
@@ -24,45 +24,45 @@ These private-network patterns are planned for later releases:
 - VPN-only or private-link-only access
 - databases with no public PostgreSQL endpoint
 
-If your database is private-only, keep using a test/public reporting replica for the first launch and contact MantrixFlow before moving the production private database.
+If your database is private-only, keep using a test/public reporting replica for the first launch and contact Arcyria before moving the production private database.
 
-## Copy the MantrixFlow IP
+## Copy the Arcyria IP
 
 In the PostgreSQL connection form, open **Private database access** and copy the CIDR shown in the panel:
 
 ```text
-<mantrixflow-static-ip>/32
+<arcyria-static-ip>/32
 ```
 
 Use `/32` so the rule allows exactly one IPv4 address. Restrict the rule to PostgreSQL port `5432`; do not allow all ports or `0.0.0.0/0`.
 
 ## Provider quick setup
 
-| Provider | Where to add MantrixFlow's IP |
+| Provider | Where to add Arcyria's IP |
 | --- | --- |
-| AWS RDS / Aurora PostgreSQL | VPC security group attached to the DB instance: inbound PostgreSQL `5432` from MantrixFlow's `/32`. See [AWS RDS security groups](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.RDSSecurityGroups.html). |
-| GCP Cloud SQL for PostgreSQL | Cloud SQL instance **Connections** page: add MantrixFlow's `/32` to Authorized networks. See [Google authorized networks](https://cloud.google.com/sql/docs/postgres/authorize-networks). |
-| Azure Database for PostgreSQL | Server **Networking** page: add a firewall rule with start IP and end IP equal to MantrixFlow's IP. See [Azure firewall rules](https://learn.microsoft.com/en-us/azure/postgresql/security/security-firewall-rules). |
-| Supabase | Database Settings -> Network Restrictions: add MantrixFlow's `/32` if restrictions are enabled. See [Supabase Network Restrictions](https://supabase.com/docs/guides/platform/network-restrictions). |
+| AWS RDS / Aurora PostgreSQL | VPC security group attached to the DB instance: inbound PostgreSQL `5432` from Arcyria's `/32`. See [AWS RDS security groups](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Overview.RDSSecurityGroups.html). |
+| GCP Cloud SQL for PostgreSQL | Cloud SQL instance **Connections** page: add Arcyria's `/32` to Authorized networks. See [Google authorized networks](https://cloud.google.com/sql/docs/postgres/authorize-networks). |
+| Azure Database for PostgreSQL | Server **Networking** page: add a firewall rule with start IP and end IP equal to Arcyria's IP. See [Azure firewall rules](https://learn.microsoft.com/en-us/azure/postgresql/security/security-firewall-rules). |
+| Supabase | Database Settings -> Network Restrictions: add Arcyria's `/32` if restrictions are enabled. See [Supabase Network Restrictions](https://supabase.com/docs/guides/platform/network-restrictions). |
 | Neon | Project Settings -> IP Allow, or `neon ip-allow add`, when IP Allow is enabled for the project. See [Neon IP Allow](https://neon.com/docs/reference/cli-ip-allow). |
 | Aiven for PostgreSQL | Service settings -> IP address allowlist / IP filter. See [Aiven access restrictions](https://aiven.io/docs/platform/howto/restrict-access). |
 | DigitalOcean Managed PostgreSQL | Database cluster -> Network Access -> Trusted sources. See [DigitalOcean trusted sources](https://docs.digitalocean.com/products/databases/postgresql/how-to/secure/). |
-| Render Postgres | Database Info -> Networking: restrict external access to MantrixFlow's IP if you enable restrictions. See [Render Postgres networking](https://render.com/docs/databases). |
+| Render Postgres | Database Info -> Networking: restrict external access to Arcyria's IP if you enable restrictions. See [Render Postgres networking](https://render.com/docs/databases). |
 
 ## Validation
 
 After adding the rule:
 
 1. Wait a few minutes for the provider firewall change to apply.
-2. Return to MantrixFlow and click **Test Connection**.
+2. Return to Arcyria and click **Test Connection**.
 3. If the test times out, re-check the provider public endpoint and allowlist.
 4. If the test authenticates but fails with permissions, update the database user grants.
 
 ## Security checklist
 
-- Use a dedicated database user for MantrixFlow.
+- Use a dedicated database user for Arcyria.
 - Use `/32`, not a broad subnet.
 - Restrict to port `5432`.
 - Keep SSL enabled for managed PostgreSQL providers.
-- Name the provider firewall rule clearly, such as `MantrixFlow ELT`.
+- Name the provider firewall rule clearly, such as `Arcyria ELT`.
 - Remove the rule if you stop using the connection.

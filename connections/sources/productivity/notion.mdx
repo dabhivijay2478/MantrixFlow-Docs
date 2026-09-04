@@ -9,12 +9,12 @@ integration, discovers modern Notion data sources, previews rows, stages them
 through dlt, applies published SQL transformations, and delivers the result to
 a supported destination.
 
-MantrixFlow never writes to Notion.
+Arcyria never writes to Notion.
 
 ## Supported resources
 
 Notion separates a database container from the data sources inside that
-database. MantrixFlow exposes each discovered data source as its own stable
+database. Arcyria exposes each discovered data source as its own stable
 stream so renaming a database or data source does not change pipeline identity.
 
 | Resource | Sync modes | Primary key | Cursor |
@@ -42,10 +42,10 @@ because every Notion data source can define a different schema.
 ## Before you begin
 
 1. Open [Notion integrations](https://www.notion.so/my-integrations).
-2. Create an internal integration for the workspace that MantrixFlow will
+2. Create an internal integration for the workspace that Arcyria will
    read.
 3. Enable read-content access and copy the internal integration token.
-4. Open each page or database that should be visible to MantrixFlow.
+4. Open each page or database that should be visible to Arcyria.
 5. Use **Connections** in Notion to share that content with the integration.
 
 <Note>
@@ -54,17 +54,17 @@ because every Notion data source can define a different schema.
   integration or inherited through a shared parent page.
 </Note>
 
-Treat the integration token like a password. MantrixFlow encrypts it at rest,
+Treat the integration token like a password. Arcyria encrypts it at rest,
 masks it after saving, and removes it from agent-visible configuration and
 sanitized errors.
 
 ## Create the source connection
 
-1. Open **Connections** in your MantrixFlow workspace.
+1. Open **Connections** in your Arcyria workspace.
 2. Click **+ New Connection** and select **Source**.
 3. Select **Notion**.
 4. Enter a descriptive connection name and the internal integration token.
-5. Click **Test Connection**. MantrixFlow validates the token against the
+5. Click **Test Connection**. Arcyria validates the token against the
    authenticated Notion bot identity.
 6. Save the connection after the test succeeds.
 
@@ -81,7 +81,7 @@ the exact dependency or configuration reason, then retry after correcting it.
 6. Save the stream settings.
 
 Discovery uses Notion Search only to find content visible to the integration.
-MantrixFlow then retrieves each data source directly to obtain authoritative
+Arcyria then retrieves each data source directly to obtain authoritative
 schema and parent-database metadata. Search is never used to extract the rows
 for a pipeline run.
 
@@ -135,7 +135,7 @@ server failures use bounded exponential retry.
 
 Notion data-source queries can return at most 10,000 results for one query. If
 Notion reports an incomplete request or the connector reaches that cap,
-MantrixFlow fails the run instead of reporting partial data as complete. Split
+Arcyria fails the run instead of reporting partial data as complete. Split
 very large operational datasets into smaller Notion data sources before
 syncing them.
 
@@ -146,7 +146,7 @@ each one independently. Select the exact data source you want to sync.
 
 Older saved configurations that contain only a database ID are resolved
 automatically when the database has exactly one data source. When it has more
-than one, MantrixFlow asks for an explicit data-source selection rather than
+than one, Arcyria asks for an explicit data-source selection rather than
 guessing.
 
 ## Verify a run

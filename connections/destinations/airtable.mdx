@@ -3,7 +3,7 @@ title: Airtable destination
 description: Deliver transformed rows into an existing Airtable table with explicit field mapping and Upsert keys.
 ---
 
-Airtable is available as a destination connector for reverse ELT. MantrixFlow
+Airtable is available as a destination connector for reverse ELT. Arcyria
 writes transformed rows into an existing Airtable table in batches and uses the
 selected merge fields to create or update records.
 
@@ -19,7 +19,7 @@ selected merge fields to create or update records.
 | Replace and Delete | Not supported |
 
 The delivery runner never creates a final destination table. Create the table
-and its fields in Airtable first, then refresh its schema in MantrixFlow.
+and its fields in Airtable first, then refresh its schema in Arcyria.
 
 ## Create the Airtable table
 
@@ -99,7 +99,7 @@ preserves the selected table assignment when it still exists.
 
 ## Upsert behavior
 
-MantrixFlow submits records in Airtable-sized batches and performs Upsert with
+Arcyria submits records in Airtable-sized batches and performs Upsert with
 the configured merge fields:
 
 - a matching record is updated;

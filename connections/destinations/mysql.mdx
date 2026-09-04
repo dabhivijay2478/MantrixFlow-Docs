@@ -3,7 +3,7 @@ title: MySQL destination
 description: Configure a MySQL destination, prepare the target table, and verify Upsert delivery.
 ---
 
-MySQL is available as a destination connector. MantrixFlow validates the target
+MySQL is available as a destination connector. Arcyria validates the target
 contract, then delivers only the published SQL model's columns into the
 configured table.
 
@@ -31,12 +31,12 @@ CREATE DATABASE IF NOT EXISTS analytics
   CHARACTER SET utf8mb4
   COLLATE utf8mb4_unicode_ci;
 
-CREATE USER 'mantrixflow_writer'@'%'
+CREATE USER 'arcyria_writer'@'%'
   IDENTIFIED BY 'replace-with-a-secret';
 
 GRANT SELECT, INSERT, UPDATE
   ON analytics.*
-  TO 'mantrixflow_writer'@'%';
+  TO 'arcyria_writer'@'%';
 
 FLUSH PRIVILEGES;
 ```

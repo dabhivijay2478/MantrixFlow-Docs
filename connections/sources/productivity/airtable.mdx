@@ -3,7 +3,7 @@ title: Airtable source
 description: Connect an Airtable base, discover tables, preview records, and use Airtable in Full Table pipelines.
 ---
 
-Airtable is available as a source connector. MantrixFlow discovers the bases
+Airtable is available as a source connector. Arcyria discovers the bases
 and tables available to a Personal Access Token, previews records, stages the
 selected table, applies the saved SQL model, and delivers the resulting rows to
 a configured destination.
@@ -17,7 +17,7 @@ for only the bases you intend to sync. In Airtable, give the token these scopes:
 - `schema.bases:read`
 
 Limit the token's resource access to the required workspace or bases. Copy the
-token when Airtable displays it and store it in a password manager. MantrixFlow
+token when Airtable displays it and store it in a password manager. Arcyria
 encrypts the saved token and never displays it again.
 
 <Note>
@@ -27,7 +27,7 @@ encrypts the saved token and never displays it again.
 
 ## Create the source connection
 
-1. Open **Connections** in the MantrixFlow workspace.
+1. Open **Connections** in the Arcyria workspace.
 2. Click **+ New Connection**.
 3. Choose the **Source** role.
 4. Select **Airtable**.
@@ -48,7 +48,7 @@ in the pipeline **Source** tab after the connection is saved.
 6. Preview the selected table and confirm the expected fields and records.
 7. Save the source configuration.
 
-MantrixFlow uses stable Airtable IDs internally. A selected table is represented
+Arcyria uses stable Airtable IDs internally. A selected table is represented
 as `airtable.tbl...`, while its DuckDB staging relation is normalized to a
 lowercase name such as `airtable__tblefetdfzjakhuqt`.
 
@@ -69,7 +69,7 @@ Every staged row includes the Airtable fields plus two lineage columns:
 
 The record ID is used because Airtable permits an empty value in the configured
 primary field. User-created fields can be sparse: when a record has no value for
-a field, MantrixFlow preserves it as a nullable column instead of changing the
+a field, Arcyria preserves it as a nullable column instead of changing the
 schema between records.
 
 ## Sync mode

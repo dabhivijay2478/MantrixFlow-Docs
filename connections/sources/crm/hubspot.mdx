@@ -3,7 +3,7 @@ title: HubSpot source
 description: Connect HubSpot as an Available Now source and deliver ten CRM streams to PostgreSQL or Airtable with dlt.
 ---
 
-HubSpot is Available Now as a source-only connector. MantrixFlow uses
+HubSpot is Available Now as a source-only connector. Arcyria uses
 dlt to extract selected HubSpot data into isolated staging, applies your SQL/dbt
 models, and delivers the result to existing PostgreSQL or Airtable tables.
 
@@ -21,12 +21,12 @@ currently supported.
 2. Create or open a read-only private app.
 3. Add only the read scopes required by the streams you plan to sync.
 4. Copy the access token.
-5. In MantrixFlow, open **Connections**, choose **Source**, and select
+5. In Arcyria, open **Connections**, choose **Source**, and select
    **HubSpot**.
 6. Enter a connection name and the private app access token.
 7. Test the connection, then save it.
 
-MantrixFlow encrypts the saved credential and masks it in connection responses.
+Arcyria encrypts the saved credential and masks it in connection responses.
 Never place the token in SQL, pipeline names, logs, or AI chat.
 
 ## Supported streams
@@ -107,8 +107,10 @@ during a run.
 - Use a primary key or stable merge key for each table.
 - Keep model output columns aligned with destination column names and types.
 - Use Upsert delivery for repeatable incremental runs.
-- Keep `_mantrixflow_run_id` if you need row-level run lineage, and
-  `extracted_at` if you need extraction-time auditing.
+- Keep the legacy `_mantrixflow_run_id` field if you need row-level run lineage,
+  and `extracted_at` if you need extraction-time auditing. The legacy field name
+  remains part of the current runtime contract until a separately versioned
+  data-schema migration is available.
 - Do not include internal `_dlt_*` staging columns in destination models.
 
 Empty but valid HubSpot streams still produce a typed staging relation, so a

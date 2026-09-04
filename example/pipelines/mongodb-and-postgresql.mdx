@@ -92,7 +92,7 @@ db.events_copy.countDocuments({})
 db.events_copy.find({ _dlt_id: { $exists: true } })
 ```
 
-The second query should return no documents. MantrixFlow removes all top-level
+The second query should return no documents. Arcyria removes all top-level
 `_dlt*` fields before MongoDB delivery.
 
 ## Operational checks

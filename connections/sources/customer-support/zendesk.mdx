@@ -3,7 +3,7 @@ title: Zendesk source
 description: Connect Zendesk Support with read-only OAuth, select from 13 supported resources, and configure bounded historical or incremental extraction.
 ---
 
-Zendesk is Available Now as a source-only connector. MantrixFlow reads
+Zendesk is Available Now as a source-only connector. Arcyria reads
 Zendesk Support data with OAuth, stages each selected resource in DuckDB,
 applies published SQL transformations, and delivers the results to supported
 destinations.
@@ -46,29 +46,29 @@ You need:
 - a Zendesk user who can approve the requested read access and read the
   resources the pipeline needs.
 
-You do not need to create or paste an API token. MantrixFlow uses Zendesk's
+You do not need to create or paste an API token. Arcyria uses Zendesk's
 authorization-code OAuth flow and requests only the `read` scope. Zendesk
 handles sign-in and approval on its own domain.
 
-For a MantrixFlow production deployment serving multiple Zendesk accounts, the
+For a Arcyria production deployment serving multiple Zendesk accounts, the
 platform operator must use a Zendesk-approved Global OAuth client. Individual
 customers authorize that client against their own Zendesk subdomain.
 
 ## Create the source connection
 
-1. Open **Connections** in your MantrixFlow workspace.
+1. Open **Connections** in your Arcyria workspace.
 2. Click **+ New Connection** and choose **Source**.
 3. Select **Zendesk**.
 4. Enter a descriptive connection name.
 5. Enter only the Zendesk subdomain. For `acme.zendesk.com`, enter `acme`.
 6. Click **Connect Zendesk**.
 7. Sign in to Zendesk and review the read-only access request.
-8. Select **Allow**. Zendesk returns you to MantrixFlow and saves the
+8. Select **Allow**. Zendesk returns you to Arcyria and saves the
    connection.
 
 Access and refresh tokens are stored encrypted. They are not returned in
 normal connection responses or sent to the browser after the OAuth callback.
-MantrixFlow refreshes short-lived access tokens server-side. If authorization
+Arcyria refreshes short-lived access tokens server-side. If authorization
 or the refresh token expires, open the saved connection and select
 **Reconnect Zendesk**.
 
@@ -94,7 +94,7 @@ When the initial sync start is empty, the first incremental run uses a bounded
 ## Full Table and Incremental
 
 Use **Incremental** for tickets and event history when you want subsequent runs
-to request records at or after the saved cursor. MantrixFlow preserves the
+to request records at or after the saved cursor. Arcyria preserves the
 inclusive boundary and relies on the resource primary key or append behavior
 to avoid losing records with the same timestamp.
 
@@ -131,7 +131,7 @@ append-style processing.
 
 ## Rate limits and safety bounds
 
-MantrixFlow follows Zendesk pagination links and honors `Retry-After` responses
+Arcyria follows Zendesk pagination links and honors `Retry-After` responses
 with bounded retries. Extraction also has request, page, runtime, and timeout
 budgets so a malformed pagination response or unexpectedly large account does
 not run without a limit.
@@ -171,7 +171,7 @@ new `updated_at` value.
 | Zendesk is missing from the catalog | Confirm both the Go API OAuth configuration and ELT runtime capability are healthy, then refresh Connections. |
 | The Zendesk account cannot be reached | Enter only the core subdomain from `<account>.zendesk.com`; do not enter a full URL or custom host-mapped domain. |
 | Authorization is denied | Sign in with a Zendesk user allowed to approve the integration and read the requested resources. |
-| Zendesk shows a generic server-error page | Ask the MantrixFlow operator to verify the OAuth client identifier, confidential client kind, and exact registered callback URL. |
+| Zendesk shows a generic server-error page | Ask the Arcyria operator to verify the OAuth client identifier, confidential client kind, and exact registered callback URL. |
 | The connection previously worked but now returns `401` | Open the connection and select **Reconnect Zendesk** to replace expired or revoked OAuth authorization. |
 | A selected resource returns `403` | Confirm the approving Zendesk user and current plan can access that Support API resource. |
 | Extraction is rate limited | Wait for the bounded retry or reduce overlapping Zendesk runs. |

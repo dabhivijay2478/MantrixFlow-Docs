@@ -1,5 +1,5 @@
 {
-  "name": "mantrixflow-docs",
+  "name": "arcyria-docs",
   "private": true,
   "scripts": {
     "dev": "mintlify dev",

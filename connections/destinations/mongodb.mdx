@@ -3,7 +3,7 @@ title: MongoDB destination
 description: Configure MongoDB as an Available Now destination and deliver transformed documents with deterministic Upsert keys.
 ---
 
-MongoDB is available as an Available Now destination connector. MantrixFlow delivers only
+MongoDB is available as an Available Now destination connector. Arcyria delivers only
 the published SQL model's output through a custom dlt destination backed by
 PyMongo. Delivery uses bounded unordered bulk writes and removes internal dlt
 fields before documents reach the destination collection.
@@ -16,7 +16,7 @@ Use a dedicated writer scoped to the destination database:
 use admin
 
 db.createUser({
-  user: "mantrixflow_writer",
+  user: "arcyria_writer",
   pwd: passwordPrompt(),
   roles: [{ role: "readWrite", db: "analytics" }]
 })
@@ -64,7 +64,7 @@ db.orders.createIndex(
 ```
 
 Without an index, Upsert remains correct but may perform poorly as the
-collection grows. MantrixFlow reports a warning when it cannot verify a
+collection grows. Arcyria reports a warning when it cannot verify a
 supporting index.
 
 ## Configure delivery

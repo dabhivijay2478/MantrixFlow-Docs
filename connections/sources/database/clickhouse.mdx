@@ -3,7 +3,7 @@ title: ClickHouse source
 description: Configure ClickHouse as a source for Full Table and Incremental pipelines.
 ---
 
-ClickHouse is available as a source connector. MantrixFlow connects over the
+ClickHouse is available as a source connector. Arcyria connects over the
 HTTP transport using the same SQL-first pipeline workflow used by relational
 sources. Discovered schemas and tables are previewed, staged, transformed with
 saved SQL models, and delivered to a supported destination.
@@ -14,10 +14,10 @@ Use a dedicated read-only database user. Source privileges should not include
 `CREATE`, `DROP`, `ALTER`, `INSERT`, or `DELETE`.
 
 ```sql
-CREATE USER mantrixflow_reader
+CREATE USER arcyria_reader
   IDENTIFIED BY 'replace-with-a-secret';
 
-GRANT SELECT ON analytics.* TO mantrixflow_reader;
+GRANT SELECT ON analytics.* TO arcyria_reader;
 ```
 
 Grant `SELECT` only on the schemas and tables the workspace needs. Use a
@@ -92,7 +92,7 @@ CREATE INDEX IF NOT EXISTS events_updated_at_idx
   TYPE set(0) GRANULARITY 1;
 ```
 
-MantrixFlow stores checkpoint state only after a successful run. Failed runs
+Arcyria stores checkpoint state only after a successful run. Failed runs
 do not advance the saved checkpoint.
 
 ## Type compatibility

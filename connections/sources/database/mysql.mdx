@@ -3,7 +3,7 @@ title: MySQL source
 description: Configure MySQL as a source, discover tables, preview rows, and run Full Table or Incremental pipelines.
 ---
 
-MySQL is available as a source connector. MantrixFlow discovers tables visible
+MySQL is available as a source connector. Arcyria discovers tables visible
 to the configured database user, previews source rows, stages selected tables
 in DuckDB, runs the saved SQL models, and delivers the result to a configured
 destination.
@@ -14,12 +14,12 @@ Use a dedicated read-only MySQL user. Grant access only to the database and
 tables the workspace needs.
 
 ```sql
-CREATE USER 'mantrixflow_reader'@'%'
+CREATE USER 'arcyria_reader'@'%'
   IDENTIFIED BY 'replace-with-a-secret';
 
 GRANT SELECT, SHOW VIEW
   ON application_db.*
-  TO 'mantrixflow_reader'@'%';
+  TO 'arcyria_reader'@'%';
 
 FLUSH PRIVILEGES;
 ```
@@ -39,7 +39,7 @@ the real password in a secret manager and never commit it.
 | Password | Source user password |
 | SSL Mode | Use the provider-required encrypted mode for hosted databases |
 
-Do not enter `localhost` when MantrixFlow is running in a different container or
+Do not enter `localhost` when Arcyria is running in a different container or
 host. Use a reachable DNS name, private address, or host gateway instead.
 
 ## Create the connection
@@ -88,7 +88,7 @@ CREATE INDEX customers_updated_at_idx
 ```
 
 The replication key should be non-null, indexed, and updated whenever a source
-record changes. MantrixFlow advances the saved checkpoint only after a
+record changes. Arcyria advances the saved checkpoint only after a
 successful run.
 
 ## Example source table and model

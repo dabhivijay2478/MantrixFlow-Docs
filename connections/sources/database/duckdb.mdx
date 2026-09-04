@@ -4,7 +4,7 @@ description: Configure an organization-managed DuckDB artifact as a read-only so
 ---
 
 DuckDB is available as an Available Now source connector for organization-managed
-`.duckdb` artifacts. MantrixFlow opens source artifacts read-only, discovers
+`.duckdb` artifacts. Arcyria opens source artifacts read-only, discovers
 their schemas, tables, views, and columns, and uses the standard SQL source
 pipeline for Full Table and Incremental extraction.
 
@@ -12,7 +12,7 @@ pipeline for Full Table and Incremental extraction.
   DuckDB currently requires a pre-provisioned managed file reference. The
   connection form does not upload a local file or accept a browser/server file
   path. If your workspace has not been given a `file_...` reference, contact
-  your MantrixFlow administrator before creating the connection.
+  your Arcyria administrator before creating the connection.
 </Warning>
 
 ## Connection fields
@@ -24,7 +24,7 @@ pipeline for Full Table and Incremental extraction.
 | Default Schema | Schema used when a table is not qualified; defaults to `main` |
 
 Do not enter `/tmp/...`, `../...`, `file://...`, a SQLAlchemy URL, or a local
-filesystem path. Hosted MantrixFlow accepts only an authorized managed file
+filesystem path. Hosted Arcyria accepts only an authorized managed file
 reference.
 
 ## Create the source connection
@@ -43,7 +43,7 @@ to the browser.
 
 ## Read-only source behavior
 
-MantrixFlow opens DuckDB sources with read-only driver configuration for
+Arcyria opens DuckDB sources with read-only driver configuration for
 connection tests, discovery, preview, and extraction. A source run must not
 create tables, write rows, install extensions, or attach another database to
 the customer artifact.

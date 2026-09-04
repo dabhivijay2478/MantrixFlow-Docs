@@ -3,7 +3,7 @@ title: MongoDB source
 description: Configure MongoDB as an Available Now source, discover collections, preview inferred schemas, and run Full Table or Incremental pipelines.
 ---
 
-MongoDB is available as an Available Now source connector. MantrixFlow uses the official
+MongoDB is available as an Available Now source connector. Arcyria uses the official
 dlt MongoDB verified source with PyMongo, stages selected collections in an
 isolated DuckDB file, runs published SQL models, and delivers the result to a
 supported destination.
@@ -15,21 +15,21 @@ production use.
 
 ## Required access
 
-Use a dedicated read-only user scoped to the databases that MantrixFlow needs.
+Use a dedicated read-only user scoped to the databases that Arcyria needs.
 For a self-managed deployment, create the user in the authentication database:
 
 ```javascript
 use admin
 
 db.createUser({
-  user: "mantrixflow_reader",
+  user: "arcyria_reader",
   pwd: passwordPrompt(),
   roles: [{ role: "read", db: "application" }]
 })
 ```
 
 For Atlas, create a database user with read access to the selected database and
-allow network access from the MantrixFlow runtime. Do not place a real URI in
+allow network access from the Arcyria runtime. Do not place a real URI in
 source control, support tickets, screenshots, or pipeline SQL.
 
 ## Connection fields
@@ -45,7 +45,7 @@ not returned to the browser. On edit, leave the masked URI unchanged unless you
 intend to rotate it.
 
 Common URI options include `authSource`, `replicaSet`, `readPreference`,
-`tls=true`, and provider certificate options. MantrixFlow passes supported URI
+`tls=true`, and provider certificate options. Arcyria passes supported URI
 options to PyMongo rather than splitting them into separate fields.
 
 ## Create the connection
@@ -101,7 +101,7 @@ run includes the saved boundary value so documents tied at that value are
 replayed instead of skipped. Use a stable Upsert key in the destination to
 absorb this safe boundary replay.
 
-MantrixFlow advances checkpoint state only after a successful run. A failed run
+Arcyria advances checkpoint state only after a successful run. A failed run
 does not replace the previous successful checkpoint.
 
 ## BSON handling
@@ -135,7 +135,7 @@ Special BSON values use loss-aware Extended JSON-compatible structures.
 | Authentication failed | Verify the username, password, `authSource`, and database roles. |
 | DNS or SRV lookup failed | Check the `mongodb+srv://` hostname and local/provider DNS access. |
 | TLS handshake failed | Verify `tls` URI options, provider CA requirements, and certificate trust. |
-| Atlas network access denied | Add the MantrixFlow runtime network to the Atlas access list. |
+| Atlas network access denied | Add the Arcyria runtime network to the Atlas access list. |
 | No collections discovered | Confirm the database name and grant read access to it. |
 | Preview returns no rows | Confirm the collection contains documents and the user can read them. |
 | Incremental rows are missing | Use a populated, indexed cursor that changes on every relevant update. |

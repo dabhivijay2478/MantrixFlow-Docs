@@ -3,7 +3,7 @@ title: GitHub source
 description: Connect one GitHub.com repository with a Personal Access Token and sync issues, pull requests, commits, releases, and repository metadata.
 ---
 
-GitHub is Available Now as a source-only connector. MantrixFlow reads selected
+GitHub is Available Now as a source-only connector. Arcyria reads selected
 resources from one GitHub.com repository, stages them with stable relation
 names, applies published SQL transformations, and delivers the reviewed rows
 to a supported destination.
@@ -50,7 +50,7 @@ You need:
 - the GitHub account or organization name that owns the repository;
 - the repository name;
 - a Personal Access Token owned by a user who can read that repository; and
-- permission to create source connections in the MantrixFlow workspace.
+- permission to create source connections in the Arcyria workspace.
 
 For the complete resource set, use a classic Personal Access Token with
 read access to the repository. Private repositories normally require the
@@ -63,14 +63,14 @@ by resource. Classic PAT is the supported contract for the GraphQL issue,
 pull-request, stargazer, comment, and reaction data.
 
 <Warning>
-  Grant access only to repositories the pipeline needs. MantrixFlow treats the
+  Grant access only to repositories the pipeline needs. Arcyria treats the
   token as an opaque secret, so the token prefix is not used to decide whether
   it is valid or sufficiently privileged.
 </Warning>
 
 ## Create the source connection
 
-1. Open **Connections** in your MantrixFlow workspace.
+1. Open **Connections** in your Arcyria workspace.
 2. Click **+ New Connection** and choose **Source**.
 3. Select **GitHub**. The card is marked **Source only** and **Available Now**.
 4. Enter a descriptive connection name.
@@ -120,7 +120,7 @@ still matter:
 
 ## Pagination and rate limits
 
-MantrixFlow follows GitHub REST `Link` headers and GraphQL opaque cursors until
+Arcyria follows GitHub REST `Link` headers and GraphQL opaque cursors until
 the API reports no next page. Repeated links or cursors fail the run instead of
 looping forever.
 
@@ -160,7 +160,7 @@ assignees in a model.
   endpoints; they are never placed in request URLs.
 - Connector errors and metrics exclude token values and repository content.
 - Rotate or revoke the PAT in GitHub, then re-test the connection in
-  MantrixFlow after updating it.
+  Arcyria after updating it.
 
 ## Current limitations
 

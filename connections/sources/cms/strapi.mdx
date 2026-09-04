@@ -3,7 +3,7 @@ title: Strapi source
 description: Connect Strapi 5 with a read-only API token, validate dynamic Content API collections, preview records, and run Full Table extraction.
 ---
 
-Strapi is Available Now as a source-only connector for Strapi 5. MantrixFlow
+Strapi is Available Now as a source-only connector for Strapi 5. Arcyria
 reads selected REST Content API collections, normalizes nested records with
 dlt, stages each resource in DuckDB, applies published SQL transformations,
 and delivers the result to a configured destination.
@@ -34,11 +34,11 @@ The Strapi URL is the origin only:
 https://cms.example.com
 ```
 
-Do not append `/api`. MantrixFlow constructs `/api/{api_id}` server-side.
+Do not append `/api`. Arcyria constructs `/api/{api_id}` server-side.
 
 ## Create the source connection
 
-1. Open **Connections** in your MantrixFlow workspace.
+1. Open **Connections** in your Arcyria workspace.
 2. Click **+ New Connection** and choose **Source**.
 3. Select **Strapi**.
 4. Enter a descriptive connection name.
@@ -47,7 +47,7 @@ Do not append `/api`. MantrixFlow constructs `/api/{api_id}` server-side.
 7. Click **Test Connection** and save the connection.
 
 The initial connection test validates the URL and host reachability. After a
-Content API ID is configured, MantrixFlow also requests one record from that
+Content API ID is configured, Arcyria also requests one record from that
 collection to verify the token and its content permission. Host reachability
 alone does not prove access to every collection.
 
@@ -69,7 +69,7 @@ catalog. Configure the collections used by this pipeline:
    and save the stream configuration.
 
 Content API IDs accept lowercase letters, numbers, and single hyphens. Enter
-`product-categories`, not `/api/product-categories` or a full URL. MantrixFlow
+`product-categories`, not `/api/product-categories` or a full URL. Arcyria
 rejects paths, traversal, admin/plugin routes, arbitrary query strings, and
 endpoint URLs.
 
@@ -87,7 +87,7 @@ Strapi currently supports **Full Table** only. Each run paginates every selected
 collection visible to the token and replaces that collection's staging
 resource. Unselected collections receive no extraction requests.
 
-Incremental sync and CDC are disabled. MantrixFlow does not yet advertise an
+Incremental sync and CDC are disabled. Arcyria does not yet advertise an
 `updatedAt` cursor or merge key because `documentId`, locale variants, inclusive
 timestamp boundaries, and failed-run recovery require additional live Strapi 5
 verification.
@@ -102,7 +102,7 @@ Strapi 5 root records preserve fields returned by the Content API, including
 present. dlt normalizes nested objects and arrays such as components, rich-text
 blocks, and dynamic zones into related staging tables.
 
-MantrixFlow does not automatically add `populate=*`. Relations and media fields
+Arcyria does not automatically add `populate=*`. Relations and media fields
 contain only the data Strapi returns for the authorized collection request.
 Media metadata can pass through the source payload, but the connector does not
 follow or download media URLs.
@@ -124,12 +124,12 @@ names from the transformation editor rather than assuming the example names.
 
 ## URL and network security
 
-Hosted MantrixFlow requires HTTPS and blocks localhost, loopback, link-local,
+Hosted Arcyria requires HTTPS and blocks localhost, loopback, link-local,
 private, reserved, and cloud-metadata network addresses. DNS answers and
 redirects are validated before requests, and redirects must remain on the same
 validated origin under `/api/`.
 
-Private-network Strapi deployments require an explicit self-hosted MantrixFlow
+Private-network Strapi deployments require an explicit self-hosted Arcyria
 network policy. A browser-supplied endpoint cannot weaken the hosted SSRF
 policy.
 

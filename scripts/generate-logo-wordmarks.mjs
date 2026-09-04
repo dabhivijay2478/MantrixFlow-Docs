@@ -1,69 +1,48 @@
 #!/usr/bin/env node
-/**
- * Regenerates logo-wordmark-light.svg / logo-wordmark-dark.svg from images/m.png.
- * Dark treatment matches apps/app/components/logo.tsx (mark → primary #00a859).
- */
-import { readFileSync, writeFileSync } from "node:fs";
+
+import { writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = join(__dirname, "..");
-const pngPath = join(root, "images", "m.png");
-const png = readFileSync(pngPath);
-const dataUri = `data:image/png;base64,${png.toString("base64")}`;
+const currentDirectory = dirname(fileURLToPath(import.meta.url));
+const root = join(currentDirectory, "..");
 
-// feColorMatrix: map alpha-weighted luminance to brand green (R=0, G/B from A)
-const greenMatrix =
-  "0 0 0 0 0  0 0 0 0.6588235294117647 0  0 0 0 0.34901960784313724 0  0 0 0 1 0";
+const markPath =
+  "M32 5.5c-4.9 8.6-11.8 12.2-20.8 9.4-3.2-1-6.2-2.9-8.7-5.5 2.4 12.3 8.3 21.8 17.8 28.6 5 3.6 8.2 9.4 9.7 17.2l2 3.3 2-3.3c1.5-7.8 4.7-13.6 9.7-17.2 9.5-6.8 15.4-16.3 17.8-28.6-2.5 2.6-5.5 4.5-8.7 5.5-9 2.8-15.9-.8-20.8-9.4Z";
+const detailPath =
+  "M21 22.4c4.5 2.1 8.1 5.5 11 10.3 2.9-4.8 6.5-8.2 11-10.3";
 
-/**
- * Lockup tuned for Mintlify navbar height: icon height ≈ word cap size (not tiny vs type).
- * Extra-tall viewBox adds horizontal/vertical padding so scaling does not clip or hug edges.
- */
-const fontPx = 40;
-const icon = Math.round(fontPx * 0.92);
-const gap = 14;
-const padX = 2;
-const padY = 16;
-const innerH = Math.max(fontPx + 8, icon + 4);
-const h = innerH + padY * 2;
-const w = 400;
-const iconY = padY + (innerH - icon) / 2;
-const textX = padX + icon + gap;
-const textY = padY + innerH / 2;
-const textTuning = `letter-spacing="-0.04em" text-rendering="geometricPrecision"`;
-const textAttrs = `dominant-baseline="central" text-anchor="start" x="${textX}" y="${textY}" ${textTuning}`;
+function wordmark({ dark }) {
+  const markStops = dark
+    ? '<stop stop-color="#67e8f9"/><stop offset=".52" stop-color="#2dd4bf"/><stop offset="1" stop-color="#38bdf8"/>'
+    : '<stop stop-color="#164e63"/><stop offset=".52" stop-color="#0f766e"/><stop offset="1" stop-color="#0369a1"/>';
+  const wordStops = dark
+    ? '<stop stop-color="#f0fdfa"/><stop offset="1" stop-color="#bae6fd"/>'
+    : '<stop stop-color="#031117"/><stop offset="1" stop-color="#164e63"/>';
+  const detail = dark ? "#ecfeff" : "#cffafe";
 
-const light = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="MantrixFlow">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 80" width="360" height="80" role="img" aria-labelledby="title">
+  <title id="title">Arcyria</title>
   <defs>
-    <linearGradient id="mf-word-light" x1="0%" y1="0%" x2="100%" y2="80%">
-      <stop offset="0%" stop-color="#09090b" />
-      <stop offset="55%" stop-color="#27272a" />
-      <stop offset="100%" stop-color="#3f3f46" />
-    </linearGradient>
+    <linearGradient id="mark" x1="2" y1="2" x2="58" y2="64" gradientUnits="userSpaceOnUse">${markStops}</linearGradient>
+    <linearGradient id="word" x1="82" y1="18" x2="315" y2="64" gradientUnits="userSpaceOnUse">${wordStops}</linearGradient>
   </defs>
-  <image href="${dataUri}" x="0" y="${iconY}" width="${icon}" height="${icon}" preserveAspectRatio="xMidYMid meet" />
-  <text ${textAttrs} font-family="Geist, ui-sans-serif, system-ui, sans-serif" font-size="${fontPx}" font-weight="600" fill="url(#mf-word-light)">MantrixFlow</text>
+  <g transform="translate(6 8)">
+    <path fill="url(#mark)" d="${markPath}"/>
+    <path fill="none" stroke="${detail}" stroke-linecap="round" stroke-width="2.4" d="${detailPath}" opacity=".82"/>
+  </g>
+  <text x="82" y="53" fill="url(#word)" font-family="Geist, Inter, ui-sans-serif, system-ui, sans-serif" font-size="42" font-weight="600" letter-spacing="-1.6">Arcyria</text>
 </svg>
 `;
+}
 
-const dark = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" role="img" aria-label="MantrixFlow">
-  <defs>
-    <filter id="m-brand-green" color-interpolation-filters="sRGB">
-      <feColorMatrix type="matrix" values="${greenMatrix}" />
-    </filter>
-    <linearGradient id="mf-word-dark" x1="0%" y1="0%" x2="100%" y2="70%">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="45%" stop-color="#fafafa" />
-      <stop offset="100%" stop-color="#d4d4d8" />
-    </linearGradient>
-  </defs>
-  <image href="${dataUri}" x="0" y="${iconY}" width="${icon}" height="${icon}" preserveAspectRatio="xMidYMid meet" filter="url(#m-brand-green)" />
-  <text ${textAttrs} font-family="Geist, ui-sans-serif, system-ui, sans-serif" font-size="${fontPx}" font-weight="600" fill="url(#mf-word-dark)">MantrixFlow</text>
-</svg>
-`;
+writeFileSync(
+  join(root, "images", "logo-wordmark-light.svg"),
+  wordmark({ dark: false }),
+);
+writeFileSync(
+  join(root, "images", "logo-wordmark-dark.svg"),
+  wordmark({ dark: true }),
+);
 
-writeFileSync(join(root, "images", "logo-wordmark-light.svg"), light);
-writeFileSync(join(root, "images", "logo-wordmark-dark.svg"), dark);
-console.log("Wrote images/logo-wordmark-light.svg and images/logo-wordmark-dark.svg");
+console.log("Wrote Arcyria light and dark SVG wordmarks");

@@ -3,12 +3,12 @@ title: Linear source
 description: Connect Linear with a Personal API Key, scope extraction to teams and projects, and sync eight supported resources.
 ---
 
-Linear is available as an Available Now source connector. MantrixFlow reads eight
+Linear is available as an Available Now source connector. Arcyria reads eight
 resources through Linear's GraphQL API, previews records, stages each selected
 resource, applies published SQL transformations, and delivers rows to a
 supported destination.
 
-MantrixFlow never creates, edits, or deletes data in Linear.
+Arcyria never creates, edits, or deletes data in Linear.
 
 ## Supported resources
 
@@ -40,7 +40,7 @@ Each resource has a stable DuckDB staging relation:
 
 1. Open **Linear Settings**.
 2. Go to **Security & access**.
-3. Under **Personal API keys**, create a key for MantrixFlow.
+3. Under **Personal API keys**, create a key for Arcyria.
 4. Limit the key to the teams the pipeline needs, when that option is
    available for your workspace.
 5. Copy the key and store it in a password manager.
@@ -50,21 +50,21 @@ Linear documents Personal API Keys in its
 [Security & access guide](https://linear.app/docs/security-and-access).
 
 <Note>
-  Linear authentication is currently Personal API Key only in MantrixFlow.
+  Linear authentication is currently Personal API Key only in Arcyria.
   OAuth is not available for this connector yet.
 </Note>
 
-The key has the access of the Linear user who created it. MantrixFlow encrypts
+The key has the access of the Linear user who created it. Arcyria encrypts
 the saved key, masks it after saving, and removes it from sanitized errors and
 pipeline logs.
 
 ## Create the source connection
 
-1. Open **Connections** in your MantrixFlow workspace.
+1. Open **Connections** in your Arcyria workspace.
 2. Select **Source**.
 3. Select **Linear**.
 4. Enter a descriptive connection name and the Personal API Key.
-5. Click **Test Connection**. MantrixFlow validates the key against the
+5. Click **Test Connection**. Arcyria validates the key against the
    authenticated Linear user.
 6. Save the connection after the test succeeds.
 
@@ -99,7 +99,7 @@ pipeline's connector options only when they are required.
 **Full Table** replaces the staged resource with the current API result.
 
 **Incremental** is available for projects, cycles, issues, and comments.
-MantrixFlow orders those resources by `updatedAt`, stores the latest cursor,
+Arcyria orders those resources by `updatedAt`, stores the latest cursor,
 and requests records whose `updatedAt` is greater than or equal to the saved
 value. The inclusive boundary prevents records with the same timestamp from
 being skipped; the `id` primary key removes duplicates during merge.
@@ -108,7 +108,7 @@ Incremental extraction is scheduled polling, not change data capture. It does
 not detect hard-deleted records. Run a periodic Full Table reconciliation when
 the destination must reflect deletions or access changes.
 
-Linear list queries use cursor-based pagination. MantrixFlow follows
+Linear list queries use cursor-based pagination. Arcyria follows
 `pageInfo.endCursor` while `hasNextPage` is true and applies bounded request,
 page, complexity, retry, and runtime limits. See Linear's
 [pagination guide](https://linear.app/developers/pagination) and
