@@ -1,42 +1,78 @@
-# Arcyria documentation (Mintlify)
+# Arcyria Documentation
 
-Product documentation for [Arcyria](https://arcyria.com). Edit MDX and `docs.json` here.
+This repository contains the customer-facing Arcyria documentation published
+with Mintlify. It covers onboarding, connections, connector configuration,
+pipelines, transformations, sync behavior, billing, workspace administration,
+security, troubleshooting, and visual user guides.
 
-## Git remote
+Internal architecture, operations, audits, and deployment runbooks do not
+belong here; they are maintained in the private engineering workspace.
 
-The GitHub remote currently retains its legacy `MantrixFlow-Docs` slug until the external repository is renamed.
+## Content map
 
-```bash
-git remote -v   # verify the configured origin before pushing
-git push -u origin main
-```
+| Path | Content |
+| --- | --- |
+| `index.mdx` | Documentation landing page |
+| `getting-started/` | Introduction, quick start, concepts, and FAQ |
+| `connections/` | Connection concepts, private access, and connector reference |
+| `pipelines/` | Creation, transformations, dbt, scheduling, and run history |
+| `sync-reference/` | Full, incremental, CDC, and state behavior |
+| `platform/` | Organization, team, security, and data-handling guides |
+| `example/pipelines/` | End-to-end pipeline examples |
+| `user-guide/` | Screenshot-led product walkthroughs |
+| `troubleshooting/` | Customer troubleshooting guidance |
+| `images/` | Theme-aware branding and documentation screenshots |
+| `docs.json` | Mintlify theme, navigation, branding, and site configuration |
+
+The navigation rendered by Mintlify is defined in `docs.json`. A page is not
+discoverable from the sidebar until it is added there.
 
 ## Local preview
+
+Node.js and npm are required.
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Branding
+The development command starts Mintlify's local preview. Use the URL printed by
+the CLI.
 
-- **Logo:** the theme-aware Arcyria marks in `images/brand-logo/light-logo.png` and `images/brand-logo/dark-logo.png`.
-- **Favicon:** theme-aware PNGs from `images/brand-logo/`, configured in `docs.json`.
-- **Colors & fonts** in `docs.json` use the shared neutral-and-blue product palette with **Geist**.
+## Validation
 
-Mintlify selects the matching light or dark logo from `docs.json`.
+```bash
+npm run broken-links
+```
 
-## Images in MDX
+Before publishing, also confirm that every page referenced by `docs.json`
+exists and that new connector claims match the product's live connector
+metadata.
 
-Screenshots use **`<img src="/images/...">`** (root-relative URLs) so paths match Mintlify’s static file hosting. Keep PNGs committed under `images/user-guide/` and `images/workspace/`.
+## Authoring conventions
 
-## Images
+- Write customer-facing behavior, not internal implementation promises.
+- Use lowercase kebab-case paths and include valid MDX frontmatter.
+- Add new pages to the appropriate group in `docs.json`.
+- Store committed images under `images/` and reference them with root-relative
+  paths such as `/images/user-guide/example.png`.
+- Keep the light and dark Arcyria marks under `images/brand-logo/` aligned with
+  the logo and favicon configuration.
+- Do not publish unverified compliance, residency, retention, uptime, or
+  connector-availability claims.
+- Never include credentials, access tokens, customer records, internal host
+  addresses, or private run evidence.
 
-- `images/user-guide/` — screenshots referenced from **User guide** MDX.
-- `images/workspace/` — login, list views, etc.
+## Deployment
 
-Refresh `images/workspace/` with `apps/app/scripts/capture-product-screenshots.mjs` in the app repo (writes into `arcyria-docs/images/workspace` when run from a monorepo layout).
+Connect this repository to the Arcyria Mintlify project. Mintlify reads
+`docs.json` from the repository root and publishes the configured navigation,
+branding, and MDX content. Protect the production branch and review content
+changes before merge.
 
-## Deploy
+## License
 
-Connect this repository to [Mintlify](https://mintlify.com) for your docs domain.
+Copyright © 2026 Arcyria. All rights reserved.
+
+This project is proprietary software and is not open source.
+Unauthorized copying, modification, distribution, or use is prohibited.
